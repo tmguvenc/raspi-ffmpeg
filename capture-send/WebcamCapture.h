@@ -5,12 +5,13 @@
  *      Author: Turan Murat Güvenç
  */
 
-#ifndef VACAPTURE_H_
-#define VACAPTURE_H_
+#ifndef WEBCAMCAPTURE_H_
+#define WEBCAMCAPTURE_H_
 
 #include <string>
 #include <tbb/tbb_thread.h>
 #include <tbb/concurrent_queue.h>
+#include "ICapture.h"
 
 struct AVCodecContext;
 struct AVFormatContext;
@@ -20,15 +21,16 @@ struct AVCodec;
 
 class VAFrameContainer;
 
-class VACapture
+class WebcamCapture: public ICapture
 {
 public:
-	VACapture(const std::string& connectionString,
+	WebcamCapture(const std::string& connectionString,
 			tbb::concurrent_bounded_queue<VAFrameContainer*>* queue);
-	~VACapture();
+	virtual ~WebcamCapture();
 
-	void start();
-	void teardown();
+	void init() override;
+	void start() override;
+	void teardown() override;
 
 	inline size_t getFrameCount() const
 	{
@@ -51,19 +53,22 @@ protected:
 	VAFrameContainer* grabFrame();
 
 private:
+	std::string m_connectionString;
 	int m_width;
 	int m_height;
 	int m_channels;
-	int m_indexofVideoStream;
-	double m_framePeriod;
-	double m_timeBaseMultiplier;
 	size_t m_totalFrameCount;
 	size_t m_frameIndex;
 	bool m_completed;
 
-	AVFormatContext* m_formatContext;
+	int m_indexofVideoStream;
+
+	double m_timeBaseMultiplier;
+	double m_framePeriod;
+
 	tbb::tbb_thread *m_thread;
+	AVFormatContext* m_formatContext;
 	tbb::concurrent_bounded_queue<VAFrameContainer*>* m_queue;
 };
 
-#endif /* VACAPTURE_H_ */
+#endif /* WEBCAMCAPTURE_H_ */

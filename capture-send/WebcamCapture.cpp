@@ -5,10 +5,12 @@
  *      Author: Turan Murat Güvenç
  */
 
-#include "VACapture.h"
+#include "WebcamCapture.h"
+
 #include "VAFrame.h"
 #include <iostream>
 #include <assert.h>
+#include <string.h>
 
 extern "C"
 {
@@ -17,16 +19,28 @@ extern "C"
 #include <libavdevice/avdevice.h>
 }
 
-VACapture::VACapture(const std::string& connectionString,
+WebcamCapture::WebcamCapture(const std::string& connectionString,
 		tbb::concurrent_bounded_queue<VAFrameContainer*>* queue) :
-		m_width(0), m_height(0), m_channels(0), m_totalFrameCount(0), m_frameIndex(
-				0), m_completed(false), m_thread(nullptr), m_queue(queue)
+		m_connectionString(connectionString), m_width(0), m_height(0), m_channels(
+				0), m_totalFrameCount(0), m_frameIndex(0), m_completed(false), m_indexofVideoStream(
+				0), m_timeBaseMultiplier(0), m_framePeriod(0), m_thread(
+				nullptr), m_formatContext(nullptr), m_queue(queue)
+{
+
+}
+
+WebcamCapture::~WebcamCapture()
+{
+	std::cout << "closing..." << std::endl;
+}
+
+void WebcamCapture::init()
 {
 	av_register_all();
 	avdevice_register_all();
 	avformat_network_init();
 	avcodec_register_all();
-	AVDictionary *options = NULL;
+	AVDictionary *options = nullptr;
 	m_formatContext = avformat_alloc_context();
 
 	m_formatContext->interrupt_callback.callback = [](void* ctx)
@@ -46,12 +60,14 @@ VACapture::VACapture(const std::string& connectionString,
 	av_dict_set(&options, "video_size", "640x480", 0);
 
 	// open input file, and allocate format context
-	if (avformat_open_input(&m_formatContext, connectionString.c_str(),
+	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(),
 			input_format, &options) < 0)
 	{
-		std::cerr << "cannot open input " << connectionString << std::endl;
+		std::cerr << "cannot open input " << m_connectionString << std::endl;
 		exit(1);
 	}
+
+	av_dict_free(&options);
 
 	avformat_find_stream_info(m_formatContext, nullptr);
 
@@ -81,11 +97,7 @@ VACapture::VACapture(const std::string& connectionString,
 	assert(m_height && "height cannot be 0");
 }
 
-VACapture::~VACapture()
-{
-}
-
-void VACapture::teardown()
+void WebcamCapture::teardown()
 {
 	m_formatContext->interrupt_callback.opaque = reinterpret_cast<void*>(1);
 
@@ -100,7 +112,7 @@ void VACapture::teardown()
 	avformat_free_context(m_formatContext);
 }
 
-VAFrameContainer* VACapture::grabFrame()
+VAFrameContainer* WebcamCapture::grabFrame()
 {
 	while (true)
 	{
@@ -121,7 +133,7 @@ VAFrameContainer* VACapture::grabFrame()
 	}
 }
 
-void VACapture::start()
+void WebcamCapture::start()
 {
 	std::cout << "started grabbing" << std::endl;
 
@@ -133,7 +145,6 @@ void VACapture::start()
 			if (frame)
 			{
 				m_queue->push(frame);
-				std::cout << "pushed frame " << m_frameIndex << std::endl;
 			}
 			else break;
 		}

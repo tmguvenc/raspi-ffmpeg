@@ -10,12 +10,12 @@
 
 #include "VAFrameContainer.h"
 
-class VACapture;
+class WebcamCapture;
 struct AVPacket;
 
 class VAFrame: public VAFrameContainer
 {
-	friend class VACapture;
+	friend class WebcamCapture;
 public:
 	VAFrame(int width, int height, int channels, size_t frameCount);
 	~VAFrame() override;

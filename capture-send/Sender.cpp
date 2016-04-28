@@ -42,13 +42,8 @@ void Sender::start()
 	{
 		// wait for new frame request
 		zmq_recv(m_socket, m_buffer, sizeof m_buffer, 0);
-
-		std::cout << "received request" << std::endl;
-
 		if (strncmp(m_buffer, "frame", 5) != 0)
 			continue;
-
-
 
 		// pop new frame from queue
 		VAFrameContainer *f;

@@ -13,7 +13,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 }
 
-#include "VACapture.h"
+#include "WebcamCapture.h"
 
 VAFrame::VAFrame(int width, int height, int channels, size_t frameCount) :
 		m_packet(new AVPacket()), m_index(0), m_width(width), m_height(height), m_channels(
