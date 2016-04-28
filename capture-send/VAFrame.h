@@ -13,28 +13,35 @@
 class VACapture;
 struct AVPacket;
 
-class VAFrame: public VAFrameContainer {
+class VAFrame: public VAFrameContainer
+{
 	friend class VACapture;
 public:
 	VAFrame(int width, int height, int channels, size_t frameCount);
 	~VAFrame() override;
 
-	inline int getWidth() override {
+	inline int getWidth() override
+	{
 		return m_width;
 	}
-	inline int getHeight() override {
+	inline int getHeight() override
+	{
 		return m_height;
 	}
-	inline int getChannels() override {
+	inline int getChannels() override
+	{
 		return m_channels;
 	}
-	inline size_t getFrameIndex() override {
+	inline size_t getFrameIndex() override
+	{
 		return m_index;
 	}
-	inline size_t getFrameCount() override {
+	inline size_t getFrameCount() override
+	{
 		return m_frameCount;
 	}
-	inline AVPacket* getPacket() {
+	inline AVPacket* getPacket()
+	{
 		return m_packet;
 	}
 

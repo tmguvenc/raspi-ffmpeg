@@ -10,9 +10,11 @@
 
 #include <stdlib.h>
 
-class VAFrameContainer {
+class VAFrameContainer
+{
 public:
-	virtual ~VAFrameContainer() {
+	virtual ~VAFrameContainer()
+	{
 	}
 	virtual size_t getEncodedLength() = 0;
 	virtual int getWidth() = 0;

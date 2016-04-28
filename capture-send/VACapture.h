@@ -20,7 +20,8 @@ struct AVCodec;
 
 class VAFrameContainer;
 
-class VACapture {
+class VACapture
+{
 public:
 	VACapture(const std::string& connectionString,
 			tbb::concurrent_bounded_queue<VAFrameContainer*>* queue);
@@ -29,16 +30,20 @@ public:
 	void start();
 	void teardown();
 
-	inline size_t getFrameCount() const {
+	inline size_t getFrameCount() const
+	{
 		return m_totalFrameCount;
 	}
-	inline size_t frameIndex() const {
+	inline size_t frameIndex() const
+	{
 		return m_frameIndex;
 	}
-	inline bool completed() const {
+	inline bool completed() const
+	{
 		return m_completed;
 	}
-	inline AVFormatContext* getFormatContext() const {
+	inline AVFormatContext* getFormatContext() const
+	{
 		return m_formatContext;
 	}
 
