@@ -18,6 +18,7 @@ struct AVFormatContext;
 struct SwsContext;
 struct AVFrame;
 struct AVCodec;
+struct AVDictionary;
 
 class VAFrameContainer;
 
@@ -30,23 +31,12 @@ public:
 
 	void init() override;
 	void start() override;
+	void stop() override;
 	void teardown() override;
 
-	inline size_t getFrameCount() const
-	{
-		return m_totalFrameCount;
-	}
-	inline size_t frameIndex() const
-	{
-		return m_frameIndex;
-	}
 	inline bool completed() const
 	{
 		return m_completed;
-	}
-	inline AVFormatContext* getFormatContext() const
-	{
-		return m_formatContext;
 	}
 
 protected:
@@ -57,17 +47,13 @@ private:
 	int m_width;
 	int m_height;
 	int m_channels;
-	size_t m_totalFrameCount;
-	size_t m_frameIndex;
 	bool m_completed;
-
+	bool m_run;
 	int m_indexofVideoStream;
-
-	double m_timeBaseMultiplier;
-	double m_framePeriod;
 
 	tbb::tbb_thread *m_thread;
 	AVFormatContext* m_formatContext;
+	AVDictionary *m_options;
 	tbb::concurrent_bounded_queue<VAFrameContainer*>* m_queue;
 };
 

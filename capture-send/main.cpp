@@ -10,21 +10,36 @@
 #include <iostream>
 #include "WebcamCapture.h"
 #include <csignal>
+#include <memory>
 
 extern "C"
 {
 #include <libavformat/avformat.h>
 }
 
+tbb::concurrent_bounded_queue<VAFrameContainer*> frameQueue;
+ICapture *capture;
+Sender *sender;
+
 void signal_handler(int signal)
 {
 	if (signal == SIGINT)
 	{
 		std::cout << "interrupt signal catched!" << std::endl;
-	}
-	else
-	{
-		std::cout << "asdas asd" << std::endl;
+
+		sender->stop();
+		delete sender;
+
+		std::cout << "stopped sender!" << std::endl;
+
+		capture->teardown();
+		delete capture;
+
+		std::cout << "stopped capturing!" << std::endl;
+
+		frameQueue.clear();
+
+		std::cout << "cleared queue!" << std::endl;
 	}
 	exit(EXIT_FAILURE);
 }
@@ -39,22 +54,13 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	tbb::concurrent_bounded_queue<VAFrameContainer*> frameQueue;
-	frameQueue.set_capacity(100);
+	capture = new WebcamCapture("/dev/video0", &frameQueue);
 
-	ICapture *capture = new WebcamCapture("/dev/video0", &frameQueue);
 	capture->init();
 	capture->start();
 
-	tbb::tbb_thread *thread = new tbb::tbb_thread(
-			[](tbb::concurrent_bounded_queue<VAFrameContainer*>* queue)
-			{
-				Sender sender(5555, queue);
-				sender.start();
-			}, &frameQueue);
-
-	thread->join();
-	delete thread;
+	sender = new Sender(5555, &frameQueue);
+	sender->start();
 
 	capture->teardown();
 	delete capture;
