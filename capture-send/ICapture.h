@@ -8,11 +8,13 @@
 #ifndef ICAPTURE_H_
 #define ICAPTURE_H_
 
+typedef void(*CaptureCallback)(void*);
+
 class ICapture{
 public:
 	virtual ~ICapture() {}
 	virtual void init() = 0;
-	virtual void start() = 0;
+	virtual void start(CaptureCallback func) = 0;
 	virtual void stop() = 0;
 	virtual void teardown() = 0;
 };

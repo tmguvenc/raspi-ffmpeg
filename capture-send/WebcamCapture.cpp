@@ -19,12 +19,10 @@ extern "C"
 #include <libavdevice/avdevice.h>
 }
 
-WebcamCapture::WebcamCapture(const std::string& connectionString,
-		tbb::concurrent_bounded_queue<VAFrameContainer*>* queue) :
+WebcamCapture::WebcamCapture(const std::string& connectionString) :
 		m_connectionString(connectionString), m_width(0), m_height(0), m_channels(
 				0), m_completed(false), m_run(false), m_indexofVideoStream(0), m_thread(
-				nullptr), m_formatContext(nullptr), m_options(nullptr), m_queue(
-				queue)
+				nullptr), m_formatContext(nullptr), m_options(nullptr)
 {
 
 }
@@ -64,7 +62,7 @@ VAFrameContainer* WebcamCapture::grabFrame()
 	}
 }
 
-void WebcamCapture::start()
+void WebcamCapture::start(CaptureCallback func)
 {
 	m_formatContext = avformat_alloc_context();
 
@@ -107,7 +105,7 @@ void WebcamCapture::start()
 	assert(m_height && "height cannot be 0");
 #endif
 
-	m_thread = new tbb::tbb_thread([this]()
+	m_thread = new tbb::tbb_thread([this, func]()
 	{
 		std::cout << "started grabbing" << std::endl;
 
@@ -117,11 +115,11 @@ void WebcamCapture::start()
 		{
 			auto frame = grabFrame();
 			if (frame)
-			m_queue->push(frame);
+				func(frame);
 			else break;
 		}
 		m_completed = true;
-		m_queue->push(nullptr);
+		func(nullptr);
 		std::cout << "completed" << std::endl;
 	});
 }

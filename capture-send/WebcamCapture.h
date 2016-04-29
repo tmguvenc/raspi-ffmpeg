@@ -10,14 +10,9 @@
 
 #include <string>
 #include <tbb/tbb_thread.h>
-#include <tbb/concurrent_queue.h>
 #include "ICapture.h"
 
-struct AVCodecContext;
 struct AVFormatContext;
-struct SwsContext;
-struct AVFrame;
-struct AVCodec;
 struct AVDictionary;
 
 class VAFrameContainer;
@@ -25,12 +20,11 @@ class VAFrameContainer;
 class WebcamCapture: public ICapture
 {
 public:
-	WebcamCapture(const std::string& connectionString,
-			tbb::concurrent_bounded_queue<VAFrameContainer*>* queue);
+	WebcamCapture(const std::string& connectionString);
 	virtual ~WebcamCapture();
 
 	void init() override;
-	void start() override;
+	void start(CaptureCallback func) override;
 	void stop() override;
 	void teardown() override;
 
@@ -54,7 +48,6 @@ private:
 	tbb::tbb_thread *m_thread;
 	AVFormatContext* m_formatContext;
 	AVDictionary *m_options;
-	tbb::concurrent_bounded_queue<VAFrameContainer*>* m_queue;
 };
 
 #endif /* WEBCAMCAPTURE_H_ */
