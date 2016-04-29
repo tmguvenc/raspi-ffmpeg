@@ -39,3 +39,4 @@ build*/
 [Bb]in/
 [Oo]bj/
 /capture-send/.settings/*.prefs
+/capture-send/*.cproject

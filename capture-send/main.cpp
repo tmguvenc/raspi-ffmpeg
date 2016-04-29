@@ -44,10 +44,6 @@ void signal_handler(int signal)
 	exit(EXIT_FAILURE);
 }
 
-void callback(void* ptr){
-	frameQueue.push(static_cast<VAFrame*>(ptr));
-}
-
 int main()
 {
 	auto handler = std::signal(SIGINT, signal_handler);
@@ -61,7 +57,7 @@ int main()
 	capture = new WebcamCapture("/dev/video0");
 
 	capture->init();
-	capture->start(callback);
+	capture->start([](void* ptr){frameQueue.push(static_cast<VAFrame*>(ptr));});
 
 	sender = new Sender(5555, &frameQueue);
 	sender->start();
