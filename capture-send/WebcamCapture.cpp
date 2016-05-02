@@ -64,6 +64,8 @@ VAFrameContainer* WebcamCapture::grabFrame()
 
 void WebcamCapture::start(CaptureCallback func)
 {
+	assert(m_formatContext == nullptr && "format context is not null.");
+
 	m_formatContext = avformat_alloc_context();
 
 	m_formatContext->interrupt_callback.callback = [](void* ctx)
@@ -95,10 +97,7 @@ void WebcamCapture::start(CaptureCallback func)
 
 #ifndef NDEBUG
 
-	std::cout << "stream index = " << m_indexofVideoStream << std::endl;
-	std::cout << "stream count = " << m_formatContext->nb_streams << std::endl;
-
-	std::cout << "*****Codec: " << stream->codec->codec_id << std::endl;
+	std::cout << "*****Codec: " << avcodec_get_name(stream->codec->codec_id) << std::endl;
 	std::cout << "*****Resolution: " << m_width << "x" << m_height << std::endl;
 
 	assert(m_width && "width cannot be 0");
