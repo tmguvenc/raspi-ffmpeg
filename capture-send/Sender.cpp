@@ -9,10 +9,10 @@
 #include <zmq.h>
 #include <sstream>
 #include <iostream>
+#include <string.h>
 
-Sender::Sender(int port,
-		tbb::concurrent_bounded_queue<VAFrameContainer*>* queue) :
-		m_port(port), m_queue(queue), m_run(false)
+Sender::Sender(int port) :
+		m_port(port), m_run(false)
 {
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_REP);
@@ -32,7 +32,7 @@ Sender::~Sender()
 	zmq_ctx_destroy(m_context);
 }
 
-void Sender::start()
+void Sender::start(DataSupplier ds)
 {
 	std::cout << "sender started" << std::endl;
 
@@ -45,10 +45,10 @@ void Sender::start()
 		if (strncmp(m_buffer, "frame", 5) != 0)
 			continue;
 
-		// pop new frame from queue
-		VAFrameContainer *f;
-		m_queue->pop(f);
+		auto f = ds();
 
+		if (f == nullptr)
+			break;
 		// send frame
 		auto frame = static_cast<VAFrame*>(f);
 		zmq_send(m_socket, frame->data(), frame->size(), 0);

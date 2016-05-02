@@ -8,23 +8,23 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
-#include <tbb/concurrent_queue.h>
 #include "VAFrame.h"
+
+typedef VAFrameContainer*(*DataSupplier)();
 
 class Sender
 {
 public:
-	Sender(int port, tbb::concurrent_bounded_queue<VAFrameContainer*>* queue);
+	Sender(int port);
 	virtual ~Sender();
 
-	void start();
+	void start(DataSupplier ds);
 	void stop();
 
 private:
 	int m_port;
 	void* m_context;
 	void* m_socket;
-	tbb::concurrent_bounded_queue<VAFrameContainer*>* m_queue;
 	bool m_run;
 	char m_buffer[10];
 };

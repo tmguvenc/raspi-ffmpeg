@@ -113,8 +113,7 @@ void WebcamCapture::start(CaptureCallback func)
 		while (m_run)
 		{
 			auto frame = grabFrame();
-			if (frame)
-				func(frame);
+			if (frame) func(frame);
 			else break;
 		}
 		m_completed = true;
