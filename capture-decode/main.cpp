@@ -15,16 +15,6 @@
 #include <opencv2/opencv.hpp>
 #include "VAFrame.h"
 
-extern "C"
-{
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-#include <libavcodec/avcodec.h>
-#include <libavdevice/avdevice.h>
-
-}
-
 #define WIDTH 640
 #define HEIGHT 480
 
@@ -33,11 +23,6 @@ ICapture *capture;
 
 int main()
 {
-	av_register_all();
-	avdevice_register_all();
-	avformat_network_init();
-	avcodec_register_all();
-
 	frameQueue.set_capacity(20);
 
 	capture = new WebcamCapture("/dev/video0");
