@@ -7,6 +7,7 @@
 
 #include "OutputFilter.h"
 #include <opencv2/opencv.hpp>
+#include "FrameContext.h"
 
 OutputFilter::OutputFilter():
 Filter(serial)
@@ -19,13 +20,15 @@ OutputFilter::~OutputFilter()
 	cv::destroyAllWindows();
 }
 
-void *OutputFilter::operator()(void *image_ptr){
-	auto aa = static_cast<std::shared_ptr<cv::Mat>*>(image_ptr);
-	auto image = *aa;
-	delete aa;
+void *OutputFilter::operator()(void *userData){
+	if (!userData) return nullptr;
+	auto c = static_cast<spFrameContext*>(userData);
+	auto context = *c;
 
-	cv::imshow("image", *image);
+	cv::imshow("image", *context->m_frame_gray);
 	cv::waitKey(1);
+
+	delete c;
 
 	return nullptr;
 }

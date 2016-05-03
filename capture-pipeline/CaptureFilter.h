@@ -10,6 +10,7 @@
 
 #include "Filter.h"
 #include <string>
+#include "ContextPool.h"
 
 class WebcamCapture;
 
@@ -24,6 +25,7 @@ public:
 
 private:
 	WebcamCapture *m_capture;
+	ContextPool m_contextPool;
 };
 
 #endif /* CAPTUREFILTER_H_ */

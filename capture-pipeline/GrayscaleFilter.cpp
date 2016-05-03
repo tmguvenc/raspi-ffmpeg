@@ -7,7 +7,7 @@
 
 #include "GrayscaleFilter.h"
 #include <opencv2/opencv.hpp>
-#include "MatrixPool.h"
+#include "FrameContext.h"
 
 GrayscaleFilter::GrayscaleFilter() :
 Filter(parallel)
@@ -19,14 +19,14 @@ GrayscaleFilter::~GrayscaleFilter()
 {
 }
 
-void* GrayscaleFilter::operator ()(void* image_ptr){
-	auto aa = static_cast<std::shared_ptr<cv::Mat>*>(image_ptr);
-	auto image = *aa;
-	delete aa;
+void* GrayscaleFilter::operator ()(void* userData){
+	if (!userData) return nullptr;
+	auto c = static_cast<spFrameContext*>(userData);
+	auto context = *c;
 
-	auto grayImage = ObjectPool::pool_mat()->create({image->rows, image->cols, CV_8UC1});
-	cv::cvtColor(*image, *grayImage, CV_BGR2GRAY);
-	return new std::shared_ptr<cv::Mat>(grayImage);
+	cv::cvtColor(*context->m_frame_org, *context->m_frame_gray, CV_BGR2GRAY);
+
+	return userData;
 }
 
 void GrayscaleFilter::finalize(void* ){

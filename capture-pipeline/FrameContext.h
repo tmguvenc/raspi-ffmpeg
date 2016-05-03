@@ -11,12 +11,12 @@
 #include <opencv2/opencv.hpp>
 #include <memory>
 
+class VAFrameContainer;
+
 class FrameContext
 {
 public:
-	FrameContext(){
-		m_frameIndex = 0;
-
+	FrameContext() : m_rawFrame(nullptr), m_frameIndex(0){
 		m_frame_org = std::make_shared<cv::Mat>(480, 640, CV_8UC3);
 		m_frame_gray = std::make_shared<cv::Mat>(480, 640, CV_8UC1);
 	}
@@ -28,6 +28,7 @@ public:
 	std::shared_ptr<cv::Mat> m_frame_org, m_frame_gray;
 
 	size_t m_frameIndex;
+	VAFrameContainer* m_rawFrame;
 };
 
 typedef std::shared_ptr<FrameContext> spFrameContext;

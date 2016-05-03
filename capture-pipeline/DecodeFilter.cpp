@@ -8,7 +8,7 @@
 #include "DecodeFilter.h"
 #include "VAFrame.h"
 #include <opencv2/opencv.hpp>
-#include "MatrixPool.h"
+#include "FrameContext.h"
 
 #define WIDTH 640
 #define HEIGHT 480
@@ -26,13 +26,18 @@ DecodeFilter::~DecodeFilter()
 	decoder.teardown();
 }
 
-void* DecodeFilter::operator ()(void* ptr){
-	VAFrame* frame = static_cast<VAFrame*>(ptr);
+void* DecodeFilter::operator ()(void* userData){
+
+	if (!userData) return nullptr;
+	auto c = static_cast<spFrameContext*>(userData);
+	auto context = *c;
+
+	VAFrame* frame = static_cast<VAFrame*>(context->m_rawFrame);
 	if (frame->size() == 0) return nullptr;
-	auto image = ObjectPool::pool_mat()->create({HEIGHT, WIDTH, CV_8UC3});
-	decoder.decode(frame->data(), frame->size(), image->data, len);
+	decoder.decode(frame->data(), frame->size(), context->m_frame_org->data, len);
 	delete frame;
-	return new std::shared_ptr<cv::Mat>(image);
+
+	return userData;
 }
 
 void DecodeFilter::finalize(void* ptr){

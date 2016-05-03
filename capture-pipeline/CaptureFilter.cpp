@@ -10,7 +10,8 @@
 
 CaptureFilter::CaptureFilter(const std::string& connectionString) :
 Filter(serial),
-m_capture(new WebcamCapture(connectionString))
+m_capture(new WebcamCapture(connectionString)),
+m_contextPool(50)
 {
 	m_capture->init();
 }
@@ -23,7 +24,10 @@ CaptureFilter::~CaptureFilter()
 }
 
 void* CaptureFilter::operator ()(void*){
-	return m_capture->grabFrame();
+	auto context = m_contextPool.CreateFrameContext();
+	context->m_rawFrame = m_capture->grabFrame();
+	std::cout << "ratio: " << m_contextPool.getBufferSize() << std::endl;
+	return new spFrameContext(context);
 }
 
 void CaptureFilter::finalize(void* ptr){
