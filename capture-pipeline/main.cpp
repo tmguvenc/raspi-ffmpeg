@@ -8,6 +8,7 @@
 #include "DecodeFilter.h"
 #include "OutputFilter.h"
 #include "GrayscaleFilter.h"
+#include "ObjectPool.h"
 
 int main()
 {

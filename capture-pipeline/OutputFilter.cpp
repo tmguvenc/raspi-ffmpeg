@@ -20,13 +20,13 @@ OutputFilter::~OutputFilter()
 }
 
 void *OutputFilter::operator()(void *image_ptr){
-
-	auto image = static_cast<cv::Mat*>(image_ptr);
+	auto aa = static_cast<std::shared_ptr<cv::Mat>*>(image_ptr);
+	auto image = *aa;
+	delete aa;
 
 	cv::imshow("image", *image);
 	cv::waitKey(1);
 
-	delete image;
 	return nullptr;
 }
 
