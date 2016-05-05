@@ -16,7 +16,7 @@ class VAFrameContainer;
 class FrameContext
 {
 public:
-	FrameContext() : m_rawFrame(nullptr), m_frameIndex(0){
+	FrameContext() : m_frameIndex(0), m_rawFrame(nullptr){
 		m_frame_org = std::make_shared<cv::Mat>(480, 640, CV_8UC3);
 		m_frame_gray = std::make_shared<cv::Mat>(480, 640, CV_8UC1);
 	}

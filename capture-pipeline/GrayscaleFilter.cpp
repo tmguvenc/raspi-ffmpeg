@@ -8,11 +8,14 @@
 #include "GrayscaleFilter.h"
 #include <opencv2/opencv.hpp>
 #include "FrameContext.h"
+#include <time.h>
+#include <chrono>
+#include <thread>
 
 GrayscaleFilter::GrayscaleFilter() :
 Filter(parallel)
 {
-
+	srand (time(NULL));
 }
 
 GrayscaleFilter::~GrayscaleFilter()
@@ -29,6 +32,8 @@ void* GrayscaleFilter::operator ()(void* userData){
 	return userData;
 }
 
-void GrayscaleFilter::finalize(void* ){
-
+void GrayscaleFilter::finalize(void* userData){
+	auto c = static_cast<spFrameContext*>(userData);
+	auto context = *c;
+	delete c;
 }

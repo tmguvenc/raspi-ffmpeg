@@ -40,6 +40,8 @@ void* DecodeFilter::operator ()(void* userData){
 	return userData;
 }
 
-void DecodeFilter::finalize(void* ptr){
-
+void DecodeFilter::finalize(void* userData){
+	auto c = static_cast<spFrameContext*>(userData);
+	auto context = *c;
+	delete c;
 }
