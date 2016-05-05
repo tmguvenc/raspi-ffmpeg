@@ -11,11 +11,29 @@
 #include "GrayscaleFilter.h"
 #include "InputFilter.h"
 #include "ContextPool.h"
+#include <chrono>
+#include <thread>
 
 tbb::concurrent_bounded_queue<spFrameContext> context_queue;
 tbb::concurrent_bounded_queue<spFrameContext> output_queue;
 auto frameIndex = 0;
-ContextPool contextPool(50);
+ContextPool contextPool(20);
+
+void drawRatioBar(cv::Mat& mat, double ratio)
+{
+	auto barHeight = static_cast<int>(mat.rows * ratio) - 13;
+
+	cv::Rect borderRect(5, 3, 20, mat.rows - 6);
+
+	cv::Rect barRect(8, mat.rows - barHeight - 5, 14, barHeight);
+
+	auto r = static_cast<int>(255 * ratio);
+	auto g = static_cast<int>(255 * std::abs<double>(1.0 - ratio));
+
+	cv::rectangle(mat, borderRect, cv::Scalar(128, 128, 0), 1);
+
+	cv::rectangle(mat, barRect, cv::Scalar(0, g, r), -1);
+}
 
 int main()
 {
@@ -40,6 +58,7 @@ int main()
 	capture.start([](void* ptr){
 		auto context = contextPool.CreateFrameContext();
 		context->m_frameIndex = ++frameIndex;
+		context->m_ratio = contextPool.getBufferSize();
 		context->m_rawFrame = static_cast<VAFrameContainer*>(ptr);
 		context_queue.push(context);
 	});
@@ -54,6 +73,7 @@ int main()
 			spFrameContext context;
 			output_queue.pop(context);
 
+			drawRatioBar(*context->m_frame_org, context->m_ratio);
 			cv::imshow("image", *context->m_frame_org);
 			cv::imshow("image_gray", *context->m_frame_gray);
 			cv::waitKey(1);
