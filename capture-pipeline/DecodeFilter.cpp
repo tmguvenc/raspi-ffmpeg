@@ -9,6 +9,7 @@
 #include "VAFrame.h"
 #include <opencv2/opencv.hpp>
 #include "FrameContext.h"
+#include "MatrixPool.h"
 
 #define WIDTH 640
 #define HEIGHT 480
@@ -33,15 +34,24 @@ void* DecodeFilter::operator ()(void* userData){
 	auto context = *c;
 
 	VAFrame* frame = static_cast<VAFrame*>(context->m_rawFrame);
-	if (frame->size() == 0) return nullptr;
-	decoder.decode(frame->data(), frame->size(), context->m_frame_org->data, len);
+
+	if(!decoder.decode(frame->data(), frame->size(), context->m_frame_org->data, len)){
+		std::cout << "cannot decode frame no: " << context->m_frameIndex << std::endl;
+		delete frame;
+		context.reset();
+		delete c;
+		return nullptr;
+	}
+
 	delete frame;
 
 	return userData;
 }
 
 void DecodeFilter::finalize(void* userData){
+	std::cout << "finalize: DecodeFilter" << std::endl;
 	auto c = static_cast<spFrameContext*>(userData);
 	auto context = *c;
 	delete c;
+	context->m_operationHandle.Done();
 }

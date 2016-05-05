@@ -47,7 +47,7 @@ void WebcamCapture::init()
 	{	return reinterpret_cast<int>(ctx);};
 	m_formatContext->interrupt_callback.opaque = static_cast<void*>(nullptr);
 
-	av_dict_set(&m_options, "framerate", "15", 0);
+	av_dict_set(&m_options, "framerate", "25", 0);
 	av_dict_set(&m_options, "input_format", "mjpeg", 0);
 	av_dict_set(&m_options, "video_size", "640x480", 0);
 
@@ -94,7 +94,7 @@ VAFrameContainer* WebcamCapture::grabFrame()
 		auto result = av_read_frame(m_formatContext, pkt);
 		if (result < 0)
 		{
-			delete frame;
+ 			delete frame;
 			return nullptr;
 		}
 		if (pkt->stream_index == m_indexofVideoStream) return frame;

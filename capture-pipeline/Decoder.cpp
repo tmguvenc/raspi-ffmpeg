@@ -116,7 +116,6 @@ void Decoder::teardown()
 	m_swsContext = nullptr;
 	m_frame = nullptr;
 	m_scaledFrame = nullptr;
-
 }
 
 bool Decoder::decode(void* inputData, size_t inputLen, void* data, size_t len)
@@ -143,7 +142,7 @@ bool Decoder::decode(AVPacket* packet, void* data, size_t len)
 			if (sws_scale(m_swsContext, m_frame->data, m_frame->linesize, 0, m_frame->height, m_scaledFrame->data, m_scaledFrame->linesize) < 0)
 			{
 				std::cout << "cannot scale in decode" << std::endl;
-				abort();// TODO Brutal
+				return false;
 			}
 			else
 			{
