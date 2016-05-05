@@ -13,7 +13,10 @@
 ContextPool::ContextPool(size_t size) :
 		m_contextPool("context", "Context Pool", [this]()
 		{
-			return spFrameContext(new FrameContext());
+			auto r = new FrameContext();
+			OperationHandle oh;
+			r->m_operationHandle = oh;
+			return spFrameContext(r);
 		}, size)
 {
 }

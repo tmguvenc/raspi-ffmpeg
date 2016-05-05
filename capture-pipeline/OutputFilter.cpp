@@ -24,18 +24,19 @@ void *OutputFilter::operator()(void *userData){
 	if (!userData) return nullptr;
 	auto c = static_cast<spFrameContext*>(userData);
 	auto context = *c;
+	delete c;
 
 	cv::putText(*context->m_frame_org, std::to_string(context->m_frameIndex), {30, context->m_frame_org->rows - 30}, CV_FONT_HERSHEY_SIMPLEX, 0.6, {0,255,0}, 1, CV_AA);
 
 	m_output_queue->push(context);
 
-	delete c;
-
 	return nullptr;
 }
 
 void OutputFilter::finalize(void *userData){
+	std::cout << "finalize: OutputFilter" << std::endl;
 	auto c = static_cast<spFrameContext*>(userData);
 	auto context = *c;
 	delete c;
+	context->m_operationHandle.Done();
 }

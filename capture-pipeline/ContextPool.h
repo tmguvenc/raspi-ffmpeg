@@ -19,7 +19,7 @@ public:
 
 	}
 	static void Pull(FrameContext* context){
-
+		context->m_operationHandle.Done();
 	}
 };
 
