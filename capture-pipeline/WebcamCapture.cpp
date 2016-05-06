@@ -47,7 +47,7 @@ void WebcamCapture::init()
 	{	return reinterpret_cast<int>(ctx);};
 	m_formatContext->interrupt_callback.opaque = static_cast<void*>(nullptr);
 
-	av_dict_set(&m_options, "framerate", "25", 0);
+	av_dict_set(&m_options, "framerate", "10", 0);
 	av_dict_set(&m_options, "input_format", "mjpeg", 0);
 	av_dict_set(&m_options, "video_size", "640x480", 0);
 

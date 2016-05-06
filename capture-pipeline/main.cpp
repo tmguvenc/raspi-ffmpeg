@@ -7,6 +7,7 @@
 
 #include "WebcamCapture.h"
 #include "DecodeFilter.h"
+#include "GaborFilter.h"
 #include "OutputFilter.h"
 #include "GrayscaleFilter.h"
 #include "InputFilter.h"
@@ -19,7 +20,7 @@ tbb::concurrent_bounded_queue<spFrameContext> output_queue;
 auto frameIndex = 0;
 ContextPool contextPool(20);
 
-void drawRatioBar(cv::Mat& mat, double ratio)
+inline void drawRatioBar(cv::Mat& mat, double ratio)
 {
 	auto barHeight = static_cast<int>(mat.rows * ratio) - 13;
 
@@ -46,6 +47,7 @@ int main()
 	InputFilter inputFilter(&context_queue);
 	DecodeFilter decodeFilter;
 	GrayscaleFilter grayscaleFilter;
+	GaborFilter gaborFilter;
 	OutputFilter outputFilter(&output_queue);
 
 	tbb::pipeline pipeline;
@@ -53,6 +55,7 @@ int main()
 	pipeline.add_filter(inputFilter);
 	pipeline.add_filter(decodeFilter);
 	pipeline.add_filter(grayscaleFilter);
+	pipeline.add_filter(gaborFilter);
 	pipeline.add_filter(outputFilter);
 
 	capture.start([](void* ptr){
@@ -72,6 +75,8 @@ int main()
 		while(true){
 			spFrameContext context;
 			output_queue.pop(context);
+
+			std::cout << context->m_ratio * 20 << std::endl;
 
 			drawRatioBar(*context->m_frame_org, context->m_ratio);
 			cv::imshow("image", *context->m_frame_org);

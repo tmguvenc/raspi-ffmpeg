@@ -15,6 +15,8 @@
 #include <assert.h>
 #include <tbb/atomic.h>
 #include <tbb/concurrent_hash_map.h>
+#include <mutex>
+#include <sstream>
 
 template <typename T>
 class Nop

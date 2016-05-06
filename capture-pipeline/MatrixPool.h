@@ -105,11 +105,7 @@ public:
 		assert(mat->rows != 0);
 		assert(mat->cols != 0);
 		assert(mat->data != nullptr);
-#ifdef USE_IPP
-		ippsSet_8u(0, (Ipp8u*)mat->data, mat->rows * (int)mat->step1());
-#else
 		memset(mat->data, 0, mat->rows * (int)mat->step1());
-#endif
 	}
 	static void Push(cv::Mat* mat)
 	{

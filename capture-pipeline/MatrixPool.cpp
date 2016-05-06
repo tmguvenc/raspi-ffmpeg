@@ -53,8 +53,8 @@ std::shared_ptr<cv::Mat> MatrixPool::create(const MatPoolKey& key, bool wait){
 	auto mat = new cv::Mat(key.rows, key.cols, key.type, vp.get(), key.cols * esz);
 
 	return std::shared_ptr<cv::Mat>(mat, [vp, size](cv::Mat* mat1){
-		//ProvideoFastFunctions::set(*mat1, 0);
-		*mat1 = cv::Mat::zeros(mat1->rows, mat1->cols, mat1->type());
+		for (auto i = 0; i < mat1->rows; ++i)
+			memset((mat1->data + i * mat1->step1()), 0, (int)mat1->step1());
 		delete mat1;
 	});
 }
