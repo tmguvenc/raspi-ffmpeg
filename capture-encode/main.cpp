@@ -47,8 +47,6 @@ int main() {
 		frameQueue.push(ptr);
 	});
 
-
-
 	auto ctx = zmq_ctx_new();
 	auto socket = zmq_socket(ctx, ZMQ_REP);
 
@@ -61,35 +59,31 @@ int main() {
 		if (ptr != nullptr) {
 			VAFrame* frame = static_cast<VAFrame*>(ptr);
 
-			auto decoded = decoder.decode(frame->data(), frame->size(), buffer, len);
+			if (decoder.decode(frame->data(), frame->size(), buffer, len)) {
 
-			void* encoded_buffer = nullptr;
-			size_t encoded_len = 0;
+				auto encoded_buffer = encoder.encode(buffer, len);
 
-			if (decoded) {
-				if (encoder.encode(buffer, len, encoded_buffer, encoded_len)) {
-					std::cout << "encoded " << encoded_len << std::endl;
+				if (encoded_buffer) {
+					std::cout << "encoded " << encoded_buffer->len() << std::endl;
 
 					char buf[10] = { 0 };
 					zmq_recv(socket, buf, sizeof buf, 0);
 					if (strncmp(buf, "frame", 5) != 0)
 						continue;
 
-					zmq_send(socket, encoded_buffer, encoded_len, 0);
+					zmq_send(socket, encoded_buffer->buffer(), encoded_buffer->len(), 0);
 				}
 			}
 
+			delete frame;
+
 			if (cv::waitKey(1) == 27)
 				break;
-
-			if (decoded) {
-				free(encoded_buffer);
-			}
-
-			delete frame;
 		}
 	}
 
+	zmq_close(socket);
+	zmq_ctx_destroy(ctx);
 	cv::destroyAllWindows();
 
 	capture->teardown();

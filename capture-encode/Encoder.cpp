@@ -13,7 +13,6 @@ extern "C" {
 }
 #include <string>
 #include <iostream>
-#include <malloc.h>
 
 Encoder::Encoder() :
 		m_pCodec(nullptr), m_pCodecContext(nullptr), m_scaleContext(nullptr), m_frame(nullptr), m_scaledFrame(nullptr) {
@@ -120,7 +119,7 @@ void Encoder::reset() {
 	av_free(m_pCodecContext);
 }
 
-bool Encoder::encode(void* inputData, size_t inputLen, void*& data, size_t& len) {
+spEncodedBuffer Encoder::encode(void* inputData, size_t inputLen) {
 
 	avpicture_fill((AVPicture *) m_frame, static_cast<uint8_t*>(inputData), AV_PIX_FMT_BGR24, 640, 480);
 
@@ -141,14 +140,13 @@ bool Encoder::encode(void* inputData, size_t inputLen, void*& data, size_t& len)
 		return false;
 	}
 
-	len = pkt.size;
+	auto encodedBuffer = std::make_shared<EncodedBuffer>(pkt.size);
 
-	data = malloc(len);
-
-	memcpy(data, pkt.data, len);
+	memcpy(encodedBuffer->buffer(), pkt.data, encodedBuffer->len());
 
 	av_packet_unref(&pkt);
-	return true;
+
+	return encodedBuffer;
 }
 
 bool Encoder::encode(AVFrame &frame, AVPacket &pkt) {

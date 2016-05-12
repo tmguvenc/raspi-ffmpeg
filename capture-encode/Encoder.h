@@ -13,6 +13,32 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
+#include <malloc.h>
+#include <memory>
+
+class EncodedBuffer{
+public:
+	EncodedBuffer(size_t lenght) : m_lenght(lenght){
+		m_buffer = malloc(lenght);
+	}
+	~EncodedBuffer(){
+		free(m_buffer);
+	}
+
+	void* buffer(){
+		return m_buffer;
+	}
+
+	size_t len(){
+		return m_lenght;
+	}
+private:
+	void* m_buffer;
+	size_t m_lenght;
+};
+
+typedef std::shared_ptr<EncodedBuffer> spEncodedBuffer;
+
 class Encoder {
 public:
 	Encoder();
@@ -29,7 +55,7 @@ public:
 	bool init(AVCodecID codecId, int width, int height, int quality);
 	void reset();
 	bool encode(AVFrame &frame, AVPacket &pkt);
-	bool encode(void* inputData, size_t inputLen, void*& data, size_t& len);
+	spEncodedBuffer encode(void* inputData, size_t inputLen);
 };
 
 #endif /* ENCODER_H_ */
