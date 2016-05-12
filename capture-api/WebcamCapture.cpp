@@ -2,7 +2,7 @@
  * VACapture.cpp
  *
  *  Created on: 26 Nis 2016
- *      Author: Turan Murat Güvenç
+ *      Author: Turan Murat GÃ¼venÃ§
  */
 
 #include "WebcamCapture.h"
@@ -147,6 +147,7 @@ void WebcamCapture::startAsync(CaptureCallback func) {
 
 void WebcamCapture::stop() {
 
+	// in case of the user stops capturing too soon.
 	while (!m_run) {
 		std::cout << "capturing is not started yet" << std::endl;
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
