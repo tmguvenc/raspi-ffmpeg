@@ -12,28 +12,22 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-extern "C"
-{
+extern "C" {
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
 }
 
 Decoder::Decoder() :
-m_codecContext(nullptr),
-m_codec(nullptr),
-m_swsContext(nullptr),
-m_frame(nullptr),
-m_scaledFrame(nullptr){
+		m_codecContext(nullptr), m_codec(nullptr), m_swsContext(nullptr), m_frame(nullptr), m_scaledFrame(nullptr) {
 
 }
 
-Decoder::~Decoder(){
+Decoder::~Decoder() {
 
 }
 
-void Decoder::setup(AVCodecID codecId)
-{
+void Decoder::setup(AVCodecID codecId) {
 	assert(!m_codecContext);
 	assert(!m_codec);
 	assert(!m_swsContext);
@@ -42,8 +36,7 @@ void Decoder::setup(AVCodecID codecId)
 
 	m_codec = avcodec_find_decoder(codecId);
 
-	if (!m_codec)
-	{
+	if (!m_codec) {
 		std::cout << "Cannot find codec" << std::endl;
 		abort();
 	}
@@ -51,11 +44,10 @@ void Decoder::setup(AVCodecID codecId)
 	m_codecContext = avcodec_alloc_context3(m_codec);
 	m_codecContext->pix_fmt = AV_PIX_FMT_YUV422P;
 
-	if (m_codec->capabilities&CODEC_CAP_TRUNCATED)
+	if (m_codec->capabilities & CODEC_CAP_TRUNCATED)
 		m_codecContext->flags |= CODEC_FLAG_TRUNCATED;
 
-	if (avcodec_open2(m_codecContext, m_codec, nullptr) < 0)
-	{
+	if (avcodec_open2(m_codecContext, m_codec, nullptr) < 0) {
 		std::cout << "Cannot open context" << std::endl;
 		abort();
 	}
@@ -64,38 +56,33 @@ void Decoder::setup(AVCodecID codecId)
 	setupScale();
 }
 
-void Decoder::setupScale()
-{
-	m_swsContext = sws_getCachedContext(m_swsContext, width(), height(), m_codecContext->pix_fmt, width(), height(), AV_PIX_FMT_BGR24, SWS_BICUBIC, nullptr, nullptr, nullptr);
+void Decoder::setupScale() {
+	m_swsContext = sws_getCachedContext(m_swsContext, width(), height(), m_codecContext->pix_fmt, width(), height(),
+			AV_PIX_FMT_BGR24,
+			SWS_BICUBIC, nullptr, nullptr, nullptr);
 
-	if (!m_swsContext)
-	{
+	if (!m_swsContext) {
 		std::cout << "Cannot get context" << std::endl;
 		abort();
 	}
 
-
 	m_scaledFrame = av_frame_alloc();
 
-	if (av_image_alloc(m_scaledFrame->data, m_scaledFrame->linesize, width(), height(), AV_PIX_FMT_BGR24, 1) < 0)
-	{
+	if (av_image_alloc(m_scaledFrame->data, m_scaledFrame->linesize, width(), height(), AV_PIX_FMT_BGR24, 1) < 0) {
 		std::cout << "Cannot allocate image" << std::endl;
 		abort();
 	}
 }
 
-int Decoder::width()
-{
+int Decoder::width() {
 	return m_frame->width ? m_frame->width : 640;
 }
 
-int Decoder::height()
-{
+int Decoder::height() {
 	return m_frame->height ? m_frame->height : 480;
 }
 
-void Decoder::teardown()
-{
+void Decoder::teardown() {
 	assert(m_codecContext);
 	assert(m_codec);
 	assert(m_swsContext);
@@ -119,8 +106,7 @@ void Decoder::teardown()
 
 }
 
-bool Decoder::decode(void* inputData, size_t inputLen, void* data, size_t len)
-{
+bool Decoder::decode(void* inputData, size_t inputLen, void* data, size_t len) {
 	AVPacket packet;
 	av_init_packet(&packet);
 	packet.data = static_cast<uint8_t*>(inputData);
@@ -130,31 +116,25 @@ bool Decoder::decode(void* inputData, size_t inputLen, void* data, size_t len)
 	return result;
 }
 
-bool Decoder::decode(AVPacket* packet, void* data, size_t len)
-{
+bool Decoder::decode(AVPacket* packet, void* data, size_t len) {
 	assert(m_swsContext != nullptr);
 
 	int gotFrame;
-	if (avcodec_decode_video2(m_codecContext, m_frame, &gotFrame, packet) >= 0)
-	{
-		if (!data) return false;
-		if (gotFrame)
-		{
-			if (sws_scale(m_swsContext, m_frame->data, m_frame->linesize, 0, m_frame->height, m_scaledFrame->data, m_scaledFrame->linesize) < 0)
-			{
+	if (avcodec_decode_video2(m_codecContext, m_frame, &gotFrame, packet) >= 0) {
+		if (!data)
+			return false;
+		if (gotFrame) {
+			if (sws_scale(m_swsContext, m_frame->data, m_frame->linesize, 0, m_frame->height, m_scaledFrame->data,
+					m_scaledFrame->linesize) < 0) {
 				std::cout << "cannot scale in decode" << std::endl;
-				abort();// TODO Brutal
-			}
-			else
-			{
+				abort(); // TODO Brutal
+			} else {
 				memcpy(data, m_scaledFrame->data[0], MIN(len, m_codecContext->width * m_codecContext->height * 3));
 			}
 
 			return true;
 		}
-	}
-	else
-	{
+	} else {
 		std::cout << packet->stream_index << " ERROR" << std::endl;
 	}
 	return false;
