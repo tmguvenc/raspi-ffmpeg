@@ -34,9 +34,9 @@ public:
 
 protected:
 	VAFrameContainer* grabFrame();
+	explicit VideoFileCapture(const std::string& connectionString);
 
 private:
-	explicit VideoFileCapture(const std::string& connectionString);
 	std::string m_connectionString;
 	int m_width;
 	int m_height;
