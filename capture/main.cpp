@@ -6,6 +6,7 @@
  */
 
 #include "VideoFileCaptureFactory.h"
+#include "RTSPCaptureFactory.h"
 #include "WebcamCaptureFactory.h"
 #include "ICapture.h"
 #include "CaptureSettings.h"
@@ -24,8 +25,11 @@ int main() {
 
 	frameQueue.set_capacity(20);
 
-	ICaptureFactory* captureFactory = new VideoFileCaptureFactory();
-	auto capture = captureFactory->createFactory("/home/pi/Desktop/output_2014117_838_1.avi");
+	ICaptureFactory* captureFactory = new RTSPCaptureFactory();
+	auto capture = captureFactory->createFactory("rtsp://admin:12345@192.168.1.68/stream1");
+
+	//ICaptureFactory* captureFactory = new VideoFileCaptureFactory();
+	//auto capture = captureFactory->createFactory("/home/pi/Desktop/output_2014117_838_1.avi");
 
 	//ICaptureFactory* captureFactory = new WebcamCaptureFactory();
 	//auto capture = captureFactory->createFactory("/dev/video0");
