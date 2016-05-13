@@ -39,7 +39,7 @@ int main()
 	const auto len = HEIGHT * WIDTH * 3;
 	char buffer[len] = { 0 };
 
-//	cv::namedWindow("image");
+	cv::namedWindow("image");
 
 	while(true){
 		void* ptr = nullptr;
@@ -52,13 +52,9 @@ int main()
 
 			decoder.decode(frame->data(), frame->size(), buffer, len);
 
-//			cv::Mat image(HEIGHT, WIDTH, CV_8UC2, frame->data());
-//
-//			cv::Mat image2;
-//
-//			cv::cvtColor(image, image2, CV_YUV2BGR_Y422);
-//
-//			cv::imshow("image", image2);
+			cv::Mat image(HEIGHT, WIDTH, CV_8UC3, buffer);
+
+			cv::imshow("image", image);
 
 			if (cv::waitKey(40) == 27) break;
 
