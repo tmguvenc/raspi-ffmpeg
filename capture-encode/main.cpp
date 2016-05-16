@@ -11,75 +11,60 @@
 #include <csignal>
 #include <memory>
 #include <tbb/concurrent_queue.h>
-#include "Decoder.h"
 #include <opencv2/opencv.hpp>
 #include "VAFrame.h"
 #include "Encoder.h"
+#include <ctime>
 
 #define WIDTH 640
 #define HEIGHT 480
 
-tbb::concurrent_bounded_queue<void*> frameQueue;
+tbb::concurrent_bounded_queue<spEncodedBuffer> encodedQueue;
 ICapture *capture;
+Encoder encoder;
 
 int main() {
-	frameQueue.set_capacity(20);
+	encodedQueue.set_capacity(100);
 
 	capture = new WebcamCapture("/dev/video0");
 
 	capture->init();
-
-	Encoder encoder;
-	Decoder decoder;
-
-	if (!encoder.init(AV_CODEC_ID_H264, WIDTH, HEIGHT, 1)) {
-		std::cout << "cannot initialize encoder" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-	decoder.setup(AV_CODEC_ID_MJPEG);
-
-	const auto len = HEIGHT * WIDTH * 3;
-	char buffer[len] = { 0 };
-
-	capture->start([](void* ptr)
-	{
-		frameQueue.push(ptr);
-	});
 
 	auto ctx = zmq_ctx_new();
 	auto socket = zmq_socket(ctx, ZMQ_REP);
 
 	zmq_bind(socket, "tcp://*:5555");
 
+	if (!encoder.init(AV_CODEC_ID_H264, WIDTH, HEIGHT, 1)) {
+		std::cout << "cannot initialize encoder" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	capture->start([](void* ptr)
+	{
+		auto begin = clock();
+		VAFrame* frame = static_cast<VAFrame*>(ptr);
+		encodedQueue.push(encoder.encode(frame->data(), frame->size()));
+		delete frame;
+		//std::cout << "encode time: " << float( clock () - begin )*1000 / CLOCKS_PER_SEC << std::endl;
+		std::cout << "push size: " << encodedQueue.size() << std::endl;
+	});
+
 	while (true) {
-		void* ptr = nullptr;
-		frameQueue.pop(ptr);
+		auto begin = clock();
+		spEncodedBuffer encodedBuffer = nullptr;
+		encodedQueue.pop(encodedBuffer);
 
-		if (ptr != nullptr) {
-			VAFrame* frame = static_cast<VAFrame*>(ptr);
+		std::cout << "pop size: " << encodedQueue.size() << std::endl;
 
-			if (decoder.decode(frame->data(), frame->size(), buffer, len)) {
-
-				auto encoded_buffer = encoder.encode(buffer, len);
-
-				if (encoded_buffer) {
-					std::cout << "encoded " << encoded_buffer->len() << std::endl;
-
-					char buf[10] = { 0 };
-					zmq_recv(socket, buf, sizeof buf, 0);
-					if (strncmp(buf, "frame", 5) != 0)
-						continue;
-
-					zmq_send(socket, encoded_buffer->buffer(), encoded_buffer->len(), 0);
-				}
-			}
-
-			delete frame;
-
-			if (cv::waitKey(1) == 27)
-				break;
+		if (encodedBuffer) {
+			char buf[10] = { 0 };
+			zmq_recv(socket, buf, sizeof buf, 0);
+			if (strncmp(buf, "frame", 5) != 0)
+				continue;
+			zmq_send(socket, encodedBuffer->buffer(), encodedBuffer->len(), 0);
 		}
+		//std::cout << "send time: " << float(clock() - begin)*1000 / CLOCKS_PER_SEC << std::endl;
 	}
 
 	zmq_close(socket);

@@ -77,14 +77,14 @@ bool Encoder::init(AVCodecID codecId, int width, int height, int quality) {
 	m_pCodecContext->height = height;
 	m_pCodecContext->gop_size = 15;
 	m_pCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
-	m_pCodecContext->thread_count = 4;
+	//m_pCodecContext->thread_count = 4;
 
 	if (avcodec_open2(m_pCodecContext, m_pCodec, NULL) < 0) {
 		std::cout << "cannot open codec" << std::endl;
 		return false;
 	}
 
-	m_scaleContext = sws_getContext(width, height, AV_PIX_FMT_BGR24, width, height, AV_PIX_FMT_YUV420P, SWS_BILINEAR,
+	m_scaleContext = sws_getContext(width, height, AV_PIX_FMT_YUYV422, width, height, AV_PIX_FMT_YUV420P, SWS_BILINEAR,
 	NULL, NULL, NULL);
 
 	if (!m_scaleContext) {
@@ -121,7 +121,7 @@ void Encoder::reset() {
 
 spEncodedBuffer Encoder::encode(void* inputData, size_t inputLen) {
 
-	avpicture_fill((AVPicture *) m_frame, static_cast<uint8_t*>(inputData), AV_PIX_FMT_BGR24, 640, 480);
+	avpicture_fill((AVPicture *) m_frame, static_cast<uint8_t*>(inputData), AV_PIX_FMT_YUYV422, 640, 480);
 
 	// rescale to outStream format
 	int h = sws_scale(m_scaleContext, ((AVPicture*) m_frame)->data, ((AVPicture*) m_frame)->linesize, 0, 480,
