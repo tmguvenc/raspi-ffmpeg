@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} pthread)
 
 set (PUBLIC_H 	"include/VAFrame.h" 
+				"include/VAFrameContainer.h"
 				"include/CaptureSettings.h"
 				"include/Decoder.h"
 				"include/ICapture.h"
