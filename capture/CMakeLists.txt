@@ -33,16 +33,16 @@ add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BIN
 target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} pthread)
 
-set (INSTALL_HEADERS 	"include/VAFrame.h" 
-						"include/CaptureSettings.h"
-						"include/Decoder.h"
-						"include/ICapture.h"
-						"include/RTSPCaptureFactory.h"
-						"include/VideoFileCaptureFactory.h"
-						"include/WebcamCaptureFactory.h"
+set (PUBLIC_H 	"include/VAFrame.h" 
+				"include/CaptureSettings.h"
+				"include/Decoder.h"
+				"include/ICapture.h"
+				"include/RTSPCaptureFactory.h"
+				"include/VideoFileCaptureFactory.h"
+				"include/WebcamCaptureFactory.h"
 						)
 
-install(FILES ${PUBLIC_H} DESTINATION ${INSTALL_HEADERS})
+install(FILES ${PUBLIC_H} DESTINATION include)
 install(TARGETS ${PROJECT_NAME} 
   EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION bin
