@@ -22,8 +22,8 @@ set(FFMPEG_INCLUDE ${INSTALL_PREFIX}/include)
 set(FFMPEG_LIBS ${INSTALL_PREFIX}/lib)
 set(FFMPEG_LINK avcodec avformat avutil swscale avdevice)
 
-FILE(GLOB TARGET_H 							"include/*.h*" "src/*.h*")
-FILE(GLOB TARGET_SRC		 				"src/*.c*")
+FILE(GLOB TARGET_H 	 "include/*.h*" "src/*.h*")
+FILE(GLOB TARGET_SRC "src/*.c*")
 
 include_directories(include/)
 include_directories(${FFMPEG_INCLUDE})
