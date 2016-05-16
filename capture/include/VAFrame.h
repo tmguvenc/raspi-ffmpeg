@@ -45,12 +45,8 @@ public:
 	bool isKey() override;
 	bool decodeFrame(void*, size_t) override;
 
-	size_t size() override{
-		return m_packet->size;
-	}
-	void* data() override{
-		return m_packet->data;
-	}
+	size_t size() override;
+	void* data() override;
 
 private:
 	AVPacket* m_packet;

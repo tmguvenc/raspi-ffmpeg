@@ -34,3 +34,11 @@ bool VAFrame::decodeFrame(void* data, size_t len) {
 size_t VAFrame::getEncodedLength() {
 	return m_packet->size;
 }
+
+size_t VAFrame::size() {
+	return m_packet->size;
+}
+
+void* VAFrame::data() {
+	return m_packet->data;
+}
