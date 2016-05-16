@@ -33,8 +33,7 @@ add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BIN
 target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} pthread)
 
-set (PUBLIC_H 	"include/VAFrame.h" 
-				"include/VAFrameContainer.h"
+set (PUBLIC_H 	"include/VAFrameContainer.h"
 				"include/CaptureSettings.h"
 				"include/Decoder.h"
 				"include/ICapture.h"
