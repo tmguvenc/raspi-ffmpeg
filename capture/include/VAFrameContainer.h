@@ -22,6 +22,8 @@ public:
 	virtual size_t getFrameCount() = 0;
 	virtual bool isKey() = 0;
 	virtual bool decodeFrame(void*, size_t) = 0;
+	virtual void* data() = 0;
+	virtual size_t size() = 0;
 };
 
 #endif /* VAFRAMECONTAINER_H_ */
