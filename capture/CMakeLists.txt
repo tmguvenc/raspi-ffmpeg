@@ -11,6 +11,13 @@ set(INSTALL_PREFIX "/usr/local/" CACHE PATH "Installation and Dependency Path")
 
 message(STATUS "Version: " ${VERSION_MAJOR} "." ${VERSION_MINOR} "." ${VERSION_TYPE} "." ${VERSION_BUILD})
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
+  ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+  @ONLY)
+  
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 set(FFMPEG_INCLUDE ${INSTALL_PREFIX}/include)
 set(FFMPEG_LIBS ${INSTALL_PREFIX}/lib)
 set(FFMPEG_LINK avcodec avformat avutil swscale avdevice)
