@@ -8,12 +8,12 @@
 #ifndef INCLUDE_CAPTURE_H_
 #define INCLUDE_CAPTURE_H_
 
-#include <VideoFileCaptureFactory.h>
-#include <RTSPCaptureFactory.h>
-#include <WebcamCaptureFactory.h>
-#include <ICapture.h>
-#include <CaptureSettings.h>
-#include <Decoder.h>
-#include <VAFrameContainer.h>
+#include <capture/VideoFileCaptureFactory.h>
+#include <capture/RTSPCaptureFactory.h>
+#include <capture/WebcamCaptureFactory.h>
+#include <capture/ICapture.h>
+#include <capture/CaptureSettings.h>
+#include <capture/Decoder.h>
+#include <capture/VAFrameContainer.h>
 
 #endif /* INCLUDE_CAPTURE_H_ */
