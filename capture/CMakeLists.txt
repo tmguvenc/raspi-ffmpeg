@@ -43,7 +43,7 @@ set (PUBLIC_H 	"include/VAFrameContainer.h"
 				"include/WebcamCaptureFactory.h"
 						)
 
-install(FILES ${PUBLIC_H} DESTINATION include)
+install(FILES ${PUBLIC_H} DESTINATION include/capture)
 install(TARGETS ${PROJECT_NAME} 
   EXPORT ${PROJECT_NAME}
   RUNTIME DESTINATION bin
