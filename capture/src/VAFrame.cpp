@@ -5,7 +5,7 @@
  *      Author: Turan Murat Güvenç
  */
 
-#include "VAFrame.h"
+#include <VAFrame.h>
 
 extern "C" {
 #include <libavformat/avformat.h>

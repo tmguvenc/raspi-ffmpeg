@@ -8,7 +8,7 @@
 #ifndef VAFRAME_H_
 #define VAFRAME_H_
 
-#include "VAFrameContainer.h"
+#include <VAFrameContainer.h>
 
 struct AVPacket;
 
@@ -42,10 +42,13 @@ public:
 	}
 
 	size_t getEncodedLength() override;
+
 	bool isKey() override;
+
 	bool decodeFrame(void*, size_t) override;
 
 	size_t size() override;
+
 	void* data() override;
 
 private:
