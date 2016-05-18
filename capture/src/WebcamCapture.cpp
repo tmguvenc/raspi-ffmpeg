@@ -54,7 +54,7 @@ void WebcamCapture::init(CaptureSettings* settings) {
 
 	if (settings != nullptr) {
 
-		auto codec = avcodec_get_name((AVCodecID) settings->codecId);
+		auto codec = avcodec_get_name((AVCodecID) settings->getCodecId());
 		if (codec != nullptr) {
 			av_dict_set(&m_options, "input_format", codec, 0);
 			std::cout << "codec: " << codec << std::endl;
@@ -63,7 +63,7 @@ void WebcamCapture::init(CaptureSettings* settings) {
 			std::cout << "codec not found. setting it to mjpeg" << std::endl;
 		}
 
-		auto fps = std::to_string(settings->fps);
+		auto fps = std::to_string(settings->getFPS());
 
 		if (is_number(fps)) {
 			av_dict_set(&m_options, "framerate", fps.c_str(), 0);
@@ -73,9 +73,9 @@ void WebcamCapture::init(CaptureSettings* settings) {
 			std::cout << "wrong frame rate format. setting it to 15" << std::endl;
 		}
 
-		if (is_number(std::to_string(settings->width)) && is_number(std::to_string(settings->height))) {
-			m_width = settings->width;
-			m_height = settings->height;
+		if (is_number(std::to_string(settings->getWidth())) && is_number(std::to_string(settings->getHeight()))) {
+			m_width = settings->getWidth();
+			m_height = settings->getHeight();
 			std::stringstream ss;
 			ss << m_width << "x" << m_height;
 			auto vs = ss.str().c_str();
