@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION "2.8.1")
 # name of Windows project will tests.sln
 PROJECT(tests)
 
-set(tests test_1)
+set(tests test_webcam)
 # add library and include dirs for all targets
 link_libraries(capture)
 include_directories("${CMAKE_SOURCE_DIR}/include")
