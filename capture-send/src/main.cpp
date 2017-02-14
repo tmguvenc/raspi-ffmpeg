@@ -90,12 +90,15 @@ int main(int argc, char* argv[])
 
 	capture->init(&settings);
 
-	capture->start([](void* ptr)
+	capture->startAsync([](void* ptr)
 	{
 		frameQueue.push(static_cast<Frame*>(ptr));
 	});
 
-	if (!capture->started()) return -1;
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+	if (!capture->started()) 
+		return -1;
 
 	auto sender = new Sender(std::atoi(options["-p"].c_str()));
 	sender->start([]()
