@@ -2,7 +2,7 @@
  * VACapture.cpp
  *
  *  Created on: 26 Nis 2016
- *      Author: Turan Murat Güvenç
+ *      Author: Turan Murat GÃ¼venÃ§
  */
 
 #include "WebcamCapture.h"
@@ -73,7 +73,7 @@ void WebcamCapture::start(CaptureCallback func)
 	m_formatContext->interrupt_callback.opaque = static_cast<void*>(nullptr);
 
 	av_dict_set(&m_options, "framerate", "15", 0);
-	av_dict_set(&m_options, "input_format", "mjpeg", 0);
+	av_dict_set(&m_options, "input_format", "h264", 0);
 	av_dict_set(&m_options, "video_size", "640x480", 0);
 
 	auto input_format = av_find_input_format("video4linux2");
