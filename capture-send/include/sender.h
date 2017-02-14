@@ -8,7 +8,7 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
-#include "Frame.h"
+#include <frame.h>
 #include <functional>
 
 typedef std::function<FrameContainer*(void)> DataSupplier;
