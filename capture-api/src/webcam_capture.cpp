@@ -65,22 +65,22 @@ void WebcamCapture::init(CaptureSettings* settings) {
 
 	auto codec_name = avcodec_get_name(static_cast<AVCodecID>(m_settings->getCodecId()));
 	if (codec_name != nullptr) {
-		assert(av_dict_set(&m_options, "input_format", codec_name, 0) >= 0);
+		av_dict_set(&m_options, "input_format", codec_name, 0);
 		m_logger->info("codec: {}", codec_name);
 	}
 	else {
-		assert(av_dict_set(&m_options, "input_format", "mjpeg", 0) >= 0);
+		av_dict_set(&m_options, "input_format", "mjpeg", 0);
 		m_logger->warn("codec not found. setting it to {}", "mjpeg");
 	}
 
 	auto fps = std::to_string(m_settings->getFPS());
 
 	if (is_number(fps)) {
-		assert(av_dict_set(&m_options, "framerate", fps.c_str(), 0) >= 0);
+		av_dict_set(&m_options, "framerate", fps.c_str(), 0);
 		m_logger->info("frame rate: {}", m_settings->getFPS());
 	}
 	else {
-		assert(av_dict_set(&m_options, "framerate", "15", 0) >= 0);
+		av_dict_set(&m_options, "framerate", "15", 0);
 		m_logger->warn("wrong frame rate format. setting it to {}", 15);
 	}
 
@@ -90,11 +90,11 @@ void WebcamCapture::init(CaptureSettings* settings) {
 		std::stringstream ss;
 		ss << m_width << "x" << m_height;
 		auto vs = ss.str();
-		assert(av_dict_set(&m_options, "video_size", vs.c_str(), 0) >= 0);
+		av_dict_set(&m_options, "video_size", vs.c_str(), 0);
 		m_logger->info("video size: {}", vs);
 	}
 	else {
-		assert(av_dict_set(&m_options, "video_size", "640x480", 0) >= 0);
+		av_dict_set(&m_options, "video_size", "640x480", 0);
 		m_logger->warn("wrong resolution format. setting it to {}", "640x480");
 	}
 }

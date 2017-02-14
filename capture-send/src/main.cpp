@@ -67,7 +67,7 @@ bool checkParams()
 
 	auto codec_name = options["-c"];
 
-	if (!(codec_name == "h264" || codec_name == "mpjeg" || codec_name == "raw")) {
+	if (codec_name != "h264" && codec_name != "mjpeg" && codec_name != "raw") {
 		std::cerr << "codec name is not valid. (h264, mjpeg or raw)" << std::endl;
 		return false;
 	}
