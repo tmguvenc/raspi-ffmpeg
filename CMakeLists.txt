@@ -103,3 +103,6 @@ enable_testing ()
 
 add_subdirectory (capture-api)
 add_subdirectory (capture-send)
+if (MSVC)
+	add_subdirectory (capture-api-net)	
+endif()
