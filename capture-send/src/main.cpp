@@ -14,11 +14,6 @@
 #include <iostream>
 #include <sstream>
 
-extern "C"
-{
-#include <libavformat/avformat.h>
-}
-
 tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
 
 //default options
