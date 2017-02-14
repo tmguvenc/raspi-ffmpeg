@@ -5,7 +5,7 @@
  *      Author: Turan Murat Güvenç
  */
 
-#include "Sender.h"
+#include <sender.h>
 #include <zmq.h>
 #include <sstream>
 #include <iostream>
