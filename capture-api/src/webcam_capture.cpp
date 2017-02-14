@@ -176,7 +176,7 @@ void WebcamCapture::stop() {
 
 bool WebcamCapture::started()
 {
-	return m_run.load();
+	return m_run;
 }
 
 bool WebcamCapture::completed() {
