@@ -25,7 +25,7 @@ tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
 std::unordered_map<std::string, std::string> options = {
 	{ "-p", "5555" },
 	{ "-b", "20" },
-	{ "-u", "dev/video0" },
+	{ "-u", "/dev/video0" },
 	{ "-r", "640x480" },
 	{ "-c", "mjpeg" },
 	{ "-f", "15" }
