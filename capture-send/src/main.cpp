@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 		frameQueue.push(static_cast<Frame*>(ptr));
 	});
 
+	if (!capture->started()) return -1;
+
 	auto sender = new Sender(std::atoi(options["-p"].c_str()));
 	sender->start([]()
 	{

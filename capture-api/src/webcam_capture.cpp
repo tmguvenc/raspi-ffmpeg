@@ -174,6 +174,11 @@ void WebcamCapture::stop() {
 	m_logger->info("capturing stopped");
 }
 
+bool WebcamCapture::started()
+{
+	return m_run.load();
+}
+
 bool WebcamCapture::completed() {
 	return m_completed;
 }

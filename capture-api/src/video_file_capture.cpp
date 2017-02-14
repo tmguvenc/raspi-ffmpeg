@@ -121,6 +121,11 @@ bool VideoFileCapture::completed() {
 	return m_completed;
 }
 
+bool VideoFileCapture::started()
+{
+	return m_run;
+}
+
 void* VideoFileCapture::getCodecInfo() {
 	if (m_codecContext != nullptr)
 		return m_codecContext;

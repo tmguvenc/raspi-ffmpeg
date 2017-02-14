@@ -25,6 +25,7 @@ public:
 	virtual void start(CaptureCallback func) = 0;
 	virtual void startAsync(CaptureCallback func) = 0;
 	virtual void stop() = 0;
+	virtual bool started() = 0;
 	virtual bool completed() = 0;
 	virtual void* getCodecInfo() = 0;
 	virtual CaptureSettings* getSettings() = 0;

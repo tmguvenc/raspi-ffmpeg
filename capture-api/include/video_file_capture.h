@@ -34,6 +34,7 @@ public:
 	void start(CaptureCallback func) override;
 	void startAsync(CaptureCallback func) override;
 	void stop() override;bool completed() override;
+	bool started() override;
 	void* getCodecInfo() override;
 
 	CaptureSettings* getSettings() override{
