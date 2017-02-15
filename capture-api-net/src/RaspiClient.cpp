@@ -8,9 +8,9 @@ m_destHeight(destHeight),
 m_control(control),
 m_started(false),
 m_initialized(false) {
-	m_decoder = new NewDecoder;
+	m_decoder = new Decoder(m_destWidth, m_destHeight);
 	AVCodecID c = codec == CodecType::MJPEG ? AV_CODEC_ID_MJPEG : codec == CodecType::H264 ? AV_CODEC_ID_H264 : AV_CODEC_ID_RAWVIDEO;
-	m_decoder->setup(c);
+	m_decoder->setup(c, AV_PIX_FMT_YUV420P);
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_REQ);
 	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;

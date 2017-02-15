@@ -4,12 +4,12 @@
 #using <System.Windows.Forms.dll>  
 #using <System.Drawing.dll>
 
-#include "NewDecoder.h"
 #include <zmq.h>
 #include <memory>
 #include <tbb/concurrent_queue.h>
 #include <string>
 #include <vcclr.h>
+#include <decoder.h>
 
 extern "C"
 {
@@ -78,7 +78,7 @@ namespace Client
 	private:
 		System::Int32 m_destWidth;
 		System::Int32 m_destHeight;
-		NewDecoder* m_decoder;
+		Decoder* m_decoder;
 		void* m_context;
 		void* m_socket;
 		std::string *m_url;

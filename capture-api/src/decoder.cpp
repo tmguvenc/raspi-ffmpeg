@@ -40,8 +40,8 @@ bool Decoder::setup(AVCodecID codecId, AVPixelFormat pix_fmt) {
 
 	m_codecContext = avcodec_alloc_context3(m_codec);
 	m_codecContext->pix_fmt = pix_fmt;
-	m_codecContext->width = 640;
-	m_codecContext->height = 480;
+	m_codecContext->width = m_destWidth;
+	m_codecContext->height = m_destHeight;
 
 	if (m_codec->capabilities & CODEC_CAP_TRUNCATED)
 		m_codecContext->flags |= CODEC_FLAG_TRUNCATED;
@@ -133,7 +133,7 @@ void Decoder::teardown() {
 	assert(m_frame);
 	assert(m_scaledFrame);
 
-	av_freep(m_frame->data[0]);
+	//av_freep(m_frame->data[0]);
 	free_frame(&m_frame);
 
 	av_freep(&m_scaledFrame->data[0]);
