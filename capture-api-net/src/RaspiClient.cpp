@@ -71,7 +71,7 @@ void RaspiClient::ImageWrite(array<System::Byte>^ data)
 	System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight), System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
 	System::Runtime::InteropServices::Marshal::Copy(data, 0, bmpData->Scan0, data->Length);
 	m_bmp->UnlockBits(bmpData);
-	m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight));
+	m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_control->Width, m_control->Height));
 }
 
 void RaspiClient::initialize() {
