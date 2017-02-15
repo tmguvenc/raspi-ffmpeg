@@ -16,7 +16,7 @@ namespace raspi_client_test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            _client = new RaspiClient(pictureBox1, "tcp://192.168.200.25:5555", 640, 480, CodecType.H264);
+            _client = new RaspiClient(pictureBox1, "tcp://192.168.200.53:5555", 1024, 576, CodecType.MJPEG);
             _client.start();
         }
 
@@ -26,6 +26,7 @@ namespace raspi_client_test
             {
                 _client.stop();
                 _client.Dispose();
+                _client = null;
             }
         } 
     }

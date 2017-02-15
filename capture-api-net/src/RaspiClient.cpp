@@ -12,7 +12,12 @@ m_initialized(false) {
 	AVCodecID c = codec == CodecType::MJPEG ? AV_CODEC_ID_MJPEG : codec == CodecType::H264 ? AV_CODEC_ID_H264 : AV_CODEC_ID_RAWVIDEO;
 	m_decoder->setup(c, AV_PIX_FMT_YUV420P);
 	m_context = zmq_ctx_new();
+
 	m_socket = zmq_socket(m_context, ZMQ_REQ);
+
+	auto linger = 0;
+	auto r = zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
+
 	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
 	m_url = new std::string(ManagedtoNativeString(serverUrl).c_str());
 	m_graphics = m_control->CreateGraphics();
@@ -21,18 +26,25 @@ m_initialized(false) {
 
 RaspiClient::~RaspiClient() {
 	m_graphics->~Graphics();
+	delete m_graphics;
+	m_graphics = nullptr;
+
 	stop();
 
 	if (m_decoder) {
+		m_decoder->teardown();
 		delete m_decoder;
 		m_decoder = nullptr;
 	}
 
 	if (m_socket) {
-		zmq_close(m_socket);
+		auto rc = zmq_disconnect(m_socket, m_url->c_str());
+		rc = zmq_close(m_socket);
+		m_socket = nullptr;
 	}
 	if (m_context) {
-		zmq_ctx_destroy(m_context);
+		auto rc = zmq_ctx_destroy(m_context);
+		m_context = nullptr;
 	}
 
 	if (m_frame_queue){
