@@ -42,7 +42,7 @@ void Sender::start(DataSupplier ds)
 	{
 		// wait for new frame request
 		zmq_recv(m_socket, m_buffer, sizeof m_buffer, 0);
-		if (strncmp(m_buffer, "stop", 5) == 0)
+		if (strncmp(m_buffer, "stop", 4) == 0)
 		{
 			std::cout << "received stop command" << std::endl;
 			stop();

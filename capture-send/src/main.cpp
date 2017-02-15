@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
 			return frame;
 		});
 
+		spdlog::drop("capturesender");
 		capture->stop();
 		delete capture;
 		delete sender;
