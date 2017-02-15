@@ -158,5 +158,9 @@ CaptureSettings parse_arguments(int argc, char* argv[])
 	else
 		codec = AV_CODEC_ID_MJPEG;
 
+	if (is_number(options["-f"])) {
+		f = atoi(options["-f"].c_str());
+	}
+
 	return CaptureSettings(w, h, 3, f, codec);
 }
