@@ -106,6 +106,8 @@ void RaspiClient::stop()
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
+
+	zmq_send(m_socket, "stop", 4, 0);
 }
 
 void RaspiClient::decode_loop()
