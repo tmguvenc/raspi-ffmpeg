@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
 		delete sender;
 
 		std::cout << "Restarting capture-send" << std::endl;
+		frameQueue.clear();
 	}
 
 	return 0;
