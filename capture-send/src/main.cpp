@@ -86,32 +86,38 @@ int main(int argc, char* argv[])
 	frameQueue.set_capacity(std::atoi(options["-b"].c_str()));
 
 	WebcamCaptureFactory captureFactory;
-	auto capture = captureFactory.create(options["-u"], spdlog::stdout_color_mt("capturesender"));
-
-	capture->init(&settings);
-
-	capture->startAsync([](void* ptr)
+	std::cout << "Starting capture-send" << std::endl;
+	while (true)
 	{
-		frameQueue.push(static_cast<Frame*>(ptr));
-	});
+		auto capture = captureFactory.create(options["-u"], spdlog::stdout_color_mt("capturesender"));
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+		capture->init(&settings);
 
-	if (!capture->started()) 
-		return -1;
+		capture->startAsync([](void* ptr)
+		{
+			frameQueue.push(static_cast<Frame*>(ptr));
+		});
 
-	auto sender = new Sender(std::atoi(options["-p"].c_str()));
-	sender->start([]()
-	{
-		FrameContainer* frame;
-		frameQueue.pop(frame);
-		return frame;
-	});
+		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
-	capture->stop();
-	delete capture;
+		if (!capture->started())
+			return -1;
 
-	delete sender;
+		auto sender = new Sender(std::atoi(options["-p"].c_str()));
+		sender->start([]()
+		{
+			FrameContainer* frame;
+			frameQueue.pop(frame);
+			return frame;
+		});
+
+		capture->stop();
+		delete capture;
+		delete sender;
+		frameQueue.clear();
+
+		std::cout << "Restarting capture-send" << std::endl;
+	}
 
 	return 0;
 }
