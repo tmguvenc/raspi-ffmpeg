@@ -111,11 +111,16 @@ int main(int argc, char* argv[])
 			return frame;
 		});
 
+		while (!frameQueue.empty()) {			
+			FrameContainer* frame;
+			frameQueue.pop(frame);
+			delete frame;
+		}
+
 		spdlog::drop("capturesender");
 		capture->stop();
 		delete capture;
 		delete sender;
-		frameQueue.clear();
 
 		std::cout << "Restarting capture-send" << std::endl;
 	}
