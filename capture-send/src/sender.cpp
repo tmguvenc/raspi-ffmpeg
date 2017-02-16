@@ -27,6 +27,8 @@ Sender::Sender(int port) :
 
 Sender::~Sender()
 {
+	spdlog::drop("sender");
+
 	zmq_close(m_socket);
 	zmq_ctx_destroy(m_context);
 }
