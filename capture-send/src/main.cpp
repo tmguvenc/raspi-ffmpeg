@@ -11,10 +11,10 @@
 #include <frame.h>
 #include <sender.h>
 #include <unordered_map>
-#include <iostream>
 #include <sstream>
 
 tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
+std::shared_ptr<spdlog::logger> logger;
 
 //default options
 std::unordered_map<std::string, std::string> options = {
@@ -48,29 +48,29 @@ std::vector<std::string> split(const std::string &s, char delim) {
 bool checkParams()
 {
 	if (!is_number(options["-b"])) {
-		std::cerr <<  "buffer size is not valid" << std::endl;
+		logger->error("buffer size is not valid");
 		return false;
 	}
 	if (!is_number(options["-p"])) {
-		std::cerr <<  "port number is not valid" << std::endl;
+		logger->error("port number is not valid");
 		return false;
 	}
 	if (!is_number(options["-f"])) {
-		std::cerr <<  "FPS value is not valid" << std::endl;
+		logger->error("FPS value is not valid");
 		return false;
 	}
 
 	auto codec_name = options["-c"];
 
 	if (codec_name != "h264" && codec_name != "mjpeg" && codec_name != "raw") {
-		std::cerr << "codec name is not valid. (h264, mjpeg or raw)" << std::endl;
+		logger->error("codec name is not valid. (h264, mjpeg or raw)");
 		return false;
 	}
 
 	auto res = split(options["-r"], 'x');
 
 	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1])) {
-		std::cerr << "resolution string is not valid. (640x480, 1024x768, etc.)" << std::endl;
+		logger->error("resolution string is not valid. (640x480, 1024x768, etc.)");
 		return false;
 	}
 
@@ -86,7 +86,11 @@ int main(int argc, char* argv[])
 	frameQueue.set_capacity(std::atoi(options["-b"].c_str()));
 
 	WebcamCaptureFactory captureFactory;
-	std::cout << "Starting capture-send" << std::endl;
+
+	logger = spdlog::stdout_color_mt("mainsender");
+
+	logger->info("Starting capture-send");
+
 	while (true)
 	{
 		auto capture = captureFactory.create(options["-u"], spdlog::stdout_color_mt("capturesender"));
@@ -122,7 +126,7 @@ int main(int argc, char* argv[])
 		delete capture;
 		delete sender;
 
-		std::cout << "Restarting capture-send" << std::endl;
+		logger->info("Restarting capture-send");
 		frameQueue.clear();
 	}
 
