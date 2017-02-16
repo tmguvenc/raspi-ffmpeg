@@ -66,14 +66,6 @@ RaspiClient::~RaspiClient() {
 
 #undef PixelFormat
 
-void RaspiClient::ImageWrite(array<System::Byte>^ data)
-{
-	System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight), System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-	System::Runtime::InteropServices::Marshal::Copy(data, 0, bmpData->Scan0, data->Length);
-	m_bmp->UnlockBits(bmpData);
-	m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_control->Width, m_control->Height));
-}
-
 void RaspiClient::initialize() {
 	av_register_all();
 	avdevice_register_all();
@@ -112,9 +104,7 @@ void RaspiClient::stop()
 
 void RaspiClient::decode_loop()
 {
-	uint32_t len = m_destWidth * m_destHeight * 3;
-	array<System::Byte>^ cli_buffer = gcnew array<System::Byte>(len);
-	pin_ptr<unsigned char> ptr = &cli_buffer[0];
+	const auto len = m_destWidth * m_destHeight * 3;
 
 	while (m_started)
 	{
@@ -122,9 +112,15 @@ void RaspiClient::decode_loop()
 		m_frame_queue->pop(frame);
 		if (!frame || frame->m_size == 0)
 			break;
-		if (!m_decoder->decode(frame->m_data, frame->m_size, ptr, len))
-			continue;
-		ImageWrite(cli_buffer);
+		
+		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight), System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+		auto decoded = m_decoder->decode(frame->m_data, frame->m_size, bmpData->Scan0.ToPointer(), len);
+		m_bmp->UnlockBits(bmpData);
+
+		if (decoded)
+			m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_control->Width, m_control->Height));
+
+		frame.reset();
 	}
 }
 

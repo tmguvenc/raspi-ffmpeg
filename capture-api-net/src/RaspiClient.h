@@ -37,6 +37,7 @@ namespace Client
 			if (m_data)
 			{
 				free(m_data);
+				m_data = nullptr;
 				m_size = 0;
 			}
 		}
@@ -44,6 +45,10 @@ namespace Client
 		size_t m_size;
 		size_t m_index;
 		void* m_data;
+
+	private:
+		Frame& operator=(const Frame& other);
+		Frame(const Frame& other);
 	};
 
 	typedef std::shared_ptr<Frame> spFrame;
@@ -73,7 +78,6 @@ namespace Client
 
 		void receive_loop();
 		void decode_loop();
-		void ImageWrite(array<System::Byte>^ data);
 
 	private:
 		System::Int32 m_destWidth;
