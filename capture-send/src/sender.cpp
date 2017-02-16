@@ -7,21 +7,20 @@
 
 #include <sender.h>
 #include <zmq.h>
-#include <sstream>
-#include <iostream>
+#include <string>
 #include <string.h>
+#include <spdlog/details/spdlog_impl.h>
 
 Sender::Sender(int port) :
-		m_port(port), m_run(false)
+		m_port(port), m_run(false),
+		m_logger(spdlog::stdout_color_mt("sender"))
 {
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_REP);
 
-	std::stringstream url;
-	url << "tcp://*:" << port;
-	zmq_bind(m_socket, url.str().c_str());
+	zmq_bind(m_socket, ("tcp://*:" + std::to_string(m_port)).c_str());
 
-	std::cout << "bound to " << url.str() << std::endl;
+	m_logger->info("listening port {}", m_port);
 
 	memset(m_buffer, 0, sizeof m_buffer);
 }
@@ -34,7 +33,7 @@ Sender::~Sender()
 
 void Sender::start(DataSupplier ds)
 {
-	std::cout << "sender started" << std::endl;
+	m_logger->info("sender started");
 
 	m_run = true;
 
@@ -44,7 +43,7 @@ void Sender::start(DataSupplier ds)
 		zmq_recv(m_socket, m_buffer, sizeof m_buffer, 0);
 		if (strncmp(m_buffer, "stop", 4) == 0)
 		{
-			std::cout << "received stop command" << std::endl;
+			m_logger->warn("received stop command");
 			stop();
 			continue;
 		}
@@ -64,7 +63,7 @@ void Sender::start(DataSupplier ds)
 		delete frame;
 	}
 
-	std::cout << "sender stopped" << std::endl;
+	m_logger->info("sender stopped");
 }
 
 void Sender::stop()

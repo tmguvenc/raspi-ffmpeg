@@ -10,6 +10,8 @@
 
 #include <frame.h>
 #include <functional>
+#include <spdlog/logger.h>
+#include <memory>
 
 typedef std::function<FrameContainer*(void)> DataSupplier;
 
@@ -28,6 +30,7 @@ private:
 	void* m_socket;
 	bool m_run;
 	char m_buffer[10];
+	std::shared_ptr<spdlog::logger> m_logger;
 };
 
 #endif /* SENDER_H_ */
