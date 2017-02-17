@@ -56,13 +56,19 @@ void Connector::start()
 		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
 		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
 	}
-}
 
-void Connector::stop()
-{
 	// Send empty frame
 	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 	// Send data frame
 	zmq_send(m_socket, "stop", 4, 0);
+
+	// read empty frame
+	zmq_recv(m_socket, m_buffer, m_size, 0);
+	// read data
+	auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
+}
+
+void Connector::stop()
+{
 	m_started  = false;
 }

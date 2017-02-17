@@ -79,14 +79,15 @@ void RaspiClient::stop()
 
 	m_started = false;
 
+	if (m_connector) {
+		m_connector->stop();
+	}
+
 	m_frame_queue->push(spFrame(nullptr));
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
 
-	if (m_connector) {
-		m_connector->stop();
-	}
 }
 
 void RaspiClient::decode_loop()
