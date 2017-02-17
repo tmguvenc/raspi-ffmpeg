@@ -1,4 +1,5 @@
 #include "RaspiClient.h"
+#include "connector.h"
 
 using namespace Client;
 
@@ -11,15 +12,11 @@ m_initialized(false) {
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
 	AVCodecID c = codec == CodecType::MJPEG ? AV_CODEC_ID_MJPEG : codec == CodecType::H264 ? AV_CODEC_ID_H264 : AV_CODEC_ID_RAWVIDEO;
 	m_decoder->setup(c, AV_PIX_FMT_YUV420P);
-	m_context = zmq_ctx_new();
-
-	m_socket = zmq_socket(m_context, ZMQ_REQ);
-
-	auto linger = 0;
-	auto r = zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
 
 	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
-	m_url = new std::string(ManagedtoNativeString(serverUrl).c_str());
+
+	m_connector = new Connector(ManagedtoNativeString(serverUrl), m_frame_queue, m_destWidth, m_destHeight);
+
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
 }
@@ -37,24 +34,14 @@ RaspiClient::~RaspiClient() {
 		m_decoder = nullptr;
 	}
 
-	if (m_socket) {
-		auto rc = zmq_disconnect(m_socket, m_url->c_str());
-		rc = zmq_close(m_socket);
-		m_socket = nullptr;
-	}
-	if (m_context) {
-		auto rc = zmq_ctx_destroy(m_context);
-		m_context = nullptr;
+	if (m_connector) {
+		delete m_connector;
+		m_connector = nullptr;
 	}
 
 	if (m_frame_queue){
 		delete m_frame_queue;
 		m_frame_queue = nullptr;
-	}
-
-	if (m_url) {
-		delete m_url;
-		m_url = nullptr;
 	}
 
 	if (m_bmp){
@@ -78,8 +65,6 @@ void RaspiClient::start()
 	if (m_started) return;
 
 	m_started = true;
-	// "tcp://192.168.1.25:5555"
-	zmq_connect(m_socket, m_url->c_str());
 
 	m_receiver_thread = gcnew System::Threading::Thread(gcnew System::Threading::ThreadStart(this, &RaspiClient::receive_loop));
 	m_decoder_thread = gcnew System::Threading::Thread(gcnew System::Threading::ThreadStart(this, &RaspiClient::decode_loop));
@@ -99,7 +84,9 @@ void RaspiClient::stop()
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
 
-	zmq_send(m_socket, "stop", 4, 0);
+	if (m_connector) {
+		m_connector->stop();
+	}
 }
 
 void RaspiClient::decode_loop()
@@ -126,16 +113,7 @@ void RaspiClient::decode_loop()
 
 void RaspiClient::receive_loop()
 {
-	const auto size = m_destWidth * m_destHeight * 3;
-	auto frame_buffer = static_cast<char*>(malloc(size));
-
-	int index = 0;
-	while (m_started)
-	{
-		zmq_send(m_socket, "frame", 5, 0);
-		auto recBytes = zmq_recv(m_socket, frame_buffer, size, 0);
-		m_frame_queue->push(std::make_shared<Frame>(frame_buffer, recBytes, ++index));
+	if (m_connector) {
+		m_connector->start();
 	}
-
-	free(frame_buffer);
 }

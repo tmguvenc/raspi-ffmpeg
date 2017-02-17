@@ -20,7 +20,7 @@ namespace raspi_client_test
             _client.start();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Stop()
         {
             if (_client != null)
             {
@@ -28,6 +28,16 @@ namespace raspi_client_test
                 _client.Dispose();
                 _client = null;
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Stop();    
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Stop();
         } 
     }
 }

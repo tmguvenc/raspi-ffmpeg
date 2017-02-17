@@ -16,7 +16,15 @@ Sender::Sender(int port) :
 		m_logger(spdlog::stdout_color_mt("sender"))
 {
 	m_context = zmq_ctx_new();
-	m_socket = zmq_socket(m_context, ZMQ_REP);
+	m_socket = zmq_socket(m_context, ZMQ_ROUTER);
+
+	auto val = 1;
+	auto xx = zmq_setsockopt(m_socket, ZMQ_ROUTER_MANDATORY, &val, sizeof val);
+	assert(xx == 0);
+
+	auto linger = 0;
+	auto r = zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
+	assert(r == 0);
 
 	zmq_bind(m_socket, ("tcp://*:" + std::to_string(m_port)).c_str());
 
