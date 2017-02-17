@@ -65,11 +65,11 @@ void Sender::start(DataSupplier ds)
 			m_logger->warn("received stop command");
 			
 			// send client id
-			zmq_send(m_socket, client_id, sizeof(client_id), ZMQ_SNDMORE);
+			zmq_send(m_socket, client_id, len_id, ZMQ_SNDMORE);
 
 			// Send empty frame
 			zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-			zmq_send(m_socket, "stopped", sizeof("stopped"), 0);
+			zmq_send(m_socket, "stopped", 7, 0);
 			m_run = false;
 			continue;
 		}
