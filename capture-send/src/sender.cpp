@@ -44,13 +44,22 @@ Sender::~Sender()
 void Sender::start(DataSupplier ds)
 {
 	m_logger->info("sender started");
-
 	m_run = true;
+
+	char client_id[80] = { 0 };
 
 	while (m_run)
 	{
+		// get client identifier
+		auto len_id = zmq_recv(m_socket, client_id, sizeof(client_id), 0);
+		assert(len_id > 0);
+
+		// read empty frame
+		auto len_ef = zmq_recv(m_socket, m_buffer, sizeof(m_buffer), 0);
+		assert(len_ef == 0);
+
 		// wait for new frame request
-		zmq_recv(m_socket, m_buffer, sizeof m_buffer, 0);
+		zmq_recv(m_socket, m_buffer, sizeof(m_buffer), 0);
 		if (strncmp(m_buffer, "stop", 4) == 0)
 		{
 			m_logger->warn("received stop command");
@@ -65,6 +74,13 @@ void Sender::start(DataSupplier ds)
 
 		if (f == nullptr)
 			break;
+
+		// send client id
+		zmq_send(m_socket, client_id, sizeof(client_id), ZMQ_SNDMORE);
+
+		// Send empty frame
+		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+
 		// send frame
 		auto frame = static_cast<Frame*>(f);
 		zmq_send(m_socket, frame->data(), frame->size(), 0);

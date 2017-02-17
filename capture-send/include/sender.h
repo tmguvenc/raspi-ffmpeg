@@ -29,7 +29,7 @@ private:
 	void* m_context;
 	void* m_socket;
 	bool m_run;
-	char m_buffer[10];
+	char m_buffer[80];
 	std::shared_ptr<spdlog::logger> m_logger;
 };
 
