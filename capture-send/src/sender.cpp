@@ -76,7 +76,7 @@ void Sender::start(DataSupplier ds)
 			break;
 
 		// send client id
-		zmq_send(m_socket, client_id, sizeof(client_id), ZMQ_SNDMORE);
+		zmq_send(m_socket, client_id, len_id, ZMQ_SNDMORE);
 
 		// Send empty frame
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
