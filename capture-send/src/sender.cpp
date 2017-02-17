@@ -63,7 +63,14 @@ void Sender::start(DataSupplier ds)
 		if (strncmp(m_buffer, "stop", 4) == 0)
 		{
 			m_logger->warn("received stop command");
-			stop();
+			
+			// send client id
+			zmq_send(m_socket, client_id, sizeof(client_id), ZMQ_SNDMORE);
+
+			// Send empty frame
+			zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+			zmq_send(m_socket, "stopped", sizeof("stopped"), 0);
+			m_run = false;
 			continue;
 		}
 
@@ -94,5 +101,5 @@ void Sender::start(DataSupplier ds)
 
 void Sender::stop()
 {
-	m_run = false;
+	
 }

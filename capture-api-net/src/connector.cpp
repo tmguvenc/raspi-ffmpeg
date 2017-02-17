@@ -14,9 +14,6 @@ m_height(height),
 m_started(false)
 {
 	m_context = zmq_ctx_new();
-	m_socket = zmq_socket(m_context, ZMQ_DEALER);
-	auto linger = 0;
-	zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
 	m_size = m_width * m_height * 3;
 	m_buffer = malloc(m_size);
 }
@@ -40,6 +37,9 @@ Connector::~Connector()
 
 void Connector::start()
 {
+	m_socket = zmq_socket(m_context, ZMQ_DEALER);
+	auto linger = 0;
+	zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
 	zmq_connect(m_socket, m_url.c_str());
 	uint32_t index = 0;
 	m_started = true;
@@ -51,7 +51,7 @@ void Connector::start()
 		zmq_send(m_socket, "frame", 5, 0);
 
 		// read empty frame
-		//zmq_recv(m_socket, m_buffer, m_size, 0);
+		zmq_recv(m_socket, m_buffer, m_size, 0);
 		// read data
 		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
 		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
