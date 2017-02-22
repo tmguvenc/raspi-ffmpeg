@@ -43,12 +43,16 @@ void Connector::start()
 	zmq_connect(m_socket, m_url.c_str());
 	uint32_t index = 0;
 	m_started = true;
+
+	int stop = 2;
+	int nextFrame = 1;
+
 	while (m_started)
 	{
 		// Send empty frame
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 		// Send data frame
-		zmq_send(m_socket, "frame", 5, 0);
+		zmq_send(m_socket, &nextFrame, sizeof(nextFrame), 0);
 
 		// read empty frame
 		zmq_recv(m_socket, m_buffer, m_size, 0);
@@ -60,7 +64,7 @@ void Connector::start()
 	// Send empty frame
 	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 	// Send data frame
-	zmq_send(m_socket, "stop", 4, 0);
+	zmq_send(m_socket, &stop, sizeof(stop), 0);
 
 	// read empty frame
 	zmq_recv(m_socket, m_buffer, m_size, 0);
