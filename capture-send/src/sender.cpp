@@ -92,6 +92,9 @@ void Sender::start(DataSupplier ds)
 			{
 				auto ok = 0;
 				send(message.first, &ok, sizeof(ok)); 
+				remove(message.first);
+				if (m_clients.empty())
+					m_run = false;
 			} break;
 		}
 	}
