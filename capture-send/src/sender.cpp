@@ -25,11 +25,11 @@ inline int64_t current_time(){
 
 Sender::Sender(int port, const CaptureSettings& settings) :
 m_port(port), m_run(false),
-m_logger(spdlog::stdout_color_mt("sender")),
-m_thread(nullptr),
 m_width(settings.getWidth()),
 m_height(settings.getHeight()),
-m_codec(settings.getCodecId())
+m_codec(settings.getCodecId()),
+m_logger(spdlog::stdout_color_mt("sender")),
+m_thread(nullptr)
 {
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_ROUTER);
