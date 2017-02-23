@@ -13,7 +13,7 @@ m_initialized(false) {
 	AVCodecID c = codec == CodecType::MJPEG ? AV_CODEC_ID_MJPEG : codec == CodecType::H264 ? AV_CODEC_ID_H264 : AV_CODEC_ID_RAWVIDEO;
 	m_decoder->setup(c, AV_PIX_FMT_YUV420P);
 
-	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
+	m_frame_queue = new tbb::concurrent_bounded_queue<Frame*>;
 
 	m_connector = new Connector(ManagedtoNativeString(serverUrl), m_frame_queue, m_destWidth, m_destHeight);
 
@@ -21,7 +21,12 @@ m_initialized(false) {
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
 }
 
-RaspiClient::~RaspiClient() {
+RaspiClient::~RaspiClient()
+{
+	this->!RaspiClient();
+}
+
+RaspiClient::!RaspiClient() {
 	m_graphics->~Graphics();
 	delete m_graphics;
 	m_graphics = nullptr;
@@ -83,7 +88,7 @@ void RaspiClient::stop()
 		m_connector->stop();
 	}
 
-	m_frame_queue->push(spFrame(nullptr));
+	m_frame_queue->push((Frame*)nullptr);
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
@@ -96,19 +101,19 @@ void RaspiClient::decode_loop()
 
 	while (m_started)
 	{
-		spFrame frame;
+		Frame *frame;
 		m_frame_queue->pop(frame);
-		if (!frame || frame->m_size == 0)
+		if (!frame || frame->size() == 0)
 			break;
-		
+
 		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight), System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-		auto decoded = m_decoder->decode(frame->m_data, frame->m_size, bmpData->Scan0.ToPointer(), len);
+		auto decoded = m_decoder->decode(frame->data(), frame->size(), bmpData->Scan0.ToPointer(), len);
 		m_bmp->UnlockBits(bmpData);
 
 		if (decoded)
 			m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_control->Width, m_control->Height));
 
-		frame.reset();
+		delete frame;
 	}
 }
 

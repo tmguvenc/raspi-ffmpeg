@@ -4,7 +4,21 @@
 
 using namespace Client;
 
-Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue, int width, int height) :
+inline std::string getHostName()
+{
+#if defined(_WIN32) && defined(_MSC_VER)
+	unsigned long len = 1024;
+	char buffer[1024];
+	GetComputerName(buffer, &len);
+	return std::string(buffer, 0, len);
+#else
+	char buffer[1024] = { 0 };
+	auto ret = gethostname(buffer, 1024);
+	return std::string(buffer);
+#endif
+}
+
+Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<Frame*>* frame_queue, int width, int height) :
 m_url(std::move(url)),
 m_context(nullptr),
 m_socket(nullptr),
@@ -40,6 +54,10 @@ void Connector::start()
 	m_socket = zmq_socket(m_context, ZMQ_DEALER);
 	auto linger = 0;
 	zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
+	
+	auto host = getHostName();
+	zmq_setsockopt(m_socket, ZMQ_IDENTITY, host.c_str(), host.length());
+
 	zmq_connect(m_socket, m_url.c_str());
 	uint32_t index = 0;
 	m_started = true;
@@ -58,7 +76,9 @@ void Connector::start()
 		zmq_recv(m_socket, m_buffer, m_size, 0);
 		// read data
 		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
-		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
+		auto frame = new Frame(m_width, m_height, 3, ++index);
+		memcpy(frame->data(), m_buffer, recBytes);
+		m_frame_queue->push(frame);
 	}
 
 	// Send empty frame
