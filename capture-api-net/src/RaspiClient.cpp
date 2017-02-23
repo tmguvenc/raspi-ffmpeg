@@ -4,7 +4,7 @@
 
 using namespace Client;
 
-RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::String^ serverUrl, System::Int32 destWidth, System::Int32 destHeight, CodecType codec) :
+RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port, System::Int32 destWidth, System::Int32 destHeight, CodecType codec) :
 m_destWidth(destWidth),
 m_destHeight(destHeight),
 m_control(control),
@@ -16,7 +16,7 @@ m_initialized(false) {
 
 	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
 
-	m_connector = new Connector(ManagedtoNativeString(serverUrl), m_frame_queue, m_destWidth, m_destHeight);
+	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" +  System::Convert::ToString(port)), m_frame_queue, m_destWidth, m_destHeight);
 
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
@@ -99,6 +99,7 @@ void RaspiClient::stop()
 void RaspiClient::decode_loop()
 {
 	const auto len = m_destWidth * m_destHeight * 3;
+	const System::Drawing::Rectangle roi = System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight);
 
 	while (m_started)
 	{
@@ -107,12 +108,12 @@ void RaspiClient::decode_loop()
 		if (!frame || frame->m_size == 0)
 			break;
 
-		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight), System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
 		auto decoded = m_decoder->decode(frame->m_data, frame->m_size, bmpData->Scan0.ToPointer(), len);
 		m_bmp->UnlockBits(bmpData);
 
 		if (decoded)
-			m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight));
+			m_graphics->DrawImage(m_bmp, roi);
 
 		frame.reset();
 	}
