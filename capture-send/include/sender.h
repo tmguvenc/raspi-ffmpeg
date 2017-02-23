@@ -53,7 +53,7 @@ private:
 	char m_buffer[80];
 	int m_commandId;
 	char m_client_id[80];
-	int m_width, m_height, m_codec;
+	uint32_t m_width, m_height, m_codec;
 	std::shared_ptr<spdlog::logger> m_logger;
 	ClientMap m_clients;
 	MessageQueue m_message_queue;

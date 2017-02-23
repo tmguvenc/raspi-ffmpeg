@@ -1,6 +1,9 @@
 #include "connector.h"
 #include <zmq.h>
 #include <malloc.h>
+#include <assert.h>
+#include <vector>
+#include <sstream>
 
 using namespace Client;
 
@@ -16,6 +19,16 @@ inline std::string getHostName()
 	auto ret = gethostname(buffer, 1024);
 	return std::string(buffer);
 #endif
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+	std::stringstream ss(s);
+	std::string item;
+	std::vector<std::string> tokens;
+	while (std::getline(ss, item, delim)) {
+		tokens.push_back(item);
+	}
+	return tokens;
 }
 
 Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue) :
@@ -66,12 +79,23 @@ void Connector::init()
 	// Send data frame
 	zmq_send(m_socket, &init, sizeof(init), 0);
 
+	char temp[80] = { 0 };
+
 	// read empty frame
-	zmq_recv(m_socket, m_buffer, m_size, 0);
-	// read data
-	zmq_recv(m_socket, &m_width, sizeof(m_width), 0);
-	zmq_recv(m_socket, &m_height, sizeof(m_height), 0);
-	zmq_recv(m_socket, &m_codec, sizeof(m_codec), 0);
+	auto r = zmq_recv(m_socket, temp, sizeof(temp), 0);
+	assert(r == 0);
+	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
+	assert(r == sizeof(init));
+
+	// read empty frame
+	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
+	assert(r == 0);
+	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
+
+	auto v = split(std::string(temp, r), ',');
+	m_width = std::atoi(v[0].c_str());
+	m_height = std::atoi(v[1].c_str());
+	m_codec = std::atoi(v[2].c_str());
 
 	m_size = m_width * m_height * 3;
 	m_buffer = malloc(m_size);

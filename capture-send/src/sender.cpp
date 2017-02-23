@@ -102,11 +102,8 @@ void Sender::start(DataSupplier ds)
 			} break;
 		case 5: // init
 			{
-				zmq_send(m_socket, message.first.c_str(), message.first.length(), ZMQ_SNDMORE);
-				zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-				zmq_send(m_socket, &m_width, sizeof(m_width), ZMQ_SNDMORE);
-				zmq_send(m_socket, &m_height, sizeof(m_height), ZMQ_SNDMORE);
-				zmq_send(m_socket, &m_codec, sizeof(m_codec), 0);
+				const auto str = std::to_string(m_width) + "," + std::to_string(m_height) + "," + std::to_string(m_codec);
+				send(message.first, str.c_str(), str.size());
 			}break;
 		}
 	}
