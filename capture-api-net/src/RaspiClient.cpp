@@ -1,5 +1,6 @@
 #include "RaspiClient.h"
 #include "connector.h"
+#include <assert.h>
 
 using namespace Client;
 
@@ -111,7 +112,7 @@ void RaspiClient::decode_loop()
 		m_bmp->UnlockBits(bmpData);
 
 		if (decoded)
-			m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_control->Width, m_control->Height));
+			m_graphics->DrawImage(m_bmp, System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight));
 
 		frame.reset();
 	}
