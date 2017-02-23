@@ -18,18 +18,18 @@ inline std::string getHostName()
 #endif
 }
 
-Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue, int width, int height) :
+Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue) :
 m_url(std::move(url)),
 m_context(nullptr),
 m_socket(nullptr),
 m_frame_queue(frame_queue),
-m_width(width),
-m_height(height),
+m_width(-1),
+m_height(-1),
+m_codec(-1),
 m_started(false)
 {
 	m_context = zmq_ctx_new();
-	m_size = m_width * m_height * 3;
-	m_buffer = malloc(m_size);
+	init();
 }
 
 Connector::~Connector()
@@ -49,21 +49,40 @@ Connector::~Connector()
 	}
 }
 
-void Connector::start()
+void Connector::init()
 {
 	m_socket = zmq_socket(m_context, ZMQ_DEALER);
 	auto linger = 0;
 	zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
-	
+
 	auto host = getHostName();
 	zmq_setsockopt(m_socket, ZMQ_IDENTITY, host.c_str(), host.length());
 
 	zmq_connect(m_socket, m_url.c_str());
-	uint32_t index = 0;
-	m_started = true;
 
+	int init = 5;
+	// Send empty frame
+	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+	// Send data frame
+	zmq_send(m_socket, &init, sizeof(init), 0);
+
+	// read empty frame
+	zmq_recv(m_socket, m_buffer, m_size, 0);
+	// read data
+	zmq_recv(m_socket, &m_width, sizeof(m_width), 0);
+	zmq_recv(m_socket, &m_height, sizeof(m_height), 0);
+	zmq_recv(m_socket, &m_codec, sizeof(m_codec), 0);
+
+	m_size = m_width * m_height * 3;
+	m_buffer = malloc(m_size);
+}
+
+void Connector::start()
+{
 	int stop = 2;
 	int nextFrame = 1;
+	uint32_t index = 0;
+	m_started = true;
 
 	while (m_started)
 	{

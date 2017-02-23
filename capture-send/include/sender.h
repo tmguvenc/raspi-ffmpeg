@@ -28,10 +28,12 @@ using ClientMap = tbb::concurrent_hash_map<std::string, CommTime>;
 using Message = std::pair<std::string, int>;
 using MessageQueue = tbb::concurrent_bounded_queue<Message>;
 
+class CaptureSettings;
+
 class Sender
 {
 public:
-	explicit Sender(int port);
+	explicit Sender(int port, const CaptureSettings& settings);
 	virtual ~Sender();
 
 	void start(DataSupplier ds);
@@ -49,8 +51,9 @@ private:
 	void* m_socket;
 	bool m_run;
 	char m_buffer[80];
-	int commandId;
+	int m_commandId;
 	char m_client_id[80];
+	int m_width, m_height, m_codec;
 	std::shared_ptr<spdlog::logger> m_logger;
 	ClientMap m_clients;
 	MessageQueue m_message_queue;

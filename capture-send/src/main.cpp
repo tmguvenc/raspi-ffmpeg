@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		auto sender = new Sender(std::atoi(options["-p"].c_str()));
+		auto sender = new Sender(std::atoi(options["-p"].c_str()), settings);
 		sender->start([]()
 		{
 			FrameContainer* frame;

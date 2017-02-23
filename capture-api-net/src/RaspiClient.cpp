@@ -4,19 +4,18 @@
 
 using namespace Client;
 
-RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port, System::Int32 destWidth, System::Int32 destHeight, CodecType codec) :
-m_destWidth(destWidth),
-m_destHeight(destHeight),
+RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port) :
 m_control(control),
 m_started(false),
 m_initialized(false) {
+
+	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_frame_queue);
+	m_destWidth = m_connector->getWidth();
+	m_destHeight = m_connector->getHeight();
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
-	AVCodecID c = codec == CodecType::MJPEG ? AV_CODEC_ID_MJPEG : codec == CodecType::H264 ? AV_CODEC_ID_H264 : AV_CODEC_ID_RAWVIDEO;
-	m_decoder->setup(c, AV_PIX_FMT_YUV420P);
+	m_decoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
 
 	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
-
-	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" +  System::Convert::ToString(port)), m_frame_queue, m_destWidth, m_destHeight);
 
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);

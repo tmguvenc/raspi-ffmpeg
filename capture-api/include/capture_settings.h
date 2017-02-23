@@ -26,19 +26,19 @@ public:
 
 	}
 
-	uint32_t getWidth() {
+	uint32_t getWidth() const {
 		return m_width;
 	}
-	uint32_t getHeight() {
+	uint32_t getHeight() const {
 		return m_height;
 	}
-	uint32_t getChannels() {
+	uint32_t getChannels() const {
 		return m_channels;
 	}
-	uint32_t getFPS() {
+	uint32_t getFPS() const {
 		return m_fps;
 	}
-	AVCodecID getCodecId() {
+	AVCodecID getCodecId() const {
 		return m_codecId;
 	}
 

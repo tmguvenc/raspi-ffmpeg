@@ -12,6 +12,7 @@
 #include <spdlog/details/spdlog_impl.h>
 #include <chrono>
 #include <thread>
+#include <capture_settings.h>
 
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
 #define TIMEOUT_INTERVAL_IN_SECONDS (3 * HEARTHBEAT_INTERVAL_IN_SECONDS)
@@ -22,10 +23,13 @@ inline int64_t current_time(){
 	return static_cast<int64_t>(temp) / 1000;
 }
 
-Sender::Sender(int port) :
+Sender::Sender(int port, const CaptureSettings& settings) :
 m_port(port), m_run(false),
 m_logger(spdlog::stdout_color_mt("sender")),
-m_thread(nullptr)
+m_thread(nullptr),
+m_width(settings.getWidth()),
+m_height(settings.getHeight()),
+m_codec(settings.getCodecId())
 {
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_ROUTER);
@@ -96,6 +100,14 @@ void Sender::start(DataSupplier ds)
 				if (m_clients.empty())
 					m_run = false;
 			} break;
+		case 5: // init
+			{
+				zmq_send(m_socket, message.first.c_str(), message.first.length(), ZMQ_SNDMORE);
+				zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+				zmq_send(m_socket, &m_width, sizeof(m_width), ZMQ_SNDMORE);
+				zmq_send(m_socket, &m_height, sizeof(m_height), ZMQ_SNDMORE);
+				zmq_send(m_socket, &m_codec, sizeof(m_codec), 0);
+			}break;
 		}
 	}
 
@@ -177,11 +189,11 @@ void Sender::receive()
 	assert(len_id > 0);
 
 	// read empty frame
-	auto len_ef = zmq_recv(m_socket, &commandId, sizeof(commandId), 0);
+	auto len_ef = zmq_recv(m_socket, &m_commandId, sizeof(m_commandId), 0);
 	assert(len_ef == 0);
 
 	// wait for new frame request
-	zmq_recv(m_socket, &commandId, sizeof(commandId), 0);
+	zmq_recv(m_socket, &m_commandId, sizeof(m_commandId), 0);
 
 	std::string client(m_client_id, len_id);
 
@@ -190,5 +202,5 @@ void Sender::receive()
 	ac->second.lastReceivedMessageTime = current_time();
 	ac.release();
 
-	m_message_queue.push(std::make_pair(client, commandId));
+	m_message_queue.push(std::make_pair(client, m_commandId));
 }

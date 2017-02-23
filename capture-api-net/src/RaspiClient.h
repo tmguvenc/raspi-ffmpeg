@@ -33,7 +33,7 @@ namespace Client
 	public ref class RaspiClient {
 
 	public:
-		RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port, System::Int32 destWidth, System::Int32 destHeight, CodecType codec);
+		RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port);
 		~RaspiClient();
 		!RaspiClient();
 
