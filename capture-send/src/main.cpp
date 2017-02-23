@@ -104,8 +104,14 @@ int main(int argc, char* argv[])
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
-		if (!capture->started())
-			return -1;
+		auto retry = 0;
+		while (!capture->started()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			if (retry++ == 200){
+				logger->error("cannot open video source in {} sec.", 200 * 100 / 1000);
+				return -1;
+			}
+		}
 
 		auto sender = new Sender(std::atoi(options["-p"].c_str()));
 		sender->start([]()
