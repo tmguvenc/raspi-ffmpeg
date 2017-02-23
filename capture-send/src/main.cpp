@@ -102,8 +102,6 @@ int main(int argc, char* argv[])
 			frameQueue.push(static_cast<Frame*>(ptr));
 		});
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
 		auto retry = 0;
 		while (!capture->started()) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
