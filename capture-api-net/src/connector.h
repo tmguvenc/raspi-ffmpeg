@@ -10,7 +10,7 @@ namespace Client
 	class Connector
 	{
 	public:
-		explicit Connector(const std::string& url, tbb::concurrent_bounded_queue<Frame*>* frame_queue, int width, int height);
+		explicit Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue, int width, int height);
 		~Connector();
 		
 		void start();
@@ -21,7 +21,7 @@ namespace Client
 		void* m_context;
 		void* m_socket;
 		int m_width, m_height;
-		tbb::concurrent_bounded_queue<Frame*>* m_frame_queue;
+		tbb::concurrent_bounded_queue<spFrame>* m_frame_queue;
 		bool m_started;
 		void* m_buffer;
 		int m_size;

@@ -18,7 +18,7 @@ inline std::string getHostName()
 #endif
 }
 
-Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<Frame*>* frame_queue, int width, int height) :
+Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue, int width, int height) :
 m_url(std::move(url)),
 m_context(nullptr),
 m_socket(nullptr),
@@ -76,9 +76,7 @@ void Connector::start()
 		zmq_recv(m_socket, m_buffer, m_size, 0);
 		// read data
 		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
-		auto frame = new Frame(m_width, m_height, 3, ++index);
-		memcpy(frame->data(), m_buffer, recBytes);
-		m_frame_queue->push(frame);
+		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
 	}
 
 	// Send empty frame

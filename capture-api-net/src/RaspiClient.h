@@ -9,7 +9,7 @@
 #include <tbb/concurrent_queue.h>
 #include <vcclr.h>
 #include <decoder.h>
-#include <frame.h>
+#include "frame.h"
 
 extern "C"
 {
@@ -55,7 +55,7 @@ namespace Client
 		System::Int32 m_destWidth;
 		System::Int32 m_destHeight;
 		Decoder* m_decoder;
-		tbb::concurrent_bounded_queue<Frame*>* m_frame_queue;
+		tbb::concurrent_bounded_queue<spFrame>* m_frame_queue;
 		volatile bool m_started;
 		volatile bool m_initialized;
 		Connector* m_connector;
