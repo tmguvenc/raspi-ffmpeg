@@ -85,7 +85,7 @@ void Sender::start(DataSupplier ds)
 		* worst design I've ever made.
 		* TODO: this part must implement protocol buffers
 		*/
-		if (strncmp(aa, "next", 4))
+		if (strncmp(aa, "next", 4) == 0)
 		{
 			auto f = ds();
 			if (f == nullptr)
@@ -95,7 +95,7 @@ void Sender::start(DataSupplier ds)
 
 			delete frame;
 		}
-		else if (strncmp(aa, "stop", 4))
+		else if (strncmp(aa, "stop", 4) == 0)
 		{
 			auto ok = 0;
 			send(message.first, &ok, sizeof(ok));
@@ -188,9 +188,9 @@ void Sender::receive()
 	assert(len_ef == 0);
 
 	// wait for new frame request
-	zmq_recv(m_socket, command, sizeof(command), 0);
+	auto len_com = zmq_recv(m_socket, command, sizeof(command), 0);
 
-	if (strncmp(command, "init", 4))
+	if (strncmp(command, "init", 4) == 0)
 	{
 		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);

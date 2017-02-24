@@ -154,8 +154,6 @@ CaptureSettings parse_arguments(int argc, char* argv[])
 	if (res.size() == 2 && is_number(res[0]) && is_number(res[1])) {
 		w = atoi(res[0].c_str());
 		h = atoi(res[1].c_str());
-		logger->info("width: {}", w);
-		logger->info("height: {}", h);
 	}
 	auto codec_name = options["-c"];
 
