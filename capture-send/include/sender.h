@@ -25,7 +25,7 @@ struct CommTime
 };
 
 using ClientMap = tbb::concurrent_hash_map<std::string, CommTime>;
-using Message = std::pair<std::string, int>;
+using Message = std::pair<std::string, std::string>;
 using MessageQueue = tbb::concurrent_bounded_queue<Message>;
 
 class CaptureSettings;
@@ -51,13 +51,13 @@ private:
 	void* m_socket;
 	bool m_run;
 	char m_buffer[80];
-	int m_commandId;
 	char m_client_id[80];
 	uint32_t m_width, m_height, m_codec;
 	std::shared_ptr<spdlog::logger> m_logger;
 	ClientMap m_clients;
 	MessageQueue m_message_queue;
 	tbb::tbb_thread *m_thread;
+	std::string m_settings;
 };
 
 #endif /* SENDER_H_ */

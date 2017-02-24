@@ -11,7 +11,6 @@
 #include <string.h>
 #include <spdlog/details/spdlog_impl.h>
 #include <chrono>
-#include <thread>
 #include <capture_settings.h>
 
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
@@ -31,6 +30,7 @@ m_codec(settings.getCodecId()),
 m_logger(spdlog::stdout_color_mt("sender")),
 m_thread(nullptr)
 {
+	m_settings = std::to_string(m_width) + "," + std::to_string(m_height) + "," + std::to_string(m_codec);
 	m_context = zmq_ctx_new();
 	m_socket = zmq_socket(m_context, ZMQ_ROUTER);
 
@@ -65,7 +65,7 @@ Sender::~Sender()
 
 void Sender::start(DataSupplier ds)
 {
-	m_logger->info("sender started");
+	m_logger->info<std::string>("sender started");
 	m_run = true;
 
 	m_thread = new tbb::tbb_thread([](Sender* srv)
@@ -79,36 +79,33 @@ void Sender::start(DataSupplier ds)
 	{
 		Message message;
 		m_message_queue.pop(message);
+		const auto aa = message.second.c_str();
 
-		switch (message.second)
+		/*
+		* worst design I've ever made.
+		* TODO: this part must implement protocol buffers
+		*/
+		if (strncmp(aa, "next", 4))
 		{
-		case 1: // next frame
-			{
-				auto f = ds();
-				if (f == nullptr)
-					break;
-				auto frame = static_cast<Frame*>(f);
-				send(message.first, frame->data(), frame->size());
+			auto f = ds();
+			if (f == nullptr)
+				break;
+			auto frame = static_cast<Frame*>(f);
+			send(message.first, frame->data(), frame->size());
 
-				delete frame;
-			} break;
-		case 2: // stop
-			{
-				auto ok = 0;
-				send(message.first, &ok, sizeof(ok)); 
-				remove(message.first);
-				if (m_clients.empty())
-					m_run = false;
-			} break;
-		case 5: // init
-			{
-				const auto str = std::to_string(m_width) + "," + std::to_string(m_height) + "," + std::to_string(m_codec);
-				send(message.first, str.c_str(), str.size());
-			}break;
+			delete frame;
+		}
+		else if (strncmp(aa, "stop", 4))
+		{
+			auto ok = 0;
+			send(message.first, &ok, sizeof(ok));
+			remove(message.first);
+			if (m_clients.empty())
+				m_run = false;
 		}
 	}
 
-	m_logger->info("sender stopped");
+	m_logger->info<std::string>("sender stopped");
 }
 
 void Sender::stop()
@@ -129,16 +126,15 @@ void Sender::poll(int timeout)
 	auto currentTime = current_time();
 
 	std::vector<std::string> names;
-	auto ping = 1;
 
-	std::for_each(m_clients.begin(), m_clients.end(), [&currentTime, &names, this, ping](const std::pair<std::string, CommTime>& pair)
+	std::for_each(m_clients.begin(), m_clients.end(), [&currentTime, &names, this](const std::pair<std::string, CommTime>& pair)
 	{
 		auto time = pair.second;
 		if (time.lastReceivedMessageTime >= 0 && currentTime - time.lastReceivedMessageTime > TIMEOUT_INTERVAL_IN_SECONDS){
 			names.push_back(pair.first); // add this client to removal list
 		}
 		else if (time.lastSendMessageTime >= 0 && currentTime - time.lastSendMessageTime > HEARTHBEAT_INTERVAL_IN_SECONDS){
-			send(pair.first, &ping, sizeof(ping));
+			send(pair.first, "ping", 4);
 		}
 	});
 
@@ -181,16 +177,25 @@ void Sender::send(const std::string& clientName, const void* data, int size)
 
 void Sender::receive()
 {
+	char command[10];
+
 	// get client identifier
 	auto len_id = zmq_recv(m_socket, m_client_id, sizeof(m_client_id), 0);
 	assert(len_id > 0);
 
 	// read empty frame
-	auto len_ef = zmq_recv(m_socket, &m_commandId, sizeof(m_commandId), 0);
+	auto len_ef = zmq_recv(m_socket, command, sizeof(command), 0);
 	assert(len_ef == 0);
 
 	// wait for new frame request
-	zmq_recv(m_socket, &m_commandId, sizeof(m_commandId), 0);
+	zmq_recv(m_socket, command, sizeof(command), 0);
+
+	if (strncmp(command, "init", 4))
+	{
+		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
+		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+		zmq_send(m_socket, m_settings.c_str(), m_settings.size(), 0);
+	}
 
 	std::string client(m_client_id, len_id);
 
@@ -199,5 +204,5 @@ void Sender::receive()
 	ac->second.lastReceivedMessageTime = current_time();
 	ac.release();
 
-	m_message_queue.push(std::make_pair(client, m_commandId));
+	m_message_queue.push(make_pair(client, command));
 }

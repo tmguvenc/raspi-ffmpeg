@@ -73,22 +73,15 @@ void Connector::init()
 
 	zmq_connect(m_socket, m_url.c_str());
 
-	int init = 5;
 	// Send empty frame
 	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 	// Send data frame
-	zmq_send(m_socket, &init, sizeof(init), 0);
+	zmq_send(m_socket, "init", 4, 0);
 
-	char temp[80] = { 0 };
+	char temp[30] = { 0 };
 
 	// read empty frame
 	auto r = zmq_recv(m_socket, temp, sizeof(temp), 0);
-	assert(r == 0);
-	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
-	assert(r == sizeof(init));
-
-	// read empty frame
-	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 	assert(r == 0);
 	r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 
@@ -99,6 +92,8 @@ void Connector::init()
 
 	m_size = m_width * m_height * 3;
 	m_buffer = malloc(m_size);
+
+	assert(m_buffer != nullptr);
 }
 
 void Connector::start()
@@ -119,6 +114,8 @@ void Connector::start()
 		zmq_recv(m_socket, m_buffer, m_size, 0);
 		// read data
 		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
+		assert(m_buffer != nullptr);
+
 		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
 	}
 
