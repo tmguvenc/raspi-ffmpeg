@@ -190,7 +190,7 @@ void Sender::receive()
 	// wait for new frame request
 	auto len_com = zmq_recv(m_socket, command, sizeof(command), 0);
 
-	if (strncmp(command, "init", 4) == 0)
+	if (strncmp(command, "init", 4))
 	{
 		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);

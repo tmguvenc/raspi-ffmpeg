@@ -29,7 +29,6 @@ namespace Client
 		int m_width, m_height, m_codec;
 		tbb::concurrent_bounded_queue<spFrame>* m_frame_queue;
 		bool m_started;
-		void* m_buffer;
 		int m_size;
 	};
 }
