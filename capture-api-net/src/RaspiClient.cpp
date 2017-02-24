@@ -9,13 +9,13 @@ m_control(control),
 m_started(false),
 m_initialized(false) {
 
+	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
+
 	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_frame_queue);
 	m_destWidth = m_connector->getWidth();
 	m_destHeight = m_connector->getHeight();
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
 	m_decoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
-
-	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
 
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);

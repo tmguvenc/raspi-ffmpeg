@@ -1,6 +1,5 @@
 #include "connector.h"
 #include <zmq.h>
-#include <malloc.h>
 #include <assert.h>
 #include <vector>
 #include <sstream>
@@ -41,6 +40,7 @@ m_height(-1),
 m_codec(-1),
 m_started(false)
 {
+	assert(m_frame_queue != nullptr);
 	m_context = zmq_ctx_new();
 	init();
 }
@@ -55,10 +55,6 @@ Connector::~Connector()
 	if (m_context) {
 		zmq_ctx_destroy(m_context);
 		m_context = nullptr;
-	}
-	if (m_buffer) {
-		free(m_buffer);
-		m_buffer = nullptr;
 	}
 }
 
@@ -91,43 +87,44 @@ void Connector::init()
 	m_codec = std::atoi(v[2].c_str());
 
 	m_size = m_width * m_height * 3;
-	m_buffer = malloc(m_size);
-
-	assert(m_buffer != nullptr);
 }
 
 void Connector::start()
 {
-	int stop = 2;
-	int nextFrame = 1;
+	const char* next = "next";
+	const char* stop = "stop";
 	uint32_t index = 0;
 	m_started = true;
+
+	std::vector<char> buffer(m_size);
 
 	while (m_started)
 	{
 		// Send empty frame
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 		// Send data frame
-		zmq_send(m_socket, &nextFrame, sizeof(nextFrame), 0);
+		zmq_send(m_socket, next, 4, 0);
 
 		// read empty frame
-		zmq_recv(m_socket, m_buffer, m_size, 0);
+		zmq_recv(m_socket, &buffer[0], m_size, 0);
 		// read data
-		auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
-		assert(m_buffer != nullptr);
+		auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
 
-		m_frame_queue->push(std::make_shared<Frame>(m_buffer, recBytes, ++index));
+		// if it's a ping message
+		if (recBytes == 4) continue;
+
+		m_frame_queue->push(std::make_shared<Frame>(&buffer[0], recBytes, ++index));
 	}
 
 	// Send empty frame
 	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 	// Send data frame
-	zmq_send(m_socket, &stop, sizeof(stop), 0);
+	zmq_send(m_socket, stop, 4, 0);
 
 	// read empty frame
-	zmq_recv(m_socket, m_buffer, m_size, 0);
+	zmq_recv(m_socket, &buffer[0], m_size, 0);
 	// read data
-	auto recBytes = zmq_recv(m_socket, m_buffer, m_size, 0);
+	auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
 }
 
 void Connector::stop()

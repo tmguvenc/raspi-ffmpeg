@@ -190,6 +190,8 @@ void Sender::receive()
 	// wait for new frame request
 	zmq_recv(m_socket, command, sizeof(command), 0);
 
+	m_logger->info("{} connected, sent {} command", std::string(m_client_id, len_id), command);
+
 	if (strncmp(command, "init", 4))
 	{
 		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
