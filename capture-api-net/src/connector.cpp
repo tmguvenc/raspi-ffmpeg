@@ -121,10 +121,10 @@ void Connector::start()
 	// Send data frame
 	zmq_send(m_socket, stop, 4, 0);
 
-	// read empty frame
-	zmq_recv(m_socket, &buffer[0], m_size, 0);
-	// read data
-	auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
+	//// read empty frame
+	//zmq_recv(m_socket, &buffer[0], m_size, 0);
+	//// read data
+	//auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
 }
 
 void Connector::stop()
