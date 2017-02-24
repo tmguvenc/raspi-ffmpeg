@@ -7,9 +7,8 @@ using namespace Client;
 RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::String^ ip, System::UInt16 port) :
 m_control(control),
 m_started(false),
-m_initialized(false) {
-
-	m_frame_queue = new tbb::concurrent_bounded_queue<spFrame>;
+m_initialized(false),
+m_frame_queue(new tbb::concurrent_bounded_queue<spFrame>) {
 
 	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_frame_queue);
 	m_destWidth = m_connector->getWidth();
