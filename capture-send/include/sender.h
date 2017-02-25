@@ -50,7 +50,6 @@ private:
 	void* m_context;
 	void* m_socket;
 	bool m_run;
-	char m_buffer[80];
 	char m_client_id[80];
 	uint32_t m_width, m_height, m_codec;
 	std::shared_ptr<spdlog::logger> m_logger;

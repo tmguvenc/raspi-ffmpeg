@@ -46,7 +46,6 @@ m_thread(nullptr)
 
 	m_logger->info("listening port {}", m_port);
 
-	memset(m_buffer, 0, sizeof m_buffer);
 	memset(m_client_id, 0, sizeof m_client_id);
 }
 
