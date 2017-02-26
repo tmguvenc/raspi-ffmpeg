@@ -91,7 +91,12 @@ void RaspiClient::stop()
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
-
+	m_receiver_thread->~Thread(); 
+	m_decoder_thread->~Thread();
+	delete m_decoder_thread;
+	m_decoder_thread = nullptr;
+	delete m_receiver_thread;
+	m_receiver_thread = nullptr;
 }
 
 void RaspiClient::decode_loop()
