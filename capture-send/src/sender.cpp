@@ -92,6 +92,9 @@ void Sender::start(DataSupplier ds)
 	{
 		Message message;
 		m_message_queue.pop(message);
+		
+		assert(message.second == NextFrameRequest || message.second == StopRequest);
+
 		if (!funcs[message.second](message.first))
 			break;
 	}

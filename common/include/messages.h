@@ -3,10 +3,10 @@
 
 enum MessageType
 {
-	NextFrameRequest,
-	StopRequest,
-	Ping,
-	Init
+	NextFrameRequest = 0,
+	StopRequest = 1,
+	Ping = 2,
+	Init = 3
 };
 
 #endif
