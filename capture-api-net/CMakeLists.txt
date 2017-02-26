@@ -28,6 +28,7 @@ FILE(GLOB TARGET_SRC		"src/*.c*")
 
 include_directories(${TBB_INCLUDE})
 include_directories("../capture-api/include/")
+include_directories("../common/include/")
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${ZEROMQ_INCLUDE})
 link_directories(${TBB_LIBS})

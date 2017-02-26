@@ -30,6 +30,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 	return tokens;
 }
 
+
 Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue) :
 m_url(std::move(url)),
 m_context(nullptr),
@@ -68,12 +69,9 @@ void Connector::init()
 	zmq_setsockopt(m_socket, ZMQ_IDENTITY, host.c_str(), host.length());
 
 	zmq_connect(m_socket, m_url.c_str());
-
-	// Send empty frame
-	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-	// Send data frame
-	zmq_send(m_socket, "init", 4, 0);
-
+	
+	sendRequest(Init);
+	
 	char temp[30] = { 0 };
 
 	// read empty frame
@@ -91,8 +89,6 @@ void Connector::init()
 
 void Connector::start()
 {
-	const char* next = "next";
-	const char* stop = "stop";
 	uint32_t index = 0;
 	m_started = true;
 
@@ -100,10 +96,7 @@ void Connector::start()
 
 	while (m_started)
 	{
-		// Send empty frame
-		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-		// Send data frame
-		zmq_send(m_socket, next, 4, 0);
+		sendRequest(NextFrameRequest);
 
 		// read empty frame
 		zmq_recv(m_socket, &buffer[0], m_size, 0);
@@ -116,15 +109,15 @@ void Connector::start()
 		m_frame_queue->push(std::make_shared<Frame>(&buffer[0], recBytes, ++index));
 	}
 
+	sendRequest(StopRequest);
+}
+
+void Connector::sendRequest(MessageType message)
+{
 	// Send empty frame
 	zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 	// Send data frame
-	zmq_send(m_socket, stop, 4, 0);
-
-	//// read empty frame
-	//zmq_recv(m_socket, &buffer[0], m_size, 0);
-	//// read data
-	//auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
+	zmq_send(m_socket, &message, sizeof(MessageType), 0);
 }
 
 void Connector::stop()
