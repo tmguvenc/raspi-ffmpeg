@@ -24,12 +24,6 @@ namespace Client
 {
 	class Connector;
 
-	public enum class CodecType {
-		MJPEG,
-		H264,
-		RAW
-	};
-
 	public ref class RaspiClient {
 
 	public:
