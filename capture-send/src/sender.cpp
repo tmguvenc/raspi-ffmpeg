@@ -85,7 +85,9 @@ void Sender::start(DataSupplier ds)
 				m_run = false;
 
 			return !m_clients.empty();
-		}
+		},
+			[](){},
+			[](){}
 	};
 
 	while (m_run)
@@ -93,7 +95,7 @@ void Sender::start(DataSupplier ds)
 		Message message;
 		m_message_queue.pop(message);
 		
-		assert(message.second == NextFrameRequest || message.second == StopRequest);
+		assert(message.second >= NextFrameRequest || message.second <= Init);
 
 		if (!funcs[message.second](message.first))
 			break;
