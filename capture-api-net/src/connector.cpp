@@ -1,35 +1,9 @@
 #include "connector.h"
 #include <zmq.h>
 #include <assert.h>
-#include <vector>
-#include <sstream>
+#include <utils.h>
 
 using namespace Client;
-
-inline std::string getHostName()
-{
-#if defined(_WIN32) && defined(_MSC_VER)
-	unsigned long len = 1024;
-	char buffer[1024];
-	GetComputerName(buffer, &len);
-	return std::string(buffer, 0, len);
-#else
-	char buffer[1024] = { 0 };
-	auto ret = gethostname(buffer, 1024);
-	return std::string(buffer);
-#endif
-}
-
-std::vector<std::string> split(const std::string &s, char delim) {
-	std::stringstream ss(s);
-	std::string item;
-	std::vector<std::string> tokens;
-	while (std::getline(ss, item, delim)) {
-		tokens.push_back(item);
-	}
-	return tokens;
-}
-
 
 Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spFrame>* frame_queue) :
 m_url(std::move(url)),
