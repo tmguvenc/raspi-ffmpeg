@@ -65,7 +65,7 @@ void Sender::start(DataSupplier ds)
 			srv->poll(25);
 	}, this);
 
-	const static std::vector<std::function<bool(const std::string&)>> funcs =
+	std::vector<std::function<bool(const std::string&)>> funcs =
 	{
 		[this, ds](const std::string& name){
 			auto f = ds();
@@ -84,19 +84,22 @@ void Sender::start(DataSupplier ds)
 			if (m_clients.empty())
 				m_run = false;
 
-			return !m_clients.empty();
+ 			return m_run;
 		},
-			[](){},
-			[](){}
+		[this](const std::string&)
+		{
+			return true;
+		},
+		[this](const std::string&)
+		{
+			return true;
+		}
 	};
 
 	while (m_run)
 	{
 		Message message;
 		m_message_queue.pop(message);
-		
-		assert(message.second >= NextFrameRequest || message.second <= Init);
-
 		if (!funcs[message.second](message.first))
 			break;
 	}
@@ -190,6 +193,9 @@ void Sender::receive()
 		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 		zmq_send(m_socket, m_settings.c_str(), m_settings.size(), 0);
+		if(m_logger){
+			m_logger->info("[{}] connected", std::string(m_client_id, len_id));
+		}
 	}
 
 	std::string client(m_client_id, len_id);
