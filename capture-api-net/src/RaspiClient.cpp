@@ -15,7 +15,6 @@ m_frame_queue(new tbb::concurrent_bounded_queue<spFrame>) {
 	m_destHeight = m_connector->getHeight();
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
 	m_decoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
-
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
 }
