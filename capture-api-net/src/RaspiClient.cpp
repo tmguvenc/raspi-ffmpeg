@@ -15,7 +15,6 @@ m_frame_queue(new tbb::concurrent_bounded_queue<spFrame>) {
 	m_destHeight = m_connector->getHeight();
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
 	m_decoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
-
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
 }
@@ -91,7 +90,12 @@ void RaspiClient::stop()
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
-
+	m_receiver_thread->~Thread(); 
+	m_decoder_thread->~Thread();
+	delete m_decoder_thread;
+	m_decoder_thread = nullptr;
+	delete m_receiver_thread;
+	m_receiver_thread = nullptr;
 }
 
 void RaspiClient::decode_loop()

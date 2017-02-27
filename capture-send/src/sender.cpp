@@ -10,17 +10,8 @@
 #include <string>
 #include <string.h>
 #include <spdlog/details/spdlog_impl.h>
-#include <chrono>
 #include <capture_settings.h>
-
-#define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
-#define TIMEOUT_INTERVAL_IN_SECONDS (3 * HEARTHBEAT_INTERVAL_IN_SECONDS)
-#define TIMEOUT_CHECK_INTERVAL_IN_SECONDS 2
-
-inline int64_t current_time(){
-	auto temp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-	return static_cast<int64_t>(temp) / 1000;
-}
+#include <utils.h>
 
 Sender::Sender(int port, const CaptureSettings& settings) :
 m_port(port), m_run(false),
@@ -74,34 +65,43 @@ void Sender::start(DataSupplier ds)
 			srv->poll(25);
 	}, this);
 
+	std::vector<std::function<bool(const std::string&)>> funcs =
+	{
+		[this, ds](const std::string& name){
+			auto f = ds();
+			if (f == nullptr)
+				return false;
+			auto frame = static_cast<Frame*>(f);
+			send(name, frame->data(), frame->size());
+			delete frame;
+			return true;
+		},
+		[this](const std::string& name)
+		{
+			auto ok = 0;
+			send(name, &ok, sizeof(ok));
+			remove(name);
+			if (m_clients.empty())
+				m_run = false;
+
+ 			return m_run;
+		},
+		[this](const std::string&)
+		{
+			return true;
+		},
+		[this](const std::string&)
+		{
+			return true;
+		}
+	};
+
 	while (m_run)
 	{
 		Message message;
 		m_message_queue.pop(message);
-		const auto aa = message.second.c_str();
-
-		/*
-		* worst design I've ever made.
-		* TODO: this part must implement protocol buffers
-		*/
-		if (strncmp(aa, "next", 4) == 0)
-		{
-			auto f = ds();
-			if (f == nullptr)
-				break;
-			auto frame = static_cast<Frame*>(f);
-			send(message.first, frame->data(), frame->size());
-
-			delete frame;
-		}
-		else if (strncmp(aa, "stop", 4) == 0)
-		{
-			auto ok = 0;
-			send(message.first, &ok, sizeof(ok));
-			remove(message.first);
-			if (m_clients.empty())
-				m_run = false;
-		}
+		if (!funcs[message.second](message.first))
+			break;
 	}
 
 	m_logger->info<std::string>("sender stopped");
@@ -125,7 +125,7 @@ void Sender::poll(int timeout)
 	auto currentTime = current_time();
 
 	std::vector<std::string> names;
-
+	const static auto ping = Ping;
 	std::for_each(m_clients.begin(), m_clients.end(), [&currentTime, &names, this](const std::pair<std::string, CommTime>& pair)
 	{
 		auto time = pair.second;
@@ -133,7 +133,7 @@ void Sender::poll(int timeout)
 			names.push_back(pair.first); // add this client to removal list
 		}
 		else if (time.lastSendMessageTime >= 0 && currentTime - time.lastSendMessageTime > HEARTHBEAT_INTERVAL_IN_SECONDS){
-			send(pair.first, "ping", 4);
+			send(pair.first, &ping, sizeof(MessageType));
 		}
 	});
 
@@ -176,24 +176,26 @@ void Sender::send(const std::string& clientName, const void* data, int size)
 
 void Sender::receive()
 {
-	char command[10];
-
 	// get client identifier
 	auto len_id = zmq_recv(m_socket, m_client_id, sizeof(m_client_id), 0);
 	assert(len_id > 0);
 
+	MessageType message_type;
 	// read empty frame
-	auto len_ef = zmq_recv(m_socket, command, sizeof(command), 0);
+	auto len_ef = zmq_recv(m_socket, &message_type, sizeof(message_type), 0);
 	assert(len_ef == 0);
 
 	// wait for new frame request
-	auto len_com = zmq_recv(m_socket, command, sizeof(command), 0);
+	zmq_recv(m_socket, &message_type, sizeof(message_type), 0);
 
-	if (strncmp(command, "init", 4) == 0)
+	if (message_type == Init)
 	{
 		zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 		zmq_send(m_socket, m_settings.c_str(), m_settings.size(), 0);
+		if(m_logger){
+			m_logger->info("[{}] connected", std::string(m_client_id, len_id));
+		}
 	}
 
 	std::string client(m_client_id, len_id);
@@ -203,5 +205,5 @@ void Sender::receive()
 	ac->second.lastReceivedMessageTime = current_time();
 	ac.release();
 
-	m_message_queue.push(make_pair(client, command));
+	m_message_queue.push(make_pair(client, message_type));
 }

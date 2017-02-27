@@ -4,6 +4,7 @@
 #include <string>
 #include <tbb/concurrent_queue.h>
 #include "frame.h"
+#include "messages.h"
 
 namespace Client
 {
@@ -21,6 +22,7 @@ namespace Client
 
 	protected:
 		void init();
+		void sendRequest(MessageType message);
 
 	private:
 		std::string m_url;

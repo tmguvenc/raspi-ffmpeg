@@ -15,6 +15,7 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/tbb_thread.h>
+#include <messages.h>
 
 typedef std::function<FrameContainer*(void)> DataSupplier;
 
@@ -25,7 +26,7 @@ struct CommTime
 };
 
 using ClientMap = tbb::concurrent_hash_map<std::string, CommTime>;
-using Message = std::pair<std::string, std::string>;
+using Message = std::pair<std::string, MessageType>;
 using MessageQueue = tbb::concurrent_bounded_queue<Message>;
 
 class CaptureSettings;

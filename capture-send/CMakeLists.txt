@@ -22,6 +22,7 @@ endif()
 
 include_directories(include/)
 include_directories("../capture-api/include/")
+include_directories("../common/include/")
 include_directories(${TBB_INCLUDE})
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${SPDLOG_INCLUDE})
