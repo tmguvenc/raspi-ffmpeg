@@ -81,9 +81,6 @@ void Sender::start(DataSupplier ds)
 			auto ok = 0;
 			send(name, &ok, sizeof(ok));
 			remove(name);
-			if (m_clients.empty())
-				m_run = false;
-
  			return m_run;
 		},
 		[this](const std::string&)
@@ -153,6 +150,8 @@ void Sender::remove(const std::string& clientName)
 		m_clients.erase(ac);
 	}
 	ac.release();
+	if (m_clients.empty())
+		m_run = false;
 }
 
 void Sender::send(const std::string& clientName, const void* data, int size)
