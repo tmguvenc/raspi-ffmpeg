@@ -4,6 +4,7 @@
 #include <chrono>
 #include <sstream>
 #include <vector>
+#include <cctype>
 
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
 #define TIMEOUT_INTERVAL_IN_SECONDS (3 * HEARTHBEAT_INTERVAL_IN_SECONDS)
@@ -36,6 +37,13 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
 		tokens.push_back(item);
 	}
 	return tokens;
+}
+
+inline static bool is_number(const std::string& s) {
+	std::string::const_iterator it = s.begin();
+	while (it != s.end() && std::isdigit(*it))
+		++it;
+	return !s.empty() && it == s.end();
 }
 
 

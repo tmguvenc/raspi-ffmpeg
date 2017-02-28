@@ -72,7 +72,7 @@
             this.txt_ip.Name = "txt_ip";
             this.txt_ip.Size = new System.Drawing.Size(162, 20);
             this.txt_ip.TabIndex = 3;
-            this.txt_ip.Text = "192.168.200.21";
+            this.txt_ip.Text = "192.168.1.140";
             // 
             // txt_port
             // 

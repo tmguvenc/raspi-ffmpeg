@@ -10,91 +10,38 @@
 #include <spdlog/spdlog.h>
 #include <frame.h>
 #include <sender.h>
-#include <unordered_map>
 #include <sstream>
+#include <parser.h>
 
 tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
 std::shared_ptr<spdlog::logger> logger;
 
-//default options
-std::unordered_map<std::string, std::string> options = {
-	{ "-p", "5555" },
-	{ "-b", "20" },
-	{ "-u", "/dev/video0" },
-	{ "-r", "640x480" },
-	{ "-c", "mjpeg" },
-	{ "-f", "15" }
-};
-
-CaptureSettings parse_arguments(int argc, char* argv[]);
-
-inline static bool is_number(const std::string& s) {
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it))
-		++it;
-	return !s.empty() && it == s.end();
-}
-
-std::vector<std::string> split(const std::string &s, char delim) {
-	std::stringstream ss(s);
-	std::string item;
-	std::vector<std::string> tokens;
-	while (std::getline(ss, item, delim)) {
-		tokens.push_back(item);
-	}
-	return tokens;
-}
-
-bool checkParams()
-{
-	if (!is_number(options["-b"])) {
-		logger->error("buffer size is not valid");
-		return false;
-	}
-	if (!is_number(options["-p"])) {
-		logger->error("port number is not valid");
-		return false;
-	}
-	if (!is_number(options["-f"])) {
-		logger->error("FPS value is not valid");
-		return false;
-	}
-
-	auto codec_name = options["-c"];
-
-	if (codec_name != "h264" && codec_name != "mjpeg" && codec_name != "raw") {
-		logger->error("codec name is not valid. (h264, mjpeg or raw)");
-		return false;
-	}
-
-	auto res = split(options["-r"], 'x');
-
-	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1])) {
-		logger->error("resolution string is not valid. (640x480, 1024x768, etc.)");
-		return false;
-	}
-
-	return true;
-}
-
 int main(int argc, char* argv[])
 {
 	logger = spdlog::stdout_color_mt("mainsender");
+	Arguments args;
 
-	auto settings = parse_arguments(argc, argv);
+	ArgumentParser parser;
 
-	if (!checkParams()) return -1;
+	try {
+		args = parser.parse(argc, argv);
+	} catch (std::exception& exception) {
+		logger->error("{}", exception.what());
+		return -1;
+	}
 
-	frameQueue.set_capacity(std::atoi(options["-b"].c_str()));
+	frameQueue.set_capacity(args.balance);
 
 	WebcamCaptureFactory captureFactory;
 
 	logger->info("Starting capture-send");
 
+	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
+
 	while (true)
 	{
-		auto capture = captureFactory.create(options["-u"], spdlog::stdout_color_mt("capturesender"));
-
+		auto capture = captureFactory.create(args.url, spdlog::stdout_color_mt("capturesender"));
+		
 		capture->init(&settings);
 
 		capture->startAsync([](void* ptr)
@@ -111,7 +58,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		auto sender = new Sender(std::atoi(options["-p"].c_str()), settings);
+		auto sender = new Sender(args.port, settings);
 		sender->start([]()
 		{
 			FrameContainer* frame;
@@ -135,40 +82,4 @@ int main(int argc, char* argv[])
 	}
 
 	return 0;
-}
-
-CaptureSettings parse_arguments(int argc, char* argv[])
-{
-	for (auto i = 1; i < argc; ++i)
-	{
-		auto op = options.find(argv[i]);
-		if (op != options.end())
-			op->second = argv[i + 1];
-	}
-
-	uint32_t w = 640, h = 480, f = 15;
-
-	AVCodecID codec;
-
-	auto res = split(options["-r"], 'x');
-	if (res.size() == 2 && is_number(res[0]) && is_number(res[1])) {
-		w = atoi(res[0].c_str());
-		h = atoi(res[1].c_str());
-	}
-	auto codec_name = options["-c"];
-
-	if (codec_name == "mjpeg")
-		codec = AV_CODEC_ID_MJPEG;
-	else if (codec_name == "h264")
-		codec = AV_CODEC_ID_H264;
-	else if (codec_name == "raw")
-		codec = AV_CODEC_ID_RAWVIDEO;
-	else
-		codec = AV_CODEC_ID_MJPEG;
-
-	if (is_number(options["-f"])) {
-		f = atoi(options["-f"].c_str());
-	}
-
-	return CaptureSettings(w, h, 3, f, codec);
 }
