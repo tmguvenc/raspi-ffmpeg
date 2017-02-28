@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
 	try {
 		args = parser.parse(argc, argv);
-	} catch (std::exception& exception) {
+	} catch (const std::exception& exception) {
 		logger->error("{}", exception.what());
 		return -1;
 	}
