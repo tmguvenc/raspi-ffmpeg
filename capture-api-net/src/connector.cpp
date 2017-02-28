@@ -22,6 +22,11 @@ m_started(false)
 
 Connector::~Connector()
 {
+	destroy();
+}
+
+void Connector::destroy()
+{
 	if (m_socket) {
 		zmq_disconnect(m_socket, m_url.c_str());
 		zmq_close(m_socket);

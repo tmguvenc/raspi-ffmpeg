@@ -23,6 +23,7 @@ namespace Client
 	protected:
 		void init();
 		void sendRequest(MessageType message);
+		void destroy();
 
 	private:
 		std::string m_url;
