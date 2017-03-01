@@ -20,6 +20,8 @@ if (NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
+enable_testing()
+
 include_directories(include/)
 include_directories("../capture-api/include/")
 include_directories("../common/include/")
@@ -44,6 +46,8 @@ target_link_libraries(${PROJECT_NAME} debug ${GTEST_LINK_DEBUG})
 target_link_libraries(${PROJECT_NAME} optimized ${GTEST_LINK_RELEASE})
 target_link_libraries(${PROJECT_NAME} capture)
 target_link_libraries(${PROJECT_NAME} common)
+
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
 
 if(NOT MSVC)
 	target_link_libraries(${PROJECT_NAME} pthread)
