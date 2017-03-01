@@ -29,6 +29,11 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		auto op = m_options.find(argv[i]);
 		if (op != m_options.end())
 			op->second = argv[i + 1];
+		else{
+			char buffer[100] = { 0 };
+			sprintf(buffer, "invalid option: %s", argv[i]);
+			throw std::runtime_error(buffer);
+		}
 	}
 
 	// get frame queue capacity
@@ -38,7 +43,7 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	else {
 		char buffer[100] = { 0 };
 		sprintf(buffer, "invalid queue size: %s", m_options["-b"].c_str());
-		throw std::runtime_error(buffer);
+		throw std::invalid_argument(buffer);
 	}
 
 	// get port number
@@ -47,8 +52,8 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	}
 	else {
 		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid port number: %s.", m_options["-p"].c_str());
-		throw std::runtime_error(buffer);
+		sprintf(buffer, "invalid port number: %s", m_options["-p"].c_str());
+		throw std::invalid_argument(buffer);
 	}
 
 	// get source URL
@@ -56,8 +61,8 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 
 	if (args.url.empty()) {
 		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid source URL: %s.", m_options["-u"].c_str());
-		throw std::runtime_error(buffer);
+		sprintf(buffer, "invalid source URL: %s", m_options["-u"].c_str());
+		throw std::invalid_argument(buffer);
 	}
 
 	// get resolution
@@ -65,8 +70,8 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 
 	if (wh.first == -1 || wh.second == -1) {
 		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid resolution: %s.", m_options["-r"].c_str());
-		throw std::runtime_error(buffer);
+		sprintf(buffer, "invalid resolution: %s", m_options["-r"].c_str());
+		throw std::invalid_argument(buffer);
 	}
 
 	args.width = wh.first;
@@ -83,8 +88,8 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	else
 	{
 		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid codec: %s.", m_options["-c"].c_str());
-		throw std::runtime_error(buffer);
+		sprintf(buffer, "invalid codec: %s", m_options["-c"].c_str());
+		throw std::invalid_argument(buffer);
 	}
 
 	// get FPS
@@ -92,8 +97,8 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		args.fps = atoi(m_options["-f"].c_str());
 	} else {
 		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid fps: %s.", m_options["-c"].c_str());
-		throw std::runtime_error(buffer);
+		sprintf(buffer, "invalid fps: %s", m_options["-f"].c_str());
+		throw std::invalid_argument(buffer);
 	}
 
 	return args;
@@ -101,8 +106,7 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 
 std::pair<uint32_t, uint32_t> ArgumentParser::getWidthAndHeight()
 {
-	auto res = split(m_options["-r"], 'x');
-	
+	auto res = split(m_options["-r"], 'x');	
 	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1]))
 		return std::make_pair(-1, -1);
 
