@@ -30,9 +30,11 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		if (op != m_options.end())
 			op->second = argv[i + 1];
 		else{
-			char buffer[100] = { 0 };
-			sprintf(buffer, "invalid option: %s", argv[i]);
-			throw std::invalid_argument(buffer);
+			if(std::string(argv[i]).find("-") != std::string::npos){
+				char buffer[100] = { 0 };
+				sprintf(buffer, "invalid option: %s", argv[i]);
+				throw std::invalid_argument(buffer);
+			}
 		}
 	}
 
