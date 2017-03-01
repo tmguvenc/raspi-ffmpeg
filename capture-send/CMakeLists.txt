@@ -39,6 +39,7 @@ target_link_libraries(${PROJECT_NAME} ${TBB_LINK})
 target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} ${ZEROMQ_LINK})
 target_link_libraries(${PROJECT_NAME} capture)
+target_link_libraries(${PROJECT_NAME} common)
 
 if(NOT MSVC)
 	target_link_libraries(${PROJECT_NAME} pthread)

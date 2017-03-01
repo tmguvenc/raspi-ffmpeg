@@ -11,7 +11,7 @@
 #include <string.h>
 #include <spdlog/details/spdlog_impl.h>
 #include <capture_settings.h>
-#include <utils.h>
+#include <common_utils.h>
 
 Sender::Sender(int port, const CaptureSettings& settings) :
 m_port(port), m_run(false),
