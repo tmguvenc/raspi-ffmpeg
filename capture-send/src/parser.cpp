@@ -32,7 +32,7 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		else{
 			char buffer[100] = { 0 };
 			sprintf(buffer, "invalid option: %s", argv[i]);
-			throw std::runtime_error(buffer);
+			throw std::invalid_argument(buffer);
 		}
 	}
 
