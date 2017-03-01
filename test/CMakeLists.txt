@@ -22,6 +22,8 @@ endif()
 
 enable_testing()
 
+add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
+
 include_directories(include/)
 include_directories("../capture-api/include/")
 include_directories("../common/include/")
@@ -42,8 +44,7 @@ add_executable(${PROJECT_NAME} ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BINARY_
 target_link_libraries(${PROJECT_NAME} ${TBB_LINK})
 target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} ${ZEROMQ_LINK})
-target_link_libraries(${PROJECT_NAME} debug ${GTEST_LINK_DEBUG})
-target_link_libraries(${PROJECT_NAME} optimized ${GTEST_LINK_RELEASE})
+target_link_libraries(${PROJECT_NAME} ${GTEST_LINK})
 target_link_libraries(${PROJECT_NAME} capture)
 target_link_libraries(${PROJECT_NAME} common)
 
@@ -56,14 +57,10 @@ endif()
 if(MSVC)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		   "${GTEST_BINS}/${GTEST_LINK_RELEASE}.dll"
+		   "${GTEST_BINS}/gtest.dll"
 	$<TARGET_FILE_DIR:${PROJECT_NAME}>)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		   "${GTEST_BINS}/${GTEST_LINK_DEBUG}.dll"
-	$<TARGET_FILE_DIR:${PROJECT_NAME}>)
-	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		   "${GTEST_BINS}/${GTEST_LINK_DEBUG}.pdb"
+		   "${GTEST_BINS}/gtest-d.dll"
 	$<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif()
