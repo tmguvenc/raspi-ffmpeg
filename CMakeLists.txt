@@ -103,6 +103,13 @@ else()
 	set(FFMPEG_INCLUDE ${LOCAL}/include)
 	set(FFMPEG_LIBS ${LOCAL}/lib)
 	set(FFMPEG_LINK avcodec avdevice avfilter avformat avutil postproc swresample swscale)
+	
+	#google test
+	set(GTEST_INCLUDE ${LOCAL}/include)
+	set(GTEST_LIBS ${LOCAL}/lib)
+	set(GTEST_BINS ${LOCAL}/lib)
+	set(GTEST_LINK_DEBUG gtest)
+	set(GTEST_LINK_RELEASE gtest)
 endif()
 
 enable_testing ()
