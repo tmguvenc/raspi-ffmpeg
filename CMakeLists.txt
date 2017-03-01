@@ -61,6 +61,12 @@ if (MSVC)
 	set(FFMPEG_BINS ${DEPENDS_FOLDER}/ffmpeg/x64/bin)
 	set(FFMPEG_LINK avcodec avdevice avfilter avformat avutil postproc swresample swscale)
 
+	#google-test
+	set(GTEST_INCLUDE ${DEPENDS_FOLDER}/googletest/distro/include)
+	set(GTEST_LIBS ${DEPENDS_FOLDER}/googletest/distro/lib)
+	set(GTEST_BINS ${DEPENDS_FOLDER}/googletest/distro/bin)
+	set(GTEST_LINK_DEBUG gtest-d)
+	set(GTEST_LINK_RELEASE gtest)
 else()
 	set(LOCAL /usr/local)
 
@@ -103,6 +109,8 @@ enable_testing ()
 
 add_subdirectory (capture-api)
 add_subdirectory (capture-send)
+add_subdirectory (common)
+add_subdirectory (test)
 if (MSVC)
 	add_subdirectory (capture-api-net)	
 endif()

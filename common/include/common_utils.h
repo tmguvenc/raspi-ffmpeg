@@ -6,6 +6,10 @@
 #include <vector>
 #include <cctype>
 
+#if defined(_WIN32) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
 #define TIMEOUT_INTERVAL_IN_SECONDS (3 * HEARTHBEAT_INTERVAL_IN_SECONDS)
 #define TIMEOUT_CHECK_INTERVAL_IN_SECONDS 2
