@@ -69,7 +69,7 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	// get source URL
 	args.url = m_options["-u"];
 
-	if (args.url.empty()) {
+	if (args.url.empty() || args.url == " " || args.url == "") {
 		char buffer[100] = { 0 };
 		sprintf(buffer, "invalid source URL: %s", m_options["-u"].c_str());
 		throw std::invalid_argument(buffer);
