@@ -1,6 +1,9 @@
 #include <parser.h>
 #include <common_utils.h>
 #include <exception>
+#include <limits>
+
+#undef max
 
 ArgumentParser::ArgumentParser() 
 {
@@ -47,7 +50,15 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 
 	// get port number
 	if (is_number(m_options["-p"])) {
+		
+		auto max = std::numeric_limits<uint16_t>::max();
+
 		args.port = atoi(m_options["-p"].c_str());
+		if (args.port < 1025 || args.port > max) {
+			char buffer[100] = { 0 };
+			sprintf(buffer, "invalid port number (must be between 1025 and 65536): %s", m_options["-p"].c_str());
+			throw std::invalid_argument(buffer);
+		}
 	}
 	else {
 		char buffer[100] = { 0 };
@@ -94,6 +105,11 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	// get FPS
 	if (is_number(m_options["-f"])) {
 		args.fps = atoi(m_options["-f"].c_str());
+		if (args.fps < 1 || args.fps > 40) {
+			char buffer[100] = { 0 };
+			sprintf(buffer, "invalid fps (must be between 1 and 40): %s", m_options["-f"].c_str());
+			throw std::invalid_argument(buffer);
+		}
 	} else {
 		char buffer[100] = { 0 };
 		sprintf(buffer, "invalid fps: %s", m_options["-f"].c_str());
