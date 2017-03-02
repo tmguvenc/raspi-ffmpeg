@@ -39,7 +39,7 @@ TEST_P(ArgumentParserTestAll, OptionValidation)
 	if (parser_state.throws)
 		ASSERT_THROW(parser->parse(3, argv), std::invalid_argument);
 	else
-		ASSERT_NO_THROW(parser->parse(3, argv), std::invalid_argument);
+		ASSERT_NO_THROW(parser->parse(3, argv));
 }
 
 INSTANTIATE_TEST_CASE_P(AllInvalid, ArgumentParserTestAll, testing::Values(

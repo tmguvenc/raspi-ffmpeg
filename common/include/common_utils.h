@@ -8,6 +8,8 @@
 
 #if defined(_WIN32) && defined(_MSC_VER)
 #include <Windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
