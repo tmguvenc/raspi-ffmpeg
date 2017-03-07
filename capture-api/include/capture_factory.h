@@ -11,18 +11,24 @@
 #include <capture_macros.h>
 #include <string>
 #include <memory>
-
+#include <assert.h>
 class ICapture;
 
-namespace spdlog
+template<typename Capture>
+struct CaptureStopper
 {
-	class logger;
-}
+	void operator()(Capture* cap){
+		assert(cap != nullptr && "capture is null");
+		cap->stop();
+	}
+};
+
+using upCapture = std::unique_ptr<ICapture, CaptureStopper<ICapture>>;
 
 class CAPTURE_EXPORT ICaptureFactory {
 public:
 	virtual ~ICaptureFactory() { }
-	virtual ICapture* create(const std::string& connectionString, std::shared_ptr<spdlog::logger>&& logger) = 0;
+	virtual upCapture create(const std::string& connectionString) = 0;
 };
 
 #endif /* ICAPTUREFACTORY_H_ */

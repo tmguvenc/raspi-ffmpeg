@@ -14,7 +14,7 @@ class CAPTURE_EXPORT RTSPCaptureFactory: public ICaptureFactory {
 public:
 	RTSPCaptureFactory();
 	virtual ~RTSPCaptureFactory();
-	ICapture* create(const std::string& connectionString, std::shared_ptr<spdlog::logger>&& logger) override;
+	upCapture create(const std::string& connectionString) override;
 };
 
 #endif /* RTSPCAPTUREFACTORY_H_ */

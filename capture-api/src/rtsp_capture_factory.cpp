@@ -17,6 +17,7 @@ RTSPCaptureFactory::~RTSPCaptureFactory() {
 	// TODO Auto-generated destructor stub
 }
 
-ICapture* RTSPCaptureFactory::create(const std::string& connectionString, std::shared_ptr<spdlog::logger>&& logger){
-	return new RTSPCapture(std::move(connectionString), std::forward<std::shared_ptr<spdlog::logger>>(logger));
+upCapture RTSPCaptureFactory::create(const std::string& connectionString){
+	auto aa = new RTSPCapture(std::move(connectionString));
+	return upCapture(aa);
 }

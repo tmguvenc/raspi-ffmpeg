@@ -8,8 +8,8 @@
 #include <rtsp_capture.h>
 #include <string>
 
-RTSPCapture::RTSPCapture(const std::string& connectionString, std::shared_ptr<spdlog::logger>&& logger) :
-VideoFileCapture(std::move(connectionString), std::forward<std::shared_ptr<spdlog::logger>>(logger)) {
+RTSPCapture::RTSPCapture(const std::string& connectionString) :
+VideoFileCapture(std::move(connectionString)) {
 
 }
 

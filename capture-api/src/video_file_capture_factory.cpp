@@ -18,6 +18,5 @@ VideoFileCaptureFactory::~VideoFileCaptureFactory() {
 
 }
 
-ICapture* VideoFileCaptureFactory::create(const std::string& connectionString, std::shared_ptr<spdlog::logger>&& logger){
-	return new VideoFileCapture(std::move(connectionString), std::forward<std::shared_ptr<spdlog::logger>>(logger));
+	auto aa = new VideoFileCapture(std::move(connectionString));
 }

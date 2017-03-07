@@ -15,7 +15,6 @@
 #include <chrono>
 #include <thread>
 #include <capture_utils.h>
-#include <spdlog/spdlog.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -23,27 +22,22 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 }
 
-WebcamCapture::WebcamCapture(const std::string& connectionString, std::shared_ptr<spdlog::logger> logger) :
+WebcamCapture::WebcamCapture(const std::string& connectionString) :
 m_connectionString(connectionString), m_width(0), m_height(0),
 m_channels(0), m_completed(false),
 m_run(false),
 m_indexofVideoStream(0),
 m_formatContext(nullptr),
 m_options(nullptr),
-m_codecContext(nullptr),
-m_logger(std::move(logger))
-{
+m_codecContext(nullptr){
 	m_settings = new CaptureSettings;
-	spdlog::set_async_mode(4096);
 }
 
 WebcamCapture::~WebcamCapture() {
-	if (m_settings)
-	{
+	if (m_settings) {
 		delete m_settings;
 		m_settings = nullptr;
 	}
-	m_logger->info("closing {}", m_connectionString);
 }
 
 void WebcamCapture::init(CaptureSettings* settings) {
@@ -55,7 +49,9 @@ void WebcamCapture::init(CaptureSettings* settings) {
 		memcpy(m_settings, settings, sizeof(CaptureSettings));
 	}
 
-	assert(m_formatContext == nullptr && "format context is not null.");
+	if (m_formatContext != nullptr) {
+		throw std::invalid_argument("Format Context must be null before initialization.");
+	}
 
 	m_formatContext = avformat_alloc_context();
 
@@ -66,22 +62,18 @@ void WebcamCapture::init(CaptureSettings* settings) {
 	auto codec_name = avcodec_get_name(static_cast<AVCodecID>(m_settings->getCodecId()));
 	if (codec_name != nullptr) {
 		av_dict_set(&m_options, "input_format", codec_name, 0);
-		m_logger->info("codec: {}", codec_name);
 	}
 	else {
 		av_dict_set(&m_options, "input_format", "mjpeg", 0);
-		m_logger->warn("codec not found. setting it to {}", "mjpeg");
 	}
 
 	auto fps = std::to_string(m_settings->getFPS());
 
 	if (is_number(fps)) {
 		av_dict_set(&m_options, "framerate", fps.c_str(), 0);
-		m_logger->info("frame rate: {}", m_settings->getFPS());
 	}
 	else {
 		av_dict_set(&m_options, "framerate", "15", 0);
-		m_logger->warn("wrong frame rate format. setting it to {}", 15);
 	}
 
 	if (is_number(std::to_string(m_settings->getWidth())) && is_number(std::to_string(m_settings->getHeight()))) {
@@ -91,11 +83,9 @@ void WebcamCapture::init(CaptureSettings* settings) {
 		ss << m_width << "x" << m_height;
 		auto vs = ss.str();
 		av_dict_set(&m_options, "video_size", vs.c_str(), 0);
-		m_logger->info("video size: {}", vs);
 	}
 	else {
 		av_dict_set(&m_options, "video_size", "640x480", 0);
-		m_logger->warn("wrong resolution format. setting it to {}", "640x480");
 	}
 }
 
@@ -120,11 +110,8 @@ void WebcamCapture::start(CaptureCallback func) {
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), input_format, &m_options) < 0) {
-		m_logger->error("cannot open input {}", m_connectionString);
-		return;
+		throw std::invalid_argument("cannot open [ " + m_connectionString + " ]");
 	}
-
-	m_logger->info("started grabbing");
 
 	m_run.store(true);
 
@@ -141,7 +128,6 @@ void WebcamCapture::start(CaptureCallback func) {
 
 	m_completed = true;
 	func(nullptr);
-	m_logger->info("completed");
 }
 
 void WebcamCapture::startAsync(CaptureCallback func) {
@@ -155,7 +141,6 @@ void WebcamCapture::stop() {
 
 	// in case of the user stops capturing too soon.
 	while (!m_run) {
-		m_logger->warn("capturing is not started yet");
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 
@@ -171,7 +156,6 @@ void WebcamCapture::stop() {
 	avformat_free_context(m_formatContext);
 	m_options = nullptr;
 	m_formatContext = nullptr;
-	m_logger->info("capturing stopped");
 }
 
 bool WebcamCapture::started()
@@ -191,8 +175,7 @@ void* WebcamCapture::getCodecInfo() {
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), input_format, &m_options) < 0) {
-		m_logger->error("cannot open input {}", m_connectionString);
-		return nullptr;
+		throw std::invalid_argument("cannot open [ " + m_connectionString + " ]");
 	}
 
 	avformat_find_stream_info(m_formatContext, nullptr);

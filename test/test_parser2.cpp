@@ -60,33 +60,9 @@ TEST_P(ArgumentParserTestAll, OptionValidation)
 }
 
 INSTANTIATE_TEST_CASE_P(MapTest, ArgumentParserTestAll, testing::Values(
-		ParserState{
-			{
-				{ "-c", "h264" },
-				{ "-f", "25" },
-				{ "-r", "1280x960" },
-				{ "-b", "12" },
-				{ "-u", "/dev/video1" },
-				{ "-p", "12345" },
-			}, false },
-		ParserState{
-			{
-				{ "-c", "h264" },
-				{ "-f", "12" },
-				{ "-r", "1280x960" },
-				{ "-b", "12" },
-				{ "-u", "/dev/video1" },
-				{ "-p", "12345" },
-			}, false },
-		ParserState{
-			{
-				{ "-c", "h264" },
-				{ "-f", "12" }, 
-				{ "-r", "1025" },
-				{ "-b", "12" },
-				{ "-u", "" },
-				{ "-p", "12" },
-			}, true }
+	ParserState{ { { "-c", "h264" }, { "-f", "25" }, { "-r", "1280x960" }, { "-b", "12" }, { "-u", "/dev/video1" }, { "-p", "12345" }, }, false },
+	ParserState{ { { "-c", "h264" }, { "-f", "12" }, { "-r", "1280x960" }, { "-b", "12" }, { "-u", "/dev/video1" }, { "-p", "12345" }, }, false },
+	ParserState{ { { "-c", "h264" }, { "-f", "12" }, { "-r", "1025" }, { "-b", "12" }, { "-u", "" }, { "-p", "12" }, }, true }
 ));
 
 

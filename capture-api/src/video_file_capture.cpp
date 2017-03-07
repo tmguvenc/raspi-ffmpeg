@@ -9,7 +9,6 @@
 #include <iostream>
 #include <video_file_capture.h>
 #include <frame.h>
-#include <spdlog/spdlog.h>
 #include <capture_utils.h>
 
 extern "C" {
@@ -18,15 +17,13 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 }
 
-VideoFileCapture::VideoFileCapture(const std::string& connectionString, std::shared_ptr<spdlog::logger> logger) :
+VideoFileCapture::VideoFileCapture(const std::string& connectionString) :
 m_connectionString(connectionString), m_width(0), m_height(0), m_channels(0), 
 m_completed(false), 
 m_run(false), 
 m_indexofVideoStream(0), 
 m_formatContext(nullptr), 
-m_codecContext(nullptr),
-m_logger(std::move(logger))
-{
+m_codecContext(nullptr) {
 
 }
 
@@ -67,11 +64,8 @@ void VideoFileCapture::start(CaptureCallback func) {
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), nullptr, nullptr) < 0) {
-		m_logger->error("cannot open input {}", m_connectionString);
-		return;
+		throw std::invalid_argument("cannot open [ " + m_connectionString + " ]");
 	}
-
-	m_logger->info("started grabbing");
 
 	m_run = true;
 
@@ -85,7 +79,6 @@ void VideoFileCapture::start(CaptureCallback func) {
 
 	m_completed = true;
 	func(nullptr);
-	m_logger->info("completed");
 }
 
 void VideoFileCapture::startAsync(CaptureCallback func) {
@@ -99,7 +92,6 @@ void VideoFileCapture::stop() {
 
 	// in case of the user stops capturing too soon.
 	while (!m_run) {
-		m_logger->warn("capturing is not started yet");
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 
@@ -132,8 +124,7 @@ void* VideoFileCapture::getCodecInfo() {
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), nullptr, nullptr) < 0) {
-		m_logger->error("cannot open input {}", m_connectionString);
-		return nullptr;
+		throw std::invalid_argument("cannot open [ " + m_connectionString + " ]");
 	}
 
 	avformat_find_stream_info(m_formatContext, nullptr);

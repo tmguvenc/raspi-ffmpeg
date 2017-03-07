@@ -10,15 +10,31 @@
 #include <spdlog/spdlog.h>
 #include <frame.h>
 #include <sender.h>
-#include <sstream>
 #include <parser.h>
+#include <signal.h>
+#include <iostream>
 
-tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
-std::shared_ptr<spdlog::logger> logger;
+std::atomic<bool> g_run = true;
 
-int main(int argc, char* argv[])
-{
-	logger = spdlog::stdout_color_mt("mainsender");
+void handler(int signal) {
+	if (signal == SIGINT) {
+		std::cout << "QUITTING!!" << std::endl;
+		g_run.store(false);
+	}
+}
+
+void inline clearQueue(tbb::concurrent_bounded_queue<FrameContainer*>* frameQueue) {
+	while (!frameQueue->empty()) {
+		FrameContainer* frame;
+		frameQueue->pop(frame);
+		delete frame;
+	}
+}
+
+int main(int argc, char* argv[]) {
+	signal(SIGINT, handler);
+
+	auto logger = spdlog::stdout_color_mt("mainsender");
 	Arguments args;
 
 	ArgumentParser parser;
@@ -29,6 +45,7 @@ int main(int argc, char* argv[])
 		logger->error("{}", exception.what());
 		return -1;
 	}
+	tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
 
 	frameQueue.set_capacity(args.balance);
 
@@ -38,14 +55,12 @@ int main(int argc, char* argv[])
 
 	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
 
-	while (true)
-	{
-		auto capture = captureFactory.create(args.url, spdlog::stdout_color_mt("capturesender"));
+	while (g_run) {
+		auto capture = captureFactory.create(args.url);
 		
 		capture->init(&settings);
 
-		capture->startAsync([](void* ptr)
-		{
+		capture->startAsync([&frameQueue](void* ptr) {
 			frameQueue.push(static_cast<Frame*>(ptr));
 		});
 
@@ -58,28 +73,22 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		auto sender = new Sender(args.port, settings);
-		sender->start([]()
-		{
+		Sender sender(args.port, settings);
+
+		sender.start([&frameQueue]() {
 			FrameContainer* frame;
 			frameQueue.pop(frame);
 			return frame;
 		});
 
-		while (!frameQueue.empty()) {			
-			FrameContainer* frame;
-			frameQueue.pop(frame);
-			delete frame;
-		}
-
-		spdlog::drop("capturesender");
-		capture->stop();
-		delete capture;
-		delete sender;
+		clearQueue(&frameQueue);
 
 		logger->info("Restarting capture-send");
-		frameQueue.clear();
+		assert(frameQueue.empty() && "frame queue is not empty!");
 	}
+
+	clearQueue(&frameQueue);
+	spdlog::drop("mainsender");
 
 	return 0;
 }
