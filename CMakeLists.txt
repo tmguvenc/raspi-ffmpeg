@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(captureapi)
+project(rvms)
 
 if (MSVC)
 	set(DEPENDS_FOLDER "D:/External" CACHE PATH "Dependency Path")
@@ -25,7 +25,8 @@ if (MSVC)
 	set(ZEROMQ_LIBS ${DEPENDS_FOLDER}/zeromq_secure/x64/lib)
 	set(ZEROMQ_BINS ${DEPENDS_FOLDER}/zeromq_secure/x64/bin)
 	set(ZEROMQ_LINK libzmq)
-	set(ZEROMQ_DLL "${ZEROMQ_BINS}/libzmq.dll" "${ZEROMQ_BINS}/libsodium.dll")
+	set(ZEROMQ_DLL "${ZEROMQ_BINS}/libzmq.dll")
+	set(ZEROMQ_DLL_D "${ZEROMQ_BINS}/libsodium.dll")
 
 	# sodium
 	set(SODIUM_INCLUDE ${DEPENDS_FOLDER}/libsodium/x64/include)
@@ -61,6 +62,11 @@ if (MSVC)
 	set(FFMPEG_BINS ${DEPENDS_FOLDER}/ffmpeg/x64/bin)
 	set(FFMPEG_LINK avcodec avdevice avfilter avformat avutil postproc swresample swscale)
 
+	#google-test
+	set(GTEST_INCLUDE ${DEPENDS_FOLDER}/googletest/googletest-distribution/include)
+	set(GTEST_LIBS ${DEPENDS_FOLDER}/googletest/googletest-distribution/lib)
+	set(GTEST_BINS ${DEPENDS_FOLDER}/googletest/googletest-distribution/lib)
+	set(GTEST_LINK debug "gtest-d" optimized "gtest")
 else()
 	set(LOCAL /usr/local)
 
@@ -97,12 +103,23 @@ else()
 	set(FFMPEG_INCLUDE ${LOCAL}/include)
 	set(FFMPEG_LIBS ${LOCAL}/lib)
 	set(FFMPEG_LINK avcodec avdevice avfilter avformat avutil postproc swresample swscale)
+	
+	#google test
+	set(GTEST_INCLUDE ${LOCAL}/include)
+	set(GTEST_LIBS ${LOCAL}/lib)
+	set(GTEST_BINS ${LOCAL}/lib)
+	set(GTEST_LINK gtest)
 endif()
 
 enable_testing ()
 
-add_subdirectory (capture-api)
-add_subdirectory (capture-send)
+add_subdirectory (capture)
+add_subdirectory (rvms-server)
+add_subdirectory (common)
+add_subdirectory (communication)
+add_subdirectory (test)
 if (MSVC)
-	add_subdirectory (capture-api-net)	
+	add_subdirectory (rvms-api-net)	
 endif()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
