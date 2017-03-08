@@ -1,15 +1,14 @@
 /*
- * Sender.cpp
+ * VideoFrameSender.cpp
  *
  *  Created on: 28 Nis 2016
  *      Author: Turan Murat Güvenç
  */
 
-#include <sender.h>
+#include <videoframesender.h>
 #include <zmq.h>
 #include <string>
 #include <string.h>
-#include <capture_settings.h>
 #include <common_utils.h>
 #include <frame.h>
 #include <spdlog/spdlog.h>
@@ -33,11 +32,11 @@ using MessageQueue = tbb::concurrent_bounded_queue<Message>;
 class SenderPrivate
 {
 public:
-	explicit SenderPrivate(int port, const CaptureSettings& settings) : 
+	explicit SenderPrivate(int port, int width, int height, int codec) :
 		m_port(port), m_run(false),
-		m_width(settings.getWidth()),
-		m_height(settings.getHeight()),
-		m_codec(settings.getCodecId()),
+		m_width(width),
+		m_height(height),
+		m_codec(codec),
 		m_logger(spdlog::stdout_color_mt("sender")),
 		m_thread(nullptr)
 	{
@@ -87,7 +86,7 @@ public:
 
 		std::vector<std::function<bool(const std::string&)>> funcs =
 		{
-			[this, ds](const std::string& name){
+			[this, ds](const std::string& name) {
 				auto f = ds();
 				if (f == nullptr)
 					return false;
@@ -96,19 +95,16 @@ public:
 				delete frame;
 				return true;
 			},
-				[this](const std::string& name)
-			{
+			[this](const std::string& name) {
 				auto ok = 0;
 				send(name, &ok, sizeof(ok));
 				remove(name);
 				return m_run;
 			},
-				[this](const std::string&)
-			{
+			[this](const std::string&) {
 				return true;
 			},
-				[this](const std::string&)
-			{
+			[this](const std::string&) {
 				return true;
 			}
 		};
@@ -241,13 +237,13 @@ private:
 	std::string m_settings;
 };
 
-Sender::Sender(int port, const CaptureSettings& settings) : 
-m_ptr(new SenderPrivate(port, settings))
+VideoFrameSender::VideoFrameSender(int port, int width, int height, int codec) :
+m_ptr(new SenderPrivate(port, width, height, codec))
 {
 
 }
 
-Sender::~Sender()
+VideoFrameSender::~VideoFrameSender()
 {
 	if (m_ptr) {
 		delete m_ptr;
@@ -255,12 +251,12 @@ Sender::~Sender()
 	}
 }
 
-void Sender::start(DataSupplier ds)
+void VideoFrameSender::start(DataSupplier ds)
 {
 	m_ptr->start(ds);
 }
 
-void Sender::stop()
+void VideoFrameSender::stop()
 {
 	m_ptr->stop();
 }
