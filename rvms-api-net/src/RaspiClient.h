@@ -4,23 +4,13 @@
 #using <System.Windows.Forms.dll>  
 #using <System.Drawing.dll>
 
-#include <zmq.h>
 #include <memory>
 #include <tbb/concurrent_queue.h>
 #include <vcclr.h>
-#include <decoder.h>
-
-extern "C"
-{
-#include "./libavformat/avformat.h"
-#include "./libavcodec/avcodec.h"
-#include "./libavdevice/avdevice.h"
-#include "./libswscale/swscale.h"
-#include "./libavutil/imgutils.h"
-}
 
 class Connector;
 class Data;
+class Decoder;
 class IReceiveStrategy;
 
 namespace Client

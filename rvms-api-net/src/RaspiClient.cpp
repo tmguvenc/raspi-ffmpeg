@@ -3,6 +3,16 @@
 #include <assert.h>
 #include <receive_strategy_queue.h>
 #include <video_frame.h>
+#include <decoder.h>
+
+extern "C"
+{
+#include "./libavformat/avformat.h"
+#include "./libavcodec/avcodec.h"
+#include "./libavdevice/avdevice.h"
+#include "./libswscale/swscale.h"
+#include "./libavutil/imgutils.h"
+}
 
 using namespace Client;
 
@@ -11,7 +21,6 @@ m_control(control),
 m_started(false),
 m_initialized(false),
 m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
-
 	m_receiveStrategy = new ReceiveStrategyQueue<tbb::concurrent_bounded_queue<Data*>>(m_frame_queue);
 	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_receiveStrategy);
 	m_destWidth = m_connector->getWidth();
@@ -115,6 +124,7 @@ void RaspiClient::decode_loop()
 	{
 		Data* data;
 		m_frame_queue->pop(data);
+		
 		auto frame = static_cast<VideoFrame*>(data);
 
 		if (!frame || frame->getSize() == 0)
