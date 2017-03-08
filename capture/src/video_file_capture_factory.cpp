@@ -18,5 +18,7 @@ VideoFileCaptureFactory::~VideoFileCaptureFactory() {
 
 }
 
+upCapture VideoFileCaptureFactory::create(const std::string& connectionString){
 	auto aa = new VideoFileCapture(std::move(connectionString));
+	return upCapture(aa);
 }

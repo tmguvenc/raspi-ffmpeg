@@ -1,9 +1,19 @@
 #include <parser.h>
 #include <common_utils.h>
-#include <exception>
 #include <limits>
+#include <cstdio>
 
 #undef max
+
+std::string string_format(const char *fmt, ...)
+{
+	va_list args1;
+	va_start(args1, fmt);
+	std::vector<char> buf(1 + std::vsnprintf(nullptr, 0, fmt, args1));
+	std::vsnprintf(buf.data(), buf.size(), fmt, args1);
+	va_end(args1);
+	return std::string(buf.data(), buf.size());
+}
 
 ArgumentParser::ArgumentParser() 
 {
@@ -31,9 +41,7 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 			op->second = argv[i + 1];
 		else{
 			if(std::string(argv[i]).find("-") != std::string::npos){
-				char buffer[100] = { 0 };
-				sprintf(buffer, "invalid option: %s", argv[i]);
-				throw std::invalid_argument(buffer);
+				throw std::invalid_argument(string_format("invalid option: %s", argv[i]));
 			}
 		}
 	}
@@ -43,45 +51,32 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		args.balance = atoi(m_options["-b"].c_str());
 	}
 	else {
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid queue size: %s", m_options["-b"].c_str());
-		throw std::invalid_argument(buffer);
+		throw std::invalid_argument(string_format("invalid queue size: %s", m_options["-b"].c_str()));
 	}
 
 	// get port number
-	if (is_number(m_options["-p"])) {
-		
-		auto max = std::numeric_limits<uint16_t>::max();
-
+	if (is_number(m_options["-p"])) {		
 		args.port = atoi(m_options["-p"].c_str());
-		if (args.port < 1025 || args.port > max) {
-			char buffer[100] = { 0 };
-			sprintf(buffer, "invalid port number (must be between 1025 and 65536): %s", m_options["-p"].c_str());
-			throw std::invalid_argument(buffer);
+		if (args.port < 1025 || args.port > std::numeric_limits<uint16_t>::max()) {
+			throw std::invalid_argument(string_format("invalid port number (must be between 1025 and 65536): %s", m_options["-p"].c_str()));
 		}
 	}
 	else {
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid port number: %s", m_options["-p"].c_str());
-		throw std::invalid_argument(buffer);
+		throw std::invalid_argument(string_format("invalid port number: %s", m_options["-p"].c_str()));
 	}
 
 	// get source URL
 	args.url = m_options["-u"];
 
 	if (args.url.empty() || args.url == " " || args.url == "") {
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid source URL: %s", m_options["-u"].c_str());
-		throw std::invalid_argument(buffer);
+		throw std::invalid_argument(string_format("invalid source URL: %s", m_options["-u"].c_str()));
 	}
 
 	// get resolution
 	auto wh = getWidthAndHeight();
 
 	if (wh.first == -1 || wh.second == -1) {
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid resolution: %s", m_options["-r"].c_str());
-		throw std::invalid_argument(buffer);
+		throw std::invalid_argument(string_format("invalid resolution: %s", m_options["-r"].c_str()));
 	}
 
 	args.width = wh.first;
@@ -96,24 +91,16 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 	else if (codec_name == "raw")
 		args.codec = AV_CODEC_ID_RAWVIDEO;
 	else
-	{
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid codec: %s", m_options["-c"].c_str());
-		throw std::invalid_argument(buffer);
-	}
+		throw std::invalid_argument(string_format("invalid codec: %s", m_options["-c"].c_str()));
 
 	// get FPS
 	if (is_number(m_options["-f"])) {
 		args.fps = atoi(m_options["-f"].c_str());
 		if (args.fps < 1 || args.fps > 40) {
-			char buffer[100] = { 0 };
-			sprintf(buffer, "invalid fps (must be between 1 and 40): %s", m_options["-f"].c_str());
-			throw std::invalid_argument(buffer);
+			throw std::invalid_argument(string_format("invalid fps (must be between 1 and 40): %s", m_options["-f"].c_str()));
 		}
 	} else {
-		char buffer[100] = { 0 };
-		sprintf(buffer, "invalid fps: %s", m_options["-f"].c_str());
-		throw std::invalid_argument(buffer);
+		throw std::invalid_argument(string_format("invalid fps: %s", m_options["-f"].c_str()));
 	}
 
 	return args;

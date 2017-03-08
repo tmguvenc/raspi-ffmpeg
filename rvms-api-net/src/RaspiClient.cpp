@@ -8,7 +8,7 @@ RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::Strin
 m_control(control),
 m_started(false),
 m_initialized(false),
-m_frame_queue(new tbb::concurrent_bounded_queue<spFrame>) {
+m_frame_queue(new tbb::concurrent_bounded_queue<spVideoFrame>) {
 
 	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_frame_queue);
 	m_destWidth = m_connector->getWidth();
@@ -86,7 +86,7 @@ void RaspiClient::stop()
 		m_connector->stop();
 	}
 
-	m_frame_queue->push(spFrame(nullptr));
+	m_frame_queue->push(spVideoFrame(nullptr));
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
@@ -105,7 +105,7 @@ void RaspiClient::decode_loop()
 
 	while (m_started)
 	{
-		spFrame frame;
+		spVideoFrame frame;
 		m_frame_queue->pop(frame);
 		if (!frame || frame->m_size == 0)
 			break;

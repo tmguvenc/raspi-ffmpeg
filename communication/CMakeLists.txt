@@ -1,5 +1,5 @@
 # Project Name
-project(capture-send)
+project(communication)
 
 set(VERSION_MAJOR "1" CACHE STRING "Major")
 set(VERSION_MINOR "0" CACHE STRING "Minor")
@@ -15,32 +15,40 @@ configure_file(
 
 FILE(GLOB TARGET_H 							"include/*.h*" "src/*.h*")
 FILE(GLOB TARGET_SRC		 				"src/*.c*")
+add_definitions(-DCOMMUNICATION_EXPORTS)
+
+if(USE_CURVE)
+	message(STATUS "${PROJECT_NAME} is using Elliptic Curve Encryption!")
+	add_definitions(-DUSE_CURVE)
+else()
+	message("${PROJECT_NAME} is not Using Elliptic Curve Encryption. Communication is NOT SECURE!")
+endif()
 
 if (NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 include_directories(include/)
-include_directories("../capture-api/include/")
-include_directories("../common/include/")
 include_directories(${TBB_INCLUDE})
+include_directories("../common/include/")
+include_directories("../capture/include/")
+include_directories(${ZEROMQ_INCLUDE})
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${SPDLOG_INCLUDE})
-include_directories(${ZEROMQ_INCLUDE})
 
 # add library directories
 link_directories(${TBB_LIBS})
-link_directories(${FFMPEG_LIBS})
 link_directories(${ZEROMQ_LIBS})
+link_directories(${FFMPEG_LIBS})
 
-add_executable(${PROJECT_NAME} ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
 
 target_link_libraries(${PROJECT_NAME} ${TBB_LINK})
-target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 target_link_libraries(${PROJECT_NAME} ${ZEROMQ_LINK})
-target_link_libraries(${PROJECT_NAME} capture)
 target_link_libraries(${PROJECT_NAME} common)
+target_link_libraries(${PROJECT_NAME} capture)
 
 if(NOT MSVC)
 	target_link_libraries(${PROJECT_NAME} pthread)
 endif()
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")
