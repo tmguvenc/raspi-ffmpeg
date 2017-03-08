@@ -46,6 +46,7 @@ STRING(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 STRING(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
 set_target_properties(${PROJECT_NAME} PROPERTIES VS_DOTNET_REFERENCES
 "System;System.Drawing;System.Windows.Forms")
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")
 
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	   COMMAND ${CMAKE_COMMAND} -E copy_if_different

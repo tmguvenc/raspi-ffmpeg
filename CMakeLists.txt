@@ -121,3 +121,5 @@ add_subdirectory (test)
 if (MSVC)
 	add_subdirectory (rvms-api-net)	
 endif()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)

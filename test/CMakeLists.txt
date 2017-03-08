@@ -52,7 +52,7 @@ add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
 		$<TARGET_FILE_DIR:${test}>)
 	endif()
 	
-	# set_target_properties(${test} PROPERTIES FOLDER "Tests")
+	set_target_properties(${test} PROPERTIES FOLDER "Tests")
 endforeach()
 		
 #Check whether all tests in the current folder are present
