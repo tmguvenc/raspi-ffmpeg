@@ -9,7 +9,6 @@
 #include <tbb/concurrent_queue.h>
 #include <vcclr.h>
 #include <decoder.h>
-#include "video_frame.h"
 
 extern "C"
 {
@@ -21,6 +20,8 @@ extern "C"
 }
 
 class Connector;
+class Data;
+class IReceiveStrategy;
 
 namespace Client
 {
@@ -49,10 +50,11 @@ namespace Client
 		System::Int32 m_destWidth;
 		System::Int32 m_destHeight;
 		Decoder* m_decoder;
-		tbb::concurrent_bounded_queue<spVideoFrame>* m_frame_queue;
+		tbb::concurrent_bounded_queue<Data*>* m_frame_queue;
 		volatile bool m_started;
 		volatile bool m_initialized;
 		Connector* m_connector;
+		IReceiveStrategy* m_receiveStrategy;
 		System::Threading::Thread^ m_receiver_thread;
 		System::Threading::Thread^ m_decoder_thread;
 		System::Windows::Forms::Control^ m_control;

@@ -1,38 +1,23 @@
 #ifndef FRAME_H
 #define FRAME_H
 
-#include <malloc.h>
-#include <memory>
+#include <data.h>
 
-class VideoFrame
+class VideoFrame : public Data
 {
 public:
-	VideoFrame() : m_size(0), m_data(nullptr){}
-
-	VideoFrame(void* data, size_t size, size_t index) : m_size(size), m_index(index)
+	explicit VideoFrame(uint32_t size) : Data(size)
 	{
-		m_data = malloc(size);
+		
+	}
+	VideoFrame(void* data, uint32_t size, uint32_t index) : Data(size), m_index(index) {
 		memcpy(m_data, data, size);
 	}
-	~VideoFrame()
-	{
-		if (m_data)
-		{
-			free(m_data);
-			m_data = nullptr;
-			m_size = 0;
-		}
-	}
 
-	size_t m_size;
-	size_t m_index;
-	void* m_data;
+	inline uint32_t getIndex() const { return m_index; }
 
 private:
-	VideoFrame& operator=(const VideoFrame& other);
-	VideoFrame(const VideoFrame& other);
+	uint32_t m_index;
 };
-
-typedef std::shared_ptr<VideoFrame> spVideoFrame;
 
 #endif

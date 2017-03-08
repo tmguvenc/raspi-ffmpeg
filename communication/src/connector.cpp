@@ -4,21 +4,30 @@
 #include <common_utils.h>
 #include "messages.h"
 #include "video_frame.h"
+#include <receive_strategy.h>
 
 class ConnectorPrivate
 {
 public:
-	explicit ConnectorPrivate(const std::string& url, tbb::concurrent_bounded_queue<spVideoFrame>* frame_queue) :
+	explicit ConnectorPrivate(const std::string& url, IReceiveStrategy* receive_strategy) :
 		m_url(std::move(url)),
 		m_context(nullptr),
 		m_socket(nullptr),
 		m_width(-1),
 		m_height(-1),
 		m_codec(-1),
-		m_frame_queue(frame_queue),
+		m_receive_strategy(receive_strategy),
 		m_started(false) {
-		assert(m_frame_queue != nullptr);
+
+		if (m_receive_strategy == nullptr){
+			throw std::invalid_argument(string_format("invalid receive strategy"));
+		}
 		m_context = zmq_ctx_new();
+
+		if (m_context == nullptr){
+			throw std::invalid_argument(string_format("cannot create context"));
+		}
+
 		init();
 	}
 	~ConnectorPrivate() {
@@ -42,7 +51,7 @@ public:
 			// if it's a ping message
 			if (recBytes == 4) continue;
 
-			m_frame_queue->push(std::make_shared<VideoFrame>(&buffer[0], recBytes, ++index));
+			m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
 		}
 
 		sendRequest(StopRequest);
@@ -108,13 +117,13 @@ private:
 	void* m_context;
 	void* m_socket;
 	int m_width, m_height, m_codec;
-	tbb::concurrent_bounded_queue<spVideoFrame>* m_frame_queue;
+	IReceiveStrategy* m_receive_strategy;
 	bool m_started;
 	int m_size;
 };
 
-Connector::Connector(const std::string& url, tbb::concurrent_bounded_queue<spVideoFrame>* frame_queue) :
-m_ptr(new ConnectorPrivate(std::move(url), frame_queue)) {
+Connector::Connector(const std::string& url, IReceiveStrategy* strategy) :
+m_ptr(new ConnectorPrivate(std::move(url), strategy)) {
 }
 
 Connector::~Connector() {

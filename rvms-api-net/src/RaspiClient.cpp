@@ -1,6 +1,8 @@
 #include "RaspiClient.h"
 #include "connector.h"
 #include <assert.h>
+#include <receive_strategy_queue.h>
+#include <video_frame.h>
 
 using namespace Client;
 
@@ -8,9 +10,10 @@ RaspiClient::RaspiClient(System::Windows::Forms::Control^ control, System::Strin
 m_control(control),
 m_started(false),
 m_initialized(false),
-m_frame_queue(new tbb::concurrent_bounded_queue<spVideoFrame>) {
+m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
 
-	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_frame_queue);
+	m_receiveStrategy = new ReceiveStrategyQueue<tbb::concurrent_bounded_queue<Data*>>(m_frame_queue);
+	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_receiveStrategy);
 	m_destWidth = m_connector->getWidth();
 	m_destHeight = m_connector->getHeight();
 	m_decoder = new Decoder(m_destWidth, m_destHeight);
@@ -35,6 +38,11 @@ RaspiClient::!RaspiClient() {
 		m_decoder->teardown();
 		delete m_decoder;
 		m_decoder = nullptr;
+	}
+
+	if (m_receiveStrategy){
+		delete m_receiveStrategy;
+		m_receiveStrategy = nullptr;
 	}
 
 	if (m_connector) {
@@ -86,7 +94,7 @@ void RaspiClient::stop()
 		m_connector->stop();
 	}
 
-	m_frame_queue->push(spVideoFrame(nullptr));
+	m_frame_queue->push((Data*)nullptr);
 	m_decoder_thread->Join();
 	m_receiver_thread->Join();
 	m_frame_queue->clear();
@@ -105,19 +113,21 @@ void RaspiClient::decode_loop()
 
 	while (m_started)
 	{
-		spVideoFrame frame;
-		m_frame_queue->pop(frame);
-		if (!frame || frame->m_size == 0)
+		Data* data;
+		m_frame_queue->pop(data);
+		auto frame = static_cast<VideoFrame*>(data);
+
+		if (!frame || frame->getSize() == 0)
 			break;
 
 		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-		auto decoded = m_decoder->decode(frame->m_data, frame->m_size, bmpData->Scan0.ToPointer(), len);
+		auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
 		m_bmp->UnlockBits(bmpData);
 
 		if (decoded)
 			m_graphics->DrawImage(m_bmp, roi);
 
-		frame.reset();
+		delete frame;
 	}
 }
 

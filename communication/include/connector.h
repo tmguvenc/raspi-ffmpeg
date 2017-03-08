@@ -2,17 +2,15 @@
 #define CONNECTOR_H
 
 #include <string>
-#include <tbb/concurrent_queue.h>
 #include <comm_macros.h>
 
-class VideoFrame;
 class ConnectorPrivate;
-using spVideoFrame = std::shared_ptr<VideoFrame>;
+class IReceiveStrategy;
 
 class COMMUNICATION_EXPORT Connector
 {
 public:
-	explicit Connector(const std::string& url, tbb::concurrent_bounded_queue<spVideoFrame>* frame_queue);
+	explicit Connector(const std::string& url, IReceiveStrategy* strategy);
 	~Connector();
 
 	void start();
