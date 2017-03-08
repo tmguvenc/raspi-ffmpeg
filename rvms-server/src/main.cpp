@@ -11,28 +11,11 @@
 #include <frame.h>
 #include <videoframesender.h>
 #include <parser.h>
-#include <signal.h>
-#include <iostream>
+#include <common_utils.h>
 
 std::atomic<bool> g_run = true;
 
-void handler(int signal) {
-	if (signal == SIGINT) {
-		std::cout << "QUITTING!!" << std::endl;
-		g_run.store(false);
-	}
-}
-
-void inline clearQueue(tbb::concurrent_bounded_queue<FrameContainer*>* frameQueue) {
-	while (!frameQueue->empty()) {
-		FrameContainer* frame;
-		frameQueue->pop(frame);
-		delete frame;
-	}
-}
-
 int main(int argc, char* argv[]) {
-	signal(SIGINT, handler);
 
 	auto logger = spdlog::stdout_color_mt("mainsender");
 	Arguments args;

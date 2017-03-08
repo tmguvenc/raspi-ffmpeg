@@ -71,5 +71,18 @@ inline static bool is_number(const std::string& s) {
 	return !s.empty() && it == s.end();
 }
 
+template<typename Queue>
+void inline clearQueue(Queue* frameQueue) {
+
+	using T = typename Queue::value_type;
+
+	static_assert(std::is_pointer<T>::value, "Queue requires pointer type as element.");
+
+	while (!frameQueue->empty()) {
+		T element;
+		frameQueue->pop(element);
+		delete element;
+	}
+}
 
 #endif
