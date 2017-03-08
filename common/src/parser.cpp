@@ -1,19 +1,8 @@
 #include <parser.h>
 #include <common_utils.h>
 #include <limits>
-#include <cstdio>
 
 #undef max
-
-std::string string_format(const char *fmt, ...)
-{
-	va_list args1;
-	va_start(args1, fmt);
-	std::vector<char> buf(1 + std::vsnprintf(nullptr, 0, fmt, args1));
-	std::vsnprintf(buf.data(), buf.size(), fmt, args1);
-	va_end(args1);
-	return std::string(buf.data(), buf.size());
-}
 
 ArgumentParser::ArgumentParser() 
 {
