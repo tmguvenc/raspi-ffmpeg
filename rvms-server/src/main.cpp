@@ -9,7 +9,7 @@
 #include <capture.h>
 #include <spdlog/spdlog.h>
 #include <frame.h>
-#include <sender.h>
+#include <videoframesender.h>
 #include <parser.h>
 #include <signal.h>
 #include <iostream>
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
 	WebcamCaptureFactory captureFactory;
 
-	logger->info("Starting capture-send");
+	logger->info<std::string>("Starting capture-send");
 
 	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
 
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		Sender sender(args.port, settings);
+		VideoFrameSender sender(args.port, settings.getWidth(), settings.getHeight(), settings.getCodecId());
 
 		sender.start([&frameQueue]() {
 			FrameContainer* frame;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 
 		clearQueue(&frameQueue);
 
-		logger->info("Restarting capture-send");
+		logger->info<std::string>("Restarting capture-send");
 		assert(frameQueue.empty() && "frame queue is not empty!");
 	}
 
