@@ -73,13 +73,17 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		VideoFrameSender sender(args.port, settings.getWidth(), settings.getHeight(), settings.getCodecId());
-
-		sender.start([&frameQueue]() {
-			FrameContainer* frame;
-			frameQueue.pop(frame);
-			return frame;
-		});
+		try {
+			VideoFrameSender sender(args.port, args.width, args.height, args.codec);
+			sender.start([&frameQueue]() {
+				FrameContainer* frame;
+				frameQueue.pop(frame);
+				return frame;
+			});
+		} catch (const std::exception& ex) {
+			logger->error("{}", ex.what());
+			return -1;
+		}
 
 		clearQueue(&frameQueue);
 
