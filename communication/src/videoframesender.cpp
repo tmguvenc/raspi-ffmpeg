@@ -40,19 +40,33 @@ public:
 		m_logger(spdlog::stdout_color_mt("sender")),
 		m_thread(nullptr)
 	{
+		if (m_width <= 1)
+			throw std::invalid_argument("Width must be greater than 1");
+		if (m_height <= 1)
+			throw std::invalid_argument("Height must be greater than 1");
+		if (m_codec <= 0)
+			throw std::invalid_argument("Codec must be greater than 0");
+
 		m_settings = std::to_string(m_width) + "," + std::to_string(m_height) + "," + std::to_string(m_codec);
 		m_context = zmq_ctx_new();
+
+		if (!m_context)
+			throw std::invalid_argument("Cannot create context");
+
 		m_socket = zmq_socket(m_context, ZMQ_ROUTER);
+		if (!m_socket)
+			throw std::invalid_argument("Cannot create socket");
 
 		auto val = 1;
-		auto xx = zmq_setsockopt(m_socket, ZMQ_ROUTER_MANDATORY, &val, sizeof val);
-		assert(xx == 0);
+		if (zmq_setsockopt(m_socket, ZMQ_ROUTER_MANDATORY, &val, sizeof val) != 0)
+			throw std::invalid_argument(string_format("Cannot set socket option: %s", zmq_strerror(zmq_errno())));
 
 		auto linger = 0;
-		auto r = zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
-		assert(r == 0);
+		if (zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)) != 0) // close cagirildiktan sonra beklemeden socket'i kapat.
+			throw std::invalid_argument(string_format("Cannot set socket option: %s", zmq_strerror(zmq_errno())));
 
-		zmq_bind(m_socket, ("tcp://*:" + std::to_string(m_port)).c_str());
+		if(zmq_bind(m_socket, ("tcp://*:" + std::to_string(m_port)).c_str())!= 0)
+			throw std::invalid_argument(string_format("cannot bind socket: %s", zmq_strerror(zmq_errno())));
 
 		m_logger->info("listening port {}", m_port);
 
@@ -113,6 +127,11 @@ public:
 		{
 			Message message;
 			m_message_queue.pop(message);
+
+			if (message.second < 0 || message.second > 3) {
+				throw std::out_of_range(string_format("Message type is invalid %d", message.second));
+			}
+
 			if (!funcs[message.second](message.first))
 				break;
 		}
@@ -237,10 +256,13 @@ private:
 	std::string m_settings;
 };
 
-VideoFrameSender::VideoFrameSender(int port, int width, int height, int codec) :
-m_ptr(new SenderPrivate(port, width, height, codec))
+VideoFrameSender::VideoFrameSender(int port, int width, int height, int codec)
 {
-
+	try {
+		m_ptr = new SenderPrivate(port, width, height, codec);
+	} catch (const std::invalid_argument& ex) {
+		throw ex;
+	}
 }
 
 VideoFrameSender::~VideoFrameSender()
@@ -253,7 +275,11 @@ VideoFrameSender::~VideoFrameSender()
 
 void VideoFrameSender::start(DataSupplier ds)
 {
-	m_ptr->start(ds);
+	try {
+		m_ptr->start(ds);
+	} catch (const std::out_of_range& ex) {
+		throw ex;
+	}
 }
 
 void VideoFrameSender::stop()
