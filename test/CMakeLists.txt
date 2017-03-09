@@ -2,8 +2,9 @@
 PROJECT(tests)
 
 set(tests 
-		test_parser
-		test_parser2
+		test_parserMultipleOptions
+		test_parserSingleOption
+		test_receiveQueue
 	)
 
 if (NOT MSVC)
