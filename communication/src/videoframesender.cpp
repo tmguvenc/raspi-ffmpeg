@@ -18,6 +18,7 @@
 #include <tbb/tbb_thread.h>
 #include <messages.h>
 #include <frame_container.h>
+#include <iostream>
 
 struct CommTime
 {
@@ -84,6 +85,7 @@ public:
 			delete m_thread;
 			m_thread = nullptr;
 		}
+		assert(m_message_queue.empty());
 	}
 
 	void start(DataSupplier ds)
@@ -261,6 +263,7 @@ VideoFrameSender::VideoFrameSender(int port, int width, int height, int codec)
 	try {
 		m_ptr = new SenderPrivate(port, width, height, codec);
 	} catch (const std::invalid_argument& ex) {
+		std::cout << "catched exception in ctor: " << ex.what() << std::endl;
 		throw ex;
 	}
 }
@@ -278,6 +281,7 @@ void VideoFrameSender::start(DataSupplier ds)
 	try {
 		m_ptr->start(ds);
 	} catch (const std::out_of_range& ex) {
+		std::cout << "catched exception in start: " << ex.what() << std::endl;
 		throw ex;
 	}
 }
