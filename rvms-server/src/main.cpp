@@ -13,8 +13,6 @@
 #include <parser.h>
 #include <common_utils.h>
 
-std::atomic<bool> g_run = true;
-
 int main(int argc, char* argv[]) {
 
 	auto logger = spdlog::stdout_color_mt("mainsender");
@@ -38,7 +36,7 @@ int main(int argc, char* argv[]) {
 
 	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
 
-	while (g_run) {
+	while (true) {
 		auto capture = captureFactory.create(args.url);
 		
 		capture->init(&settings);
