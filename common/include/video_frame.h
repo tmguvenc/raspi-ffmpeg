@@ -2,6 +2,7 @@
 #define FRAME_H
 
 #include <data.h>
+#include <cstring>
 
 class VideoFrame : public Data
 {
