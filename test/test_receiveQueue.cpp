@@ -9,20 +9,20 @@ struct QueueState
 
 struct ArgumentParserTestAll : testing::TestWithParam<QueueState>
 {
-	ArgumentParserTestAll()
-	{
-		queue = new ReceiveStrategyQueue<Queue>(&q);
-	}
-
-	virtual ~ArgumentParserTestAll()
-	{
-		delete queue;
-	}
-
-private:
-	using Queue = std::queue<Data*>;
-	Queue q;
-	IReceiveStrategy *queue;
+//	ArgumentParserTestAll()
+//	{
+//		queue = new ReceiveStrategyQueue<Queue>(&q);
+//	}
+//
+//	virtual ~ArgumentParserTestAll()
+//	{
+//		delete queue;
+//	}
+//
+//private:
+//	using Queue = std::queue<Data*>;
+//	Queue q;
+//	IReceiveStrategy *queue;
 };
 
 int main(int argc, char* argv[])
