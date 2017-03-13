@@ -4,7 +4,6 @@
 #include <vector>
 #include <limits>
 #include <iostream>
-#include <assert.h>
 #include <chrono>
 #include <thread>
 
@@ -84,15 +83,12 @@ inline bool readDHT22(float& h, float& t){
 	return false;
 }
 
-HumidityTemperatureSensor::HumidityTemperatureSensor(){
-	auto r = wiringPiSetup();
-	assert(r != -1);
-}
+HumidityTemperatureSensor::HumidityTemperatureSensor(){}
 
 std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
-	float h = std::numeric_limits<float>::min(), t = std::numeric_limits<float>::min();
-	int counter = 0;
-	while(!readDHT22(h, t) && counter++ < 100)
+	float h = min_f, t = min_f;
+	int counter = 100;
+	while(!readDHT22(h, t) && --counter)
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	return std::make_unique<HumidityTemperatureSensorData>(h, t);
 }

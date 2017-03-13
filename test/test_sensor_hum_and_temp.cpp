@@ -2,6 +2,7 @@
 #include <hum_temp_sensor.h>
 #include <limits>
 #include <sensor_data_base.h>
+#include <wiringPi.h>
 
 struct SensorState
 {
@@ -13,6 +14,7 @@ struct ArgumentParserTestAll : testing::TestWithParam<SensorState>
 	HumidityTemperatureSensor* sensor;
 	ArgumentParserTestAll()
 	{
+		wiringPiSetup();
 		sensor = new HumidityTemperatureSensor;
 	}
 	virtual ~ArgumentParserTestAll()
