@@ -33,6 +33,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.txt_ip = new System.Windows.Forms.TextBox();
             this.txt_port = new System.Windows.Forms.TextBox();
+            this.lbl_humidity = new System.Windows.Forms.Label();
+            this.lbl_temperature = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -82,11 +84,29 @@
             this.txt_port.TabIndex = 4;
             this.txt_port.Text = "5555";
             // 
+            // lbl_humidity
+            // 
+            this.lbl_humidity.AutoSize = true;
+            this.lbl_humidity.Location = new System.Drawing.Point(626, 12);
+            this.lbl_humidity.Name = "lbl_humidity";
+            this.lbl_humidity.Size = new System.Drawing.Size(0, 13);
+            this.lbl_humidity.TabIndex = 5;
+            // 
+            // lbl_temperature
+            // 
+            this.lbl_temperature.AutoSize = true;
+            this.lbl_temperature.Location = new System.Drawing.Point(837, 13);
+            this.lbl_temperature.Name = "lbl_temperature";
+            this.lbl_temperature.Size = new System.Drawing.Size(0, 13);
+            this.lbl_temperature.TabIndex = 6;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1337, 1029);
+            this.Controls.Add(this.lbl_temperature);
+            this.Controls.Add(this.lbl_humidity);
             this.Controls.Add(this.txt_port);
             this.Controls.Add(this.txt_ip);
             this.Controls.Add(this.button2);
@@ -108,6 +128,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox txt_ip;
         private System.Windows.Forms.TextBox txt_port;
+        private System.Windows.Forms.Label lbl_humidity;
+        private System.Windows.Forms.Label lbl_temperature;
     }
 }
 

@@ -13,6 +13,9 @@
 #include <parser.h>
 #include <common_utils.h>
 
+#ifdef __linux__
+#include <wiringPi.h>
+#endif
 
 int main(int argc, char* argv[]) {
 
@@ -27,6 +30,10 @@ int main(int argc, char* argv[]) {
 		logger->error("{}", exception.what());
 		return -1;
 	}
+
+#ifdef __linux__
+	wiringPiSetup();
+#endif
 
 	WebcamCaptureFactory captureFactory;
 

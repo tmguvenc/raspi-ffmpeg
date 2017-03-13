@@ -118,10 +118,10 @@ add_subdirectory (rvms-server)
 add_subdirectory (common)
 add_subdirectory (communication)
 add_subdirectory (test)
+add_subdirectory (sensor)	
+
 if (MSVC)
 	add_subdirectory (rvms-api-net)
-else()
-	add_subdirectory (sensor)	
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

@@ -15,6 +15,7 @@ public:
 
 	void start();
 	void stop();
+	void readSensor();
 	inline int getWidth();
 	inline int getHeight();
 	inline int getCodec();

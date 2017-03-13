@@ -20,6 +20,8 @@ public:
 		}
 	}
 
+	virtual int type() = 0;
+
 	void* getData() const { return m_data; }
 	uint32_t getSize() const { return m_size; }
 

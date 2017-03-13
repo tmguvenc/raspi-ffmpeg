@@ -26,6 +26,8 @@ namespace Client
 		void stop();
 		static void initialize();
 
+		event System::Action<float, float>^ OnSensorDataReceived;
+
 	protected:
 		std::string ManagedtoNativeString(System::String^ input) {
 			pin_ptr<const wchar_t> wch = PtrToStringChars(input);

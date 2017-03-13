@@ -1,20 +1,12 @@
 # Project Name
 PROJECT(tests)
 
-if(NOT MSVC)
-	set(tests 
-			test_parserMultipleOptions
-			test_parserSingleOption
-			test_receiveQueue
-			test_sensor_hum_and_temp
-		)
-else()
-	set(tests 
-			test_parserMultipleOptions
-			test_parserSingleOption
-			test_receiveQueue
-		)
-endif()	
+set(tests 
+		test_parserMultipleOptions
+		test_parserSingleOption
+		test_receiveQueue
+		test_sensor_hum_and_temp
+	)
 
 if (NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
@@ -40,7 +32,7 @@ link_directories(${GTEST_LIBS})
 
 foreach(test ${tests})
 
-add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
+	add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
 
 	add_executable(${test} ${test}.cpp)
 	add_test(NAME ${test} COMMAND ${test})
@@ -51,10 +43,7 @@ add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
 	target_link_libraries(${test} ${GTEST_LINK})
 	target_link_libraries(${test} capture)
 	target_link_libraries(${test} common)
-	
-if(NOT MSVC)
 	target_link_libraries(${test} sensor)
-endif()
 
 	if (MSVC)
 		add_custom_command(TARGET ${test} POST_BUILD
@@ -64,6 +53,14 @@ endif()
 		add_custom_command(TARGET ${test} POST_BUILD
 		   COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			   "${GTEST_BINS}/gtest-d.dll"
+		$<TARGET_FILE_DIR:${test}>)
+		add_custom_command(TARGET ${test} POST_BUILD
+		   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			   "${CMAKE_BINARY_DIR}/capture/Debug/capture.dll"
+		$<TARGET_FILE_DIR:${test}>)
+		add_custom_command(TARGET ${test} POST_BUILD
+		   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			   "${CMAKE_BINARY_DIR}/sensor/Debug/sensor.dll"
 		$<TARGET_FILE_DIR:${test}>)
 	endif()
 	

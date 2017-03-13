@@ -4,6 +4,7 @@
 #include <common_utils.h>
 #include "messages.h"
 #include "video_frame.h"
+#include "sensor_data.h"
 #include <receive_strategy.h>
 
 class ConnectorPrivate
@@ -34,24 +35,39 @@ public:
 		destroy();
 	}
 
+	void readSensor(){
+		sendRequest(HumTempRequest);
+	}
+
 	void start() {
 		uint32_t index = 0;
 		m_started = true;
 
 		std::vector<char> buffer(m_size);
-
+		MessageType messageType;
 		while (m_started) {
-			sendRequest(NextFrameRequest);
+			sendRequest(FrameRequest);
 
 			// read empty frame
 			zmq_recv(m_socket, &buffer[0], m_size, 0);
+			zmq_recv(m_socket, &messageType, sizeof(MessageType), 0);
 			// read data
 			auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
 
-			// if it's a ping message
-			if (recBytes == 4) continue;
-
-			m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+			switch (messageType)
+			{
+			case Ping:
+				break;
+			case FrameResponse:
+				m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+				break;
+			case StopResponse:
+				// do nothing
+				break;
+			case HumTempResponse:
+				m_receive_strategy->handle(new HumTempSensorData(&buffer[0], recBytes));
+				break;
+			}
 		}
 
 		sendRequest(StopRequest);
@@ -76,7 +92,7 @@ protected:
 
 		zmq_connect(m_socket, m_url.c_str());
 
-		sendRequest(Init);
+		sendRequest(InitRequest);
 
 		char temp[30] = { 0 };
 

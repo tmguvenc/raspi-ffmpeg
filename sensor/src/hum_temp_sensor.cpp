@@ -1,8 +1,13 @@
+
 #include <hum_temp_sensor.h>
 #include <hum_temp_sensor_data.h>
+#include <limits>
+
+static const auto min_f = std::numeric_limits<float>::min();
+
+#ifdef __linux__
 #include <wiringPi.h>
 #include <vector>
-#include <limits>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -10,7 +15,6 @@
 #define DHTPIN 7
 #define MAXTIMINGS 85
 
-static const auto min_f = std::numeric_limits<float>::min();
 static int dht22_dat[5] = {0,0,0,0,0};
 
 static uint8_t sizecvt(const int read)
@@ -92,3 +96,13 @@ std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	return std::make_unique<HumidityTemperatureSensorData>(h, t);
 }
+
+#else
+
+HumidityTemperatureSensor::HumidityTemperatureSensor(){}
+
+std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
+	return std::make_unique<HumidityTemperatureSensorData>(min_f, min_f);
+}
+
+#endif

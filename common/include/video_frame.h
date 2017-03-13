@@ -17,6 +17,9 @@ public:
 	}
 
 	inline uint32_t getIndex() const { return m_index; }
+	int type() override{
+		return 1;
+	}
 
 private:
 	uint32_t m_index;

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <receive_strategy_queue.h>
 #include <video_frame.h>
+#include <sensor_data.h>
 #include <decoder.h>
 
 extern "C"
@@ -125,19 +126,30 @@ void RaspiClient::decode_loop()
 		Data* data;
 		m_frame_queue->pop(data);
 		
-		auto frame = static_cast<VideoFrame*>(data);
+		if (data->type() == 1){
+			auto frame = static_cast<VideoFrame*>(data);
 
-		if (!frame || frame->getSize() == 0)
-			break;
+			if (!frame || frame->getSize() == 0)
+				break;
 
-		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-		auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
-		m_bmp->UnlockBits(bmpData);
+			System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+			auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
+			m_bmp->UnlockBits(bmpData);
 
-		if (decoded)
-			m_graphics->DrawImage(m_bmp, roi);
+			if (decoded)
+				m_graphics->DrawImage(m_bmp, roi);
+			delete frame;
+		}
+		else{
+			auto sensorData = static_cast<HumTempSensorData*>(data);
 
-		delete frame;
+			auto h = sensorData->getHumidity();
+			auto t = sensorData->getTemperature();
+
+			delete sensorData;
+
+			OnSensorDataReceived(h, t);
+		}
 	}
 }
 

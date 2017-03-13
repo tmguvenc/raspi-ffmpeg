@@ -11,6 +11,8 @@ enum SensorDataType
 	Pressure
 };
 
+#undef min
+
 class SENSOR_EXPORT ISensorData
 {
 public:

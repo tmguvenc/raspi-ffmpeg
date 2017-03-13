@@ -19,6 +19,8 @@
 #include <messages.h>
 #include <frame_container.h>
 #include <iostream>
+#include <hum_temp_sensor.h>
+#include <sensor_data_base.h>
 
 struct CommTime
 {
@@ -29,6 +31,19 @@ struct CommTime
 using ClientMap = tbb::concurrent_hash_map<std::string, CommTime>;
 using Message = std::pair<std::string, MessageType>;
 using MessageQueue = tbb::concurrent_bounded_queue<Message>;
+
+using ReadSensorCallback = std::function<void(std::unique_ptr<ISensorData>)>;
+
+// bababababa
+struct HumTempSensorManager
+{
+	HumTempSensorManager(ReadSensorCallback cb) {
+		auto thread = std::make_unique<tbb::tbb_thread>([cb](){
+			HumidityTemperatureSensor sensor;
+			cb(sensor.readData());
+		});
+	}
+};
 
 class SenderPrivate
 {
@@ -107,15 +122,26 @@ public:
 				if (f == nullptr)
 					return false;
 				auto frame = static_cast<Frame*>(f);
-				send(name, frame->data(), static_cast<int>(frame->size()));
+				send(name, FrameResponse, frame->data(), static_cast<int>(frame->size()));
 				delete frame;
 				return true;
 			},
 			[this](const std::string& name) {
-				auto ok = 0;
-				send(name, &ok, sizeof(ok));
+				MessageType type = StopResponse;
+				send(name, StopResponse, &type, sizeof(MessageType));
 				remove(name);
 				return m_run;
+			},
+			[this](const std::string& name) {
+				HumTempSensorManager([this, &name](std::unique_ptr<ISensorData> data){
+
+					float h = data->getData(Humidity);
+					float t = data->getData(Temperature);
+					const std::string aa = std::to_string(h) + ";" + std::to_string(t);
+					send(name, HumTempResponse, aa.c_str(), aa.size());
+				});
+
+				return true;
 			},
 			[this](const std::string&) {
 				return true;
@@ -167,7 +193,7 @@ protected:
 				names.push_back(pair.first); // add this client to removal list
 			}
 			else if (time.lastSendMessageTime >= 0 && currentTime - time.lastSendMessageTime > HEARTHBEAT_INTERVAL_IN_SECONDS){
-				send(pair.first, &ping, sizeof(MessageType));
+				send(pair.first, Ping, &ping, sizeof(MessageType));
 			}
 		});
 
@@ -205,10 +231,12 @@ protected:
 		// wait for new frame request
 		zmq_recv(m_socket, &message_type, sizeof(message_type), 0);
 
-		if (message_type == Init)
+		if (message_type == InitRequest)
 		{
+			MessageType message = InitResponse;
 			zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 			zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+			zmq_send(m_socket, &message, sizeof(MessageType), ZMQ_SNDMORE);
 			zmq_send(m_socket, m_settings.c_str(), m_settings.size(), 0);
 			if (m_logger){
 				m_logger->info("[{}] connected", std::string(m_client_id, len_id));
@@ -225,13 +253,14 @@ protected:
 		m_message_queue.push(make_pair(client, message_type));
 	}
 
-	void send(const std::string& clientName, const void* data, int size)
+	void send(const std::string& clientName, MessageType messageType, const void* data, int size)
 	{
 		ClientMap::accessor ac;
 		if (m_clients.find(ac, clientName))
 		{
 			zmq_send(m_socket, clientName.c_str(), clientName.length(), ZMQ_SNDMORE);
 			zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+			zmq_send(m_socket, &messageType, sizeof(MessageType), ZMQ_SNDMORE);
 			zmq_send(m_socket, data, size, 0);
 
 			ac->second.lastSendMessageTime = current_time();
