@@ -120,7 +120,7 @@ add_subdirectory (communication)
 add_subdirectory (test)
 if (MSVC)
 	add_subdirectory (rvms-api-net)
-else()
+# else()
 	add_subdirectory (sensor)	
 endif()
 
