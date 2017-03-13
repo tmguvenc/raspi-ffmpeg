@@ -1,12 +1,20 @@
 # Project Name
 PROJECT(tests)
 
-set(tests 
-		test_parserMultipleOptions
-		test_parserSingleOption
-		test_receiveQueue
-		test_sensor_hum_and_temp
-	)
+if(NOT MSVC)
+	set(tests 
+			test_parserMultipleOptions
+			test_parserSingleOption
+			test_receiveQueue
+			test_sensor_hum_and_temp
+		)
+else()
+	set(tests 
+			test_parserMultipleOptions
+			test_parserSingleOption
+			test_receiveQueue
+		)
+endif()	
 
 if (NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
@@ -43,7 +51,10 @@ add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
 	target_link_libraries(${test} ${GTEST_LINK})
 	target_link_libraries(${test} capture)
 	target_link_libraries(${test} common)
+	
+if(NOT MSVC)
 	target_link_libraries(${test} sensor)
+endif()
 
 	if (MSVC)
 		add_custom_command(TARGET ${test} POST_BUILD
