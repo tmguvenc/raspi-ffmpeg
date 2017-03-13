@@ -22,13 +22,10 @@ if (NOT MSVC)
 endif()
 
 include_directories(include/)
-include_directories("../common/include/")
 include_directories(${SPDLOG_INCLUDE})
 
 # add library directories
 
 add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
-
-target_link_libraries(${PROJECT_NAME} common)
 target_link_libraries(${PROJECT_NAME} wiringPi)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")
