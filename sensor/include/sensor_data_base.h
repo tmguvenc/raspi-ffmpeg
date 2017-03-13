@@ -2,6 +2,7 @@
 #define SENSOR_DATA_BASE_H
 
 #include <limits>
+#include <sensor_macros.h>
 
 enum SensorDataType
 {
@@ -10,7 +11,7 @@ enum SensorDataType
 	Pressure
 };
 
-class ISensorData
+class SENSOR_EXPORT ISensorData
 {
 public:
 	virtual ~ISensorData() { }

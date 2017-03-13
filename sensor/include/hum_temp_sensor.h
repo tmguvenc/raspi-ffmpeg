@@ -3,7 +3,7 @@
 
 #include <sensor_base.h>
 
-class HumidityTemperatureSensor : ISensor
+class SENSOR_EXPORT HumidityTemperatureSensor : ISensor
 {
 public:
 	HumidityTemperatureSensor();

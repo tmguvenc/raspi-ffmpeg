@@ -5,6 +5,7 @@ set(tests
 		test_parserMultipleOptions
 		test_parserSingleOption
 		test_receiveQueue
+		test_sensor_hum_and_temp
 	)
 
 if (NOT MSVC)
@@ -16,6 +17,7 @@ enable_testing()
 
 include_directories("../capture/include/")
 include_directories("../common/include/")
+include_directories("../sensor/include/")
 include_directories(${TBB_INCLUDE})
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${SPDLOG_INCLUDE})
@@ -41,6 +43,7 @@ add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY)
 	target_link_libraries(${test} ${GTEST_LINK})
 	target_link_libraries(${test} capture)
 	target_link_libraries(${test} common)
+	target_link_libraries(${test} sensor)
 
 	if (MSVC)
 		add_custom_command(TARGET ${test} POST_BUILD

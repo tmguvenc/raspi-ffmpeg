@@ -3,7 +3,7 @@
 
 #include <sensor_data_base.h>
 
-class HumidityTemperatureSensorData : public ISensorData
+class SENSOR_EXPORT HumidityTemperatureSensorData : public ISensorData
 {
 public:
 	HumidityTemperatureSensorData(float hum, float temp) : m_hum(hum), m_temp(temp) { 

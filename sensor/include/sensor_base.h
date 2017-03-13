@@ -6,7 +6,7 @@
 
 class ISensorData;
 
-class ISensor
+class SENSOR_EXPORT ISensor
 {
 public:
 	virtual ~ISensor() { }
