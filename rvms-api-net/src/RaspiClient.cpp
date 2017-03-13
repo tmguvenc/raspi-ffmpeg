@@ -116,6 +116,10 @@ void RaspiClient::stop()
 	m_receiver_thread = nullptr;
 }
 
+void RaspiClient::readSensor(){
+	m_connector->readSensor();
+}
+
 void RaspiClient::decode_loop()
 {
 	const auto len = m_destWidth * m_destHeight * 3;

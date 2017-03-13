@@ -157,6 +157,10 @@ void Connector::stop() {
 	m_ptr->stop();
 }
 
+void Connector::readSensor() {
+	m_ptr->readSensor();
+}
+
 int Connector::getWidth() {
 	return m_ptr->getWidth();
 }

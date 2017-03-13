@@ -25,6 +25,7 @@ namespace Client
 		void start();
 		void stop();
 		static void initialize();
+		void readSensor();
 
 		event System::Action<float, float>^ OnSensorDataReceived;
 

@@ -47,6 +47,11 @@ namespace raspi_client_test
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Stop();
+        }
+
+        private void btn_readSensor_Click(object sender, EventArgs e)
+        {
+            _client.readSensor();
         } 
     }
 }
