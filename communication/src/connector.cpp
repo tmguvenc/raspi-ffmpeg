@@ -99,6 +99,12 @@ protected:
 		// read empty frame
 		auto r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 		assert(r == 0);
+
+		MessageType messageType;
+
+		r = zmq_recv(m_socket, &messageType, sizeof(MessageType), 0);
+		assert(r == sizeof(MessageType));
+
 		r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 
 		auto v = split(std::string(temp, r), ',');

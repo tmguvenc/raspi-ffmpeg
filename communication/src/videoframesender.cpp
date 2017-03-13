@@ -156,7 +156,7 @@ public:
 			Message message;
 			m_message_queue.pop(message);
 
-			if (message.second < 0 || message.second > 3) {
+			if (message.second < 0 || message.second > 4) {
 				throw std::out_of_range(string_format("Message type is invalid %d", message.second));
 			}
 

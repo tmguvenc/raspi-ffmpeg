@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 using Client;
@@ -25,8 +24,14 @@ namespace raspi_client_test
 
         private void _client_OnSensorDataReceived(float arg1, float arg2)
         {
-            lbl_humidity.Text = arg1.ToString(CultureInfo.CurrentCulture);
-            lbl_temperature.Text = arg2.ToString(CultureInfo.CurrentCulture);
+            if (lbl_humidity.InvokeRequired)
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    lbl_humidity.Text = arg1.ToString(CultureInfo.CurrentCulture);
+                    lbl_temperature.Text = arg2.ToString(CultureInfo.CurrentCulture);
+                }));
+            }
         }
 
         private void Stop()
