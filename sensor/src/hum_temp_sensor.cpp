@@ -2,17 +2,15 @@
 #include <hum_temp_sensor.h>
 #include <hum_temp_sensor_data.h>
 #include <limits>
-
-static const auto min_f = std::numeric_limits<float>::min();
-
-HumidityTemperatureSensor::HumidityTemperatureSensor(){}
-
-#ifdef __linux__
-#include <wiringPi.h>
 #include <vector>
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <rgpio.h>
+
+static const auto min_f = std::numeric_limits<float>::min();
+
+HumidityTemperatureSensor::HumidityTemperatureSensor(){}
 
 #define DHTPIN 7
 #define MAXTIMINGS 85
@@ -38,28 +36,28 @@ inline bool readDHT22(float& h, float& t){
 	dht22_dat[0] = dht22_dat[1] = dht22_dat[2] = dht22_dat[3] = dht22_dat[4] = 0;
 
 	// pull pin down for 18 milliseconds
-	pinMode(DHTPIN, OUTPUT);
-	digitalWrite(DHTPIN, HIGH);
-	delay(10);
-	digitalWrite(DHTPIN, LOW);
-	delay(18);
+	GPIO::setPinMode(DHTPIN, OUTPUT);
+	GPIO::write(DHTPIN, HIGH);
+	GPIO::sleepMilliSeconds(10);
+	GPIO::write(DHTPIN, LOW);
+	GPIO::sleepMilliSeconds(18);
 	// then pull it up for 40 microseconds
-	digitalWrite(DHTPIN, HIGH);
-	delayMicroseconds(40);
+	GPIO::write(DHTPIN, HIGH);
+	GPIO::sleepMicroSeconds(40);
 	// prepare to read the pin
-	pinMode(DHTPIN, INPUT);
+	GPIO::setPinMode(DHTPIN, INPUT);
 
 	// detect change and read data
 	for (i = 0; i < MAXTIMINGS; i++) {
 		counter = 0;
-		while (sizecvt(digitalRead(DHTPIN)) == laststate) {
+		while (sizecvt(GPIO::read(DHTPIN)) == laststate) {
 			counter++;
-			delayMicroseconds(1);
+			GPIO::sleepMicroSeconds(1);
 			if (counter == 255) {
 				break;
 			}
 		}
-		laststate = sizecvt(digitalRead(DHTPIN));
+		laststate = sizecvt(GPIO::read(DHTPIN));
 
 		if (counter == 255) break;
 
@@ -97,11 +95,3 @@ std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 	return std::make_unique<HumidityTemperatureSensorData>(h, t);
 }
-
-#else
-
-std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
-	return std::make_unique<HumidityTemperatureSensorData>(min_f, min_f);
-}
-
-#endif

@@ -62,6 +62,10 @@ foreach(test ${tests})
 		   COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			   "${CMAKE_BINARY_DIR}/sensor/Debug/sensor.dll"
 		$<TARGET_FILE_DIR:${test}>)
+		add_custom_command(TARGET ${test} POST_BUILD
+		   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			   "${CMAKE_BINARY_DIR}/common/Debug/common.dll"
+		$<TARGET_FILE_DIR:${test}>)
 	endif()
 	
 	set_target_properties(${test} PROPERTIES FOLDER "Tests")

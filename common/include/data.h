@@ -2,8 +2,9 @@
 #define DATA_H
 
 #include <memory>
+#include <common_macros.h>
 
-class Data
+class COMMON_EXPORT Data
 {
 public:
 	explicit Data(uint32_t size) : m_size(size)
