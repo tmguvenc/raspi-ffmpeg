@@ -5,6 +5,8 @@
 
 static const auto min_f = std::numeric_limits<float>::min();
 
+HumidityTemperatureSensor::HumidityTemperatureSensor(){}
+
 #ifdef __linux__
 #include <wiringPi.h>
 #include <vector>
@@ -87,7 +89,6 @@ inline bool readDHT22(float& h, float& t){
 	return false;
 }
 
-HumidityTemperatureSensor::HumidityTemperatureSensor(){}
 
 std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
 	float h = min_f, t = min_f;
@@ -98,8 +99,6 @@ std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
 }
 
 #else
-
-HumidityTemperatureSensor::HumidityTemperatureSensor(){}
 
 std::unique_ptr<ISensorData> HumidityTemperatureSensor::readData(){
 	return std::make_unique<HumidityTemperatureSensorData>(min_f, min_f);

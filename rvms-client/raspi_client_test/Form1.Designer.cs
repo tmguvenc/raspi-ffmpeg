@@ -35,7 +35,6 @@
             this.txt_port = new System.Windows.Forms.TextBox();
             this.lbl_humidity = new System.Windows.Forms.Label();
             this.lbl_temperature = new System.Windows.Forms.Label();
-            this.btn_readSensor = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -101,22 +100,11 @@
             this.lbl_temperature.Size = new System.Drawing.Size(0, 13);
             this.lbl_temperature.TabIndex = 6;
             // 
-            // btn_readSensor
-            // 
-            this.btn_readSensor.Location = new System.Drawing.Point(486, 13);
-            this.btn_readSensor.Name = "btn_readSensor";
-            this.btn_readSensor.Size = new System.Drawing.Size(91, 23);
-            this.btn_readSensor.TabIndex = 7;
-            this.btn_readSensor.Text = "Read Sensor";
-            this.btn_readSensor.UseVisualStyleBackColor = true;
-            this.btn_readSensor.Click += new System.EventHandler(this.btn_readSensor_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1337, 1029);
-            this.Controls.Add(this.btn_readSensor);
             this.Controls.Add(this.lbl_temperature);
             this.Controls.Add(this.lbl_humidity);
             this.Controls.Add(this.txt_port);
@@ -142,7 +130,6 @@
         private System.Windows.Forms.TextBox txt_port;
         private System.Windows.Forms.Label lbl_humidity;
         private System.Windows.Forms.Label lbl_temperature;
-        private System.Windows.Forms.Button btn_readSensor;
     }
 }
 
