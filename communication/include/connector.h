@@ -16,6 +16,12 @@ public:
 	void start();
 	void stop();
 	void readSensor();
+	void moveRight();
+	void moveUp();
+	void moveDown();
+	void moveLeft();
+	void motorStop();
+
 	inline int getWidth();
 	inline int getHeight();
 	inline int getCodec();

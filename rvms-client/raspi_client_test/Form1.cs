@@ -65,5 +65,30 @@ namespace raspi_client_test
         {
             Stop();
         }
+
+        private void btn_up_MouseUp(object sender, MouseEventArgs e)
+        {
+            _client.motorStop();
+        }
+
+        private void btn_up_MouseClick(object sender, MouseEventArgs e)
+        {
+            _client.moveUp();
+        }
+
+        private void btn_right_MouseClick(object sender, MouseEventArgs e)
+        {
+            _client.moveRight();
+        }
+
+        private void btl_left_Click(object sender, EventArgs e)
+        {
+            _client.moveLeft();
+        }
+
+        private void btn_down_Click(object sender, EventArgs e)
+        {
+            _client.moveDown();
+        }
     }
 }

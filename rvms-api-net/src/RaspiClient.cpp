@@ -163,3 +163,38 @@ void RaspiClient::receive_loop()
 		m_connector->start();
 	}
 }
+
+void RaspiClient::moveRight() 
+{
+	if (m_connector) {
+		m_connector->moveRight();
+	}
+}
+
+void RaspiClient::moveUp()
+{
+	if (m_connector) {
+		m_connector->moveUp();
+	}
+}
+
+void RaspiClient::moveDown()
+{
+	if (m_connector) {
+		m_connector->moveDown();
+	}
+}
+
+void RaspiClient::moveLeft()
+{
+	if (m_connector) {
+		m_connector->moveLeft();
+	}
+}
+
+void RaspiClient::motorStop()
+{
+	if (m_connector) {
+		m_connector->motorStop();
+	}
+}

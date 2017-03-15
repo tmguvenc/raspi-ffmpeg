@@ -27,6 +27,12 @@ namespace Client
 		static void initialize();
 		void readSensor();
 
+		void moveRight();
+		void moveUp();
+		void moveDown();
+		void moveLeft();
+		void motorStop();
+
 		event System::Action<float, float>^ OnSensorDataReceived;
 
 	protected:

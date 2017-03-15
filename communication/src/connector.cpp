@@ -39,6 +39,22 @@ public:
 		sendRequest(HumTempRequest);
 	}
 
+	void moveRight() {
+		sendRequest(MotorRightRequest);
+	}
+	void moveUp() {
+		sendRequest(MotorUpRequest);
+	}
+	void moveDown() {
+		sendRequest(MotorDownRequest);
+	}
+	void moveLeft() {
+		sendRequest(MotorLeftRequest);
+	}
+	void motorStop() {
+		sendRequest(MotorStopRequest);
+	}
+
 	void start() {
 		uint32_t index = 0;
 		m_started = true;
@@ -165,6 +181,31 @@ void Connector::stop() {
 
 void Connector::readSensor() {
 	m_ptr->readSensor();
+}
+
+void Connector::moveRight()
+{
+	m_ptr->moveRight();
+}
+
+void Connector::moveUp()
+{
+	m_ptr->moveUp();
+}
+
+void Connector::moveDown()
+{
+	m_ptr->moveDown();
+}
+
+void Connector::moveLeft()
+{
+	m_ptr->moveLeft();
+}
+
+void Connector::motorStop()
+{
+	m_ptr->motorStop();
 }
 
 int Connector::getWidth() {

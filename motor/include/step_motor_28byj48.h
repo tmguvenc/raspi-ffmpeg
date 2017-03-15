@@ -3,8 +3,9 @@
 
 #include <motor_base.h>
 #include <functional>
+#include <atomic>
 
-class MOTOR_EXPORT StepMotor28BYJ48 : IMotor
+class MOTOR_EXPORT StepMotor28BYJ48 : public IMotor
 {
 public:
 	StepMotor28BYJ48();
@@ -21,7 +22,7 @@ protected:
 private:
 	std::vector<std::vector<int>> m_array;
 	int m_pins[4];
-	volatile bool m_turn;
+	std::atomic<bool> m_move;
 
 	std::vector<std::function<void(int)>> m_funcs;
 };

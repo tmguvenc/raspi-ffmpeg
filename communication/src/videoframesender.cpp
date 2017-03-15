@@ -21,6 +21,7 @@
 #include <iostream>
 #include <hum_temp_sensor.h>
 #include <sensor_data_base.h>
+#include <step_motor_28byj48.h>
 
 struct CommTime
 {
@@ -37,7 +38,7 @@ using ReadSensorCallback = std::function<void(std::unique_ptr<ISensorData>)>;
 // bababababa
 struct HumTempSensorManager
 {
-	HumTempSensorManager(ReadSensorCallback cb) {
+	explicit HumTempSensorManager(ReadSensorCallback cb) {
 		auto thread = std::make_unique<tbb::tbb_thread>([cb](){
 			HumidityTemperatureSensor sensor;
 			cb(sensor.readData());
@@ -87,6 +88,11 @@ public:
 		m_logger->info("listening port {}", m_port);
 
 		memset(m_client_id, 0, sizeof m_client_id);
+
+		m_panMotor = new StepMotor28BYJ48;
+		m_tiltMotor = new StepMotor28BYJ48;
+
+		m_panMotor->setup({ 0, 2, 3, 4 });
 	}
 
 	virtual ~SenderPrivate()
@@ -99,6 +105,17 @@ public:
 		{
 			delete m_thread;
 			m_thread = nullptr;
+		}
+
+		if (m_panMotor) {
+			m_panMotor->stop();
+			delete m_panMotor;
+			m_panMotor = nullptr;
+		}
+		if (m_tiltMotor) {
+			m_tiltMotor->stop();
+			delete m_tiltMotor;
+			m_tiltMotor = nullptr;
 		}
 		assert(m_message_queue.empty());
 	}
@@ -117,7 +134,7 @@ public:
 
 		std::vector<std::function<bool(const std::string&)>> funcs =
 		{
-			[this, ds](const std::string& name) {
+			[this, ds](const std::string& name) { //FrameRequest
 				auto f = ds();
 				if (f == nullptr)
 					return false;
@@ -126,27 +143,56 @@ public:
 				delete frame;
 				return true;
 			},
-			[this](const std::string& name) {
-				MessageType type = StopResponse;
+			[this](const std::string& name) { //StopRequest
+				auto type = StopResponse;
 				send(name, StopResponse, &type, sizeof(MessageType));
 				remove(name);
 				return m_run;
 			},
-			[this](const std::string& name) {
+			[this](const std::string& name) { //HumTempRequest
 				HumTempSensorManager([this, &name](std::unique_ptr<ISensorData> data){
-
-					float h = data->getData(Humidity);
-					float t = data->getData(Temperature);
-					const std::string aa = std::to_string(h) + ";" + std::to_string(t);
+					auto h = data->getData(Humidity);
+					auto t = data->getData(Temperature);
+					const auto aa = std::to_string(h) + ";" + std::to_string(t);
 					send(name, HumTempResponse, aa.c_str(), aa.size());
 				});
 
 				return true;
 			},
-			[this](const std::string&) {
+			[this](const std::string&) { //InitRequest
 				return true;
 			},
-			[this](const std::string&) {
+			[this](const std::string& name) { //MotorUpRequest
+				if (m_tiltMotor) {
+					m_tiltMotor->move(true);
+				}
+				return true;
+			},
+			[this](const std::string& name) { //MotorDownRequest
+				if (m_tiltMotor) {
+					m_tiltMotor->move(false);
+				}
+				return true;
+			},
+			[this](const std::string& name) { //MotorRightRequest
+				if (m_panMotor) {
+					m_panMotor->move(true);
+				}
+				return true;
+			},
+			[this](const std::string& name) { //MotorLeftRequest
+				if (m_panMotor) {
+					m_panMotor->move(false);
+				}
+				return true;
+			},
+			[this](const std::string& name) { //MotorStopRequest
+				if (m_panMotor) {
+					m_panMotor->stop();
+				}
+				if (m_tiltMotor) {
+					m_tiltMotor->stop();
+				}
 				return true;
 			}
 		};
@@ -156,7 +202,7 @@ public:
 			Message message;
 			m_message_queue.pop(message);
 
-			if (message.second < 0 || message.second > 4) {
+			if (message.second < 0 || message.second > funcs.size()) {
 				throw std::out_of_range(string_format("Message type is invalid %d", message.second));
 			}
 
@@ -233,7 +279,7 @@ protected:
 
 		if (message_type == InitRequest)
 		{
-			MessageType message = InitResponse;
+			auto message = InitResponse;
 			zmq_send(m_socket, m_client_id, len_id, ZMQ_SNDMORE);
 			zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
 			zmq_send(m_socket, &message, sizeof(MessageType), ZMQ_SNDMORE);
@@ -285,6 +331,8 @@ private:
 	MessageQueue m_message_queue;
 	tbb::tbb_thread *m_thread;
 	std::string m_settings;
+	IMotor *m_panMotor;
+	IMotor *m_tiltMotor;
 };
 
 VideoFrameSender::VideoFrameSender(int port, int width, int height, int codec)

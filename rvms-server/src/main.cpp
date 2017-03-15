@@ -12,10 +12,7 @@
 #include <videoframesender.h>
 #include <parser.h>
 #include <common_utils.h>
-
-#ifdef __linux__
-#include <wiringPi.h>
-#endif
+#include <rgpio.h>
 
 int main(int argc, char* argv[]) {
 
@@ -31,9 +28,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-#ifdef __linux__
-	wiringPiSetup();
-#endif
+	GPIO::setup();
 
 	WebcamCaptureFactory captureFactory;
 
