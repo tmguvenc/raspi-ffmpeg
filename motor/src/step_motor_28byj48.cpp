@@ -32,6 +32,9 @@ void StepMotor28BYJ48::setup(const std::vector<int>& pins)
 	if (pins.size() != 4)
 		throw std::invalid_argument("Invalid Pin Count");
 	std::copy(pins.begin(), pins.end(), std::begin(m_pins));
+
+	for (auto pin : m_pins)
+		GPIO::setPinMode(pin, OUTPUT);
 }
 
 void StepMotor28BYJ48::move(bool clockwise)
