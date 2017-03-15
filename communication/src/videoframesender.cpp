@@ -93,6 +93,7 @@ public:
 		m_tiltMotor = new StepMotor28BYJ48;
 
 		m_panMotor->setup({ 0, 2, 3, 4 });
+		m_panMotor->stop();
 	}
 
 	virtual ~SenderPrivate()

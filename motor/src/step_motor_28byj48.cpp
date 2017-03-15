@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "rgpio.h"
 
-StepMotor28BYJ48::StepMotor28BYJ48() : m_move(false)
+StepMotor28BYJ48::StepMotor28BYJ48()
 {
 	m_array =
 	{
@@ -39,16 +39,12 @@ void StepMotor28BYJ48::setup(const std::vector<int>& pins)
 
 void StepMotor28BYJ48::move(bool clockwise)
 {
-	m_move.store(true);
-
-	while (m_move) {
+	for(int i = 0; i < 8; ++i)
 		m_funcs[clockwise](1200);
-	}
 }
 
 void StepMotor28BYJ48::stop()
 {
-	m_move.store(false);
 	setStep(0, 0, 0, 0);
 }
 
