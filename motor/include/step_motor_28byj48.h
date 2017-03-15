@@ -8,7 +8,7 @@
 class MOTOR_EXPORT StepMotor28BYJ48 : public IMotor
 {
 public:
-	StepMotor28BYJ48();
+	explicit StepMotor28BYJ48(int delayMicroseconds, int step);
 	~StepMotor28BYJ48();
 	void setup(const std::vector<int>& pins) override;
 	void move(bool clockwise) override;
@@ -25,6 +25,8 @@ private:
 	std::atomic<bool> m_move;
 
 	std::vector<std::function<void(int)>> m_funcs;
+	int m_step;
+	int m_delayMicroseconds;
 };
 
 #endif

@@ -2,7 +2,9 @@
 #include <algorithm>
 #include "rgpio.h"
 
-StepMotor28BYJ48::StepMotor28BYJ48()
+StepMotor28BYJ48::StepMotor28BYJ48(int delayMicroseconds, int step) :
+m_step(step),
+m_delayMicroseconds(delayMicroseconds)
 {
 	m_array =
 	{
@@ -39,8 +41,8 @@ void StepMotor28BYJ48::setup(const std::vector<int>& pins)
 
 void StepMotor28BYJ48::move(bool clockwise)
 {
-	for(int i = 0; i < 8; ++i)
-		m_funcs[clockwise](1200);
+	for (auto i = 0; i < m_step; ++i)
+		m_funcs[clockwise](m_delayMicroseconds);
 }
 
 void StepMotor28BYJ48::stop()
