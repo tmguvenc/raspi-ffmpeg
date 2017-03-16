@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <sensor_message_handler.h>
 #include <motor_message_handler.h>
+#include <video_message_handler.h>
 
 struct CommunicationTime
 {
@@ -12,11 +13,13 @@ struct CommunicationTime
 	int64_t lastSendMessageTime;
 };
 
-JobDistributor::JobDistributor(int port, int width, int height, int codec, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins) :
+JobDistributor::JobDistributor(int port, int width, int height, int codec, int fps, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins) :
 m_motor_executer(new MotorMessageHandler(delayMicroseconds, step, std::move(panPins), std::move(tiltPins))),
 m_sensor_executer(new SensorMessageHandler),
+m_video_executer(new VideoMessageHandler("/dev/video0", width, height, codec, fps)),
 m_motor_message_handler(&m_motor_request_queue, nullptr, m_motor_executer),
 m_sensor_message_handler(&m_sensor_request_queue, &m_response_queue, m_sensor_executer),
+m_video_message_handler(&m_video_request_queue, &m_response_queue, m_video_executer),
 m_port(port),
 m_context(nullptr),
 m_socket(nullptr)
@@ -33,6 +36,8 @@ m_socket(nullptr)
 
 	m_functionMap.resize(MessageCount, nullptr);
 
+	m_functionMap[FrameRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, FrameRequest)); };
+	m_functionMap[StopRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, StopRequest)); };
 	m_functionMap[HumTempRequest] = [this](const std::string& client){m_sensor_request_queue.push(std::make_pair(client, HumTempRequest)); };
 	m_functionMap[InitRequest] = [this](const std::string& client){
 		auto message = InitResponse;
@@ -71,6 +76,7 @@ void JobDistributor::start()
 
 	m_sensor_message_handler.start();
 	m_motor_message_handler.start();
+	m_video_message_handler.start();
 
 	m_run.store(true);
 
@@ -82,6 +88,7 @@ void JobDistributor::start()
 			m_response_queue.pop(response);
 			assert(response.second && "data is null");
 			send(response.first.first, response.first.second, response.second->getData(), response.second->getSize());
+			delete response.second;
 		}
 	});
 

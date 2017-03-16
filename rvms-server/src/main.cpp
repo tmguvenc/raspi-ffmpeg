@@ -9,7 +9,6 @@
 #include <capture.h>
 #include <spdlog/spdlog.h>
 #include <frame.h>
-//#include <videoframesender.h>
 #include <jobdistributor.h>
 #include <parser.h>
 #include <common_utils.h>
@@ -33,7 +32,7 @@ int main(int argc, char* argv[]) {
 
 	WebcamCaptureFactory captureFactory;
 
-	logger->info<std::string>("Starting capture-send");
+	logger->info<std::string>("Starting {0}", argv[0]);
 
 	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
 
@@ -58,7 +57,7 @@ int main(int argc, char* argv[]) {
 			//	}
 			//}
 
-			JobDistributor distributor(args.port, args.width, args.height, args.codec, 1000, 8, { 0, 2, 3, 4 }, { 0, 2, 3, 4 });
+			JobDistributor distributor(args.port, args.width, args.height, args.codec, args.fps, 1000, 8, { 0, 2, 3, 4 }, { 0, 2, 3, 4 });
 			distributor.start();
 			//VideoFrameSender sender(args.port, args.width, args.height, args.codec);
 			//sender.start([&frameQueue]() {

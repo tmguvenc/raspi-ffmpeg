@@ -29,6 +29,7 @@ if (NOT MSVC)
 endif()
 
 include_directories(include/)
+include_directories("../common/include/")
 include_directories(${TBB_INCLUDE})
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${SPDLOG_INCLUDE})

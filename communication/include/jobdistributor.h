@@ -13,6 +13,7 @@
 class Data;
 class MotorMessageHandler;
 class SensorMessageHandler;
+class VideoMessageHandler;
 struct CommunicationTime;
 using Request = std::pair<std::string, MessageType>;
 using Response = std::pair<Request, Data*>;
@@ -23,7 +24,7 @@ using ClientMap = tbb::concurrent_hash_map<std::string, CommunicationTime>;
 class COMMUNICATION_EXPORT JobDistributor
 {
 public:
-	JobDistributor(int port, int width, int height, int codec, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins);
+	JobDistributor(int port, int width, int height, int codec, int fps, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins);
 	~JobDistributor();
 
 	void start();
@@ -44,8 +45,10 @@ private:
 
 	MotorMessageHandler *m_motor_executer;
 	SensorMessageHandler *m_sensor_executer;
+	VideoMessageHandler *m_video_executer;
 	MessageHandler<RequestQueue, ResponseQueue, MotorMessageHandler> m_motor_message_handler;
 	MessageHandler<RequestQueue, ResponseQueue, SensorMessageHandler> m_sensor_message_handler;
+	MessageHandler<RequestQueue, ResponseQueue, VideoMessageHandler> m_video_message_handler;
 
 	int m_port;
 	void* m_context;
