@@ -22,6 +22,7 @@
 #include <hum_temp_sensor.h>
 #include <sensor_data_base.h>
 #include <step_motor_28byj48.h>
+#include <message_handler.h>
 
 struct CommTime
 {
@@ -93,7 +94,6 @@ public:
 		m_tiltMotor = new StepMotor28BYJ48(1000, 8);
 
 		m_panMotor->setup({ 0, 2, 3, 4 });
-		m_panMotor->stop();
 	}
 
 	virtual ~SenderPrivate()
@@ -109,12 +109,10 @@ public:
 		}
 
 		if (m_panMotor) {
-			m_panMotor->stop();
 			delete m_panMotor;
 			m_panMotor = nullptr;
 		}
 		if (m_tiltMotor) {
-			m_tiltMotor->stop();
 			delete m_tiltMotor;
 			m_tiltMotor = nullptr;
 		}
@@ -160,42 +158,6 @@ public:
 
 				return true;
 			},
-			[this](const std::string&) { //InitRequest
-				return true;
-			},
-			[this](const std::string& name) { //MotorUpRequest
-				if (m_tiltMotor) {
-					m_tiltMotor->move(true);
-				}
-				return true;
-			},
-			[this](const std::string& name) { //MotorDownRequest
-				if (m_tiltMotor) {
-					m_tiltMotor->move(false);
-				}
-				return true;
-			},
-			[this](const std::string& name) { //MotorRightRequest
-				if (m_panMotor) {
-					m_panMotor->move(true);
-				}
-				return true;
-			},
-			[this](const std::string& name) { //MotorLeftRequest
-				if (m_panMotor) {
-					m_panMotor->move(false);
-				}
-				return true;
-			},
-			[this](const std::string& name) { //MotorStopRequest
-				if (m_panMotor) {
-					m_panMotor->stop();
-				}
-				if (m_tiltMotor) {
-					m_tiltMotor->stop();
-				}
-				return true;
-			}
 		};
 
 		while (m_run)
