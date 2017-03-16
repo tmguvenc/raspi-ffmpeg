@@ -38,39 +38,8 @@ int main(int argc, char* argv[]) {
 
 	while (true) {
 		try {
-			//tbb::concurrent_bounded_queue<FrameContainer*> frameQueue;
-			//frameQueue.set_capacity(args.balance);
-
-			//auto capture = captureFactory.create(args.url);	
-			//capture->init(&settings);
-
-			//capture->startAsync([&frameQueue](void* ptr) {
-			//	frameQueue.push(static_cast<Frame*>(ptr));
-			//});
-
-			//auto retry = 0;
-			//while (!capture->started()) {
-			//	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			//	if (retry++ == 200){
-			//		logger->error("cannot open video source in {} sec.", 200 * 100 / 1000);
-			//		return -1;
-			//	}
-			//}
-
 			JobDistributor distributor(args.port, args.width, args.height, args.codec, args.fps, 1000, 8, { 0, 2, 3, 4 }, { 0, 2, 3, 4 });
 			distributor.start();
-			//VideoFrameSender sender(args.port, args.width, args.height, args.codec);
-			//sender.start([&frameQueue]() {
-			//	FrameContainer* frame;
-			//	frameQueue.pop(frame);
-			//	assert(frame != nullptr && "frame is null");
-			//	return frame;
-			//});
-
-			//clearQueue(&frameQueue);
-
-			//logger->info<std::string>("Restarting capture-send");
-			//assert(frameQueue.empty() && "frame queue is not empty!");
 		} catch (const std::exception& ex) {
 			logger->error("{}", ex.what());
 			return -1;
