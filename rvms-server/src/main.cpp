@@ -5,13 +5,9 @@
  *      Author: Turan Murat Güvenç
  */
 
-#include <tbb/concurrent_queue.h>
-#include <capture.h>
 #include <spdlog/spdlog.h>
-#include <frame.h>
 #include <jobdistributor.h>
 #include <parser.h>
-#include <common_utils.h>
 #include <rgpio.h>
 
 int main(int argc, char* argv[]) {
@@ -30,11 +26,7 @@ int main(int argc, char* argv[]) {
 
 	GPIO::setup();
 
-	WebcamCaptureFactory captureFactory;
-
 	logger->info<std::string>("Starting {0}", argv[0]);
-
-	CaptureSettings settings(args.width, args.height, 3, args.fps, args.codec);
 
 	while (true) {
 		try {
