@@ -37,7 +37,11 @@ public:
 			{
 				RequestValueType request;
 				m_requestQueue->pop(request);
-				if (request.second == StopQueueMessage) continue;
+
+				if (request.second == StopQueueMessage) {
+					m_run.store(false);
+					break;
+				}
 
 				auto retVal = m_executer->execute(request.second);
 				

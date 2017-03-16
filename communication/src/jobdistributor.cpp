@@ -6,6 +6,7 @@
 #include <sensor_message_handler.h>
 #include <motor_message_handler.h>
 #include <video_message_handler.h>
+#include <iostream>
 
 struct CommunicationTime
 {
@@ -37,7 +38,13 @@ m_socket(nullptr)
 	m_functionMap.resize(MessageCount, nullptr);
 
 	m_functionMap[FrameRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, FrameRequest)); };
-	m_functionMap[StopRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, StopRequest)); };
+	m_functionMap[StopRequest] = [this](const std::string& client)
+	{
+		m_video_request_queue.push(std::make_pair(client, StopQueueMessage));
+		m_sensor_request_queue.push(std::make_pair(client, StopQueueMessage));
+		m_motor_request_queue.push(std::make_pair(client, StopQueueMessage));
+		stop();
+	};
 	m_functionMap[HumTempRequest] = [this](const std::string& client){m_sensor_request_queue.push(std::make_pair(client, HumTempRequest)); };
 	m_functionMap[InitRequest] = [this](const std::string& client){
 		auto message = InitResponse;
@@ -60,6 +67,15 @@ JobDistributor::~JobDistributor()
 	if (m_context)
 		zmq_ctx_destroy(m_context);
 
+	m_sensor_message_handler.stop();
+	std::cout << "Sensor message handler ended" << std::endl;
+
+	m_motor_message_handler.stop();
+	std::cout << "Motor message handler ended" << std::endl;
+
+	m_video_message_handler.stop();
+	std::cout << "Video message handler ended" << std::endl;
+
 	if (m_motor_executer) {
 		delete m_motor_executer;
 		m_motor_executer = nullptr;
@@ -68,6 +84,12 @@ JobDistributor::~JobDistributor()
 		delete m_sensor_executer;
 		m_sensor_executer = nullptr;
 	}
+	if (m_video_executer) {
+		delete m_video_executer;
+		m_video_executer = nullptr;
+	}
+
+	std::cout << "job distributor desructing" << std::endl;
 }
 
 inline MessageType dummy(MessageType in)
@@ -100,24 +122,25 @@ void JobDistributor::start()
 		{
 			Response response;
 			m_response_queue.pop(response);
-			if (!response.second)
-				continue;
+			if (!response.second) break;
 			send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
 			delete response.second;
 		}
+		std::cout << "job distributor thread ending" << std::endl;
 	});
 
 	while (m_run)
 		poll(10);
+
+	std::cout << "job distributor start function ending" << std::endl;
 }
 
 void JobDistributor::stop()
 {
-	m_video_message_handler.stop();
-	m_motor_message_handler.stop();
-	m_sensor_message_handler.stop();
-
 	m_run.store(false);
+	Response response;
+	response.second = nullptr;
+	m_response_queue.push(response);
 }
 
 void JobDistributor::init()
