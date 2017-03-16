@@ -129,6 +129,8 @@ void RaspiClient::decode_loop()
 	{
 		Data* data;
 		m_frame_queue->pop(data);
+		if (!data)
+			break;
 		
 		if (data->type() == 1){
 			auto frame = static_cast<VideoFrame*>(data);
