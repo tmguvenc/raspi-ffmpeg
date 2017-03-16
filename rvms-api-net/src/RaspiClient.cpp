@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <receive_strategy_queue.h>
 #include <video_frame.h>
+#include <sensor_data.h>
 #include <decoder.h>
 
 extern "C"
@@ -115,6 +116,10 @@ void RaspiClient::stop()
 	m_receiver_thread = nullptr;
 }
 
+void RaspiClient::readSensor(){
+	m_connector->readSensor();
+}
+
 void RaspiClient::decode_loop()
 {
 	const auto len = m_destWidth * m_destHeight * 3;
@@ -124,20 +129,33 @@ void RaspiClient::decode_loop()
 	{
 		Data* data;
 		m_frame_queue->pop(data);
-		
-		auto frame = static_cast<VideoFrame*>(data);
-
-		if (!frame || frame->getSize() == 0)
+		if (!data)
 			break;
+		
+		if (data->type() == 1){
+			auto frame = static_cast<VideoFrame*>(data);
 
-		System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-		auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
-		m_bmp->UnlockBits(bmpData);
+			if (!frame || frame->getSize() == 0)
+				break;
 
-		if (decoded)
-			m_graphics->DrawImage(m_bmp, roi);
+			System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
+			auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
+			m_bmp->UnlockBits(bmpData);
 
-		delete frame;
+			if (decoded)
+				m_graphics->DrawImage(m_bmp, roi);
+			delete frame;
+		}
+		else{
+			auto sensorData = static_cast<HumTempSensorData*>(data);
+
+			auto h = sensorData->getHumidity();
+			auto t = sensorData->getTemperature();
+
+			delete sensorData;
+
+			OnSensorDataReceived(h, t);
+		}
 	}
 }
 
@@ -145,5 +163,33 @@ void RaspiClient::receive_loop()
 {
 	if (m_connector) {
 		m_connector->start();
+	}
+}
+
+void RaspiClient::moveRight() 
+{
+	if (m_connector) {
+		m_connector->moveRight();
+	}
+}
+
+void RaspiClient::moveUp()
+{
+	if (m_connector) {
+		m_connector->moveUp();
+	}
+}
+
+void RaspiClient::moveDown()
+{
+	if (m_connector) {
+		m_connector->moveDown();
+	}
+}
+
+void RaspiClient::moveLeft()
+{
+	if (m_connector) {
+		m_connector->moveLeft();
 	}
 }

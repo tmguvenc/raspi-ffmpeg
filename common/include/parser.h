@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <libavcodec/avcodec.h>
+#include <common_macros.h>
 
 struct Arguments
 {
@@ -16,7 +17,7 @@ struct Arguments
 	std::string url;
 };
 
-class ArgumentParser
+class COMMON_EXPORT ArgumentParser
 {
 public:
 	ArgumentParser();

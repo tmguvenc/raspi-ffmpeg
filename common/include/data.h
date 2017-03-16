@@ -2,8 +2,9 @@
 #define DATA_H
 
 #include <memory>
+#include <common_macros.h>
 
-class Data
+class COMMON_EXPORT Data
 {
 public:
 	explicit Data(uint32_t size) : m_size(size)
@@ -19,6 +20,8 @@ public:
 			m_size = 0;
 		}
 	}
+
+	virtual int type() = 0;
 
 	void* getData() const { return m_data; }
 	uint32_t getSize() const { return m_size; }

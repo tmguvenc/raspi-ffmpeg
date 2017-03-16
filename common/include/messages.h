@@ -3,10 +3,21 @@
 
 enum MessageType
 {
-	NextFrameRequest = 0,
+	FrameRequest = 0,
 	StopRequest = 1,
-	Ping = 2,
-	Init = 3
+	HumTempRequest = 2,
+	InitRequest = 3,
+	MotorUpRequest = 4,
+	MotorDownRequest = 5,
+	MotorRightRequest = 6,
+	MotorLeftRequest = 7,
+	Ping = 8,
+	InitResponse = 9,
+	FrameResponse = 10,
+	StopResponse = 11,
+	HumTempResponse = 12,
+	StopQueueMessage = 13,
+	MessageCount = 14
 };
 
 #endif

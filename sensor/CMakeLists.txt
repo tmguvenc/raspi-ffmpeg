@@ -23,9 +23,19 @@ endif()
 
 include_directories(include/)
 include_directories(${SPDLOG_INCLUDE})
+include_directories("../common/include/")
 
 # add library directories
 
+link_directories(${TBB_LIBS})
+link_directories(${FFMPEG_LIBS})
+link_directories(${ZEROMQ_LIBS})
+
 add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H} ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
-target_link_libraries(${PROJECT_NAME} wiringPi)
+target_link_libraries(${PROJECT_NAME} common)
+
+if(NOT MSVC)
+	target_link_libraries(${PROJECT_NAME} wiringPi)
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")

@@ -4,7 +4,10 @@
 #include <common_utils.h>
 #include "messages.h"
 #include "video_frame.h"
+#include "sensor_data.h"
 #include <receive_strategy.h>
+#include <tbb/concurrent_queue.h>
+#include <tbb/tbb_thread.h>
 
 class ConnectorPrivate
 {
@@ -34,24 +37,48 @@ public:
 		destroy();
 	}
 
+	void readSensor(){
+		sendRequest(HumTempRequest);
+	}
+
+	void moveRight() {
+		sendRequest(MotorRightRequest);
+	}
+	void moveUp() {
+		sendRequest(MotorUpRequest);
+	}
+	void moveDown() {
+		sendRequest(MotorDownRequest);
+	}
+	void moveLeft() {
+		sendRequest(MotorLeftRequest);
+	}
+
 	void start() {
 		uint32_t index = 0;
 		m_started = true;
 
 		std::vector<char> buffer(m_size);
-
+		MessageType messageType;
 		while (m_started) {
-			sendRequest(NextFrameRequest);
+			sendRequest(FrameRequest);
 
 			// read empty frame
 			zmq_recv(m_socket, &buffer[0], m_size, 0);
+			zmq_recv(m_socket, &messageType, sizeof(MessageType), 0);
 			// read data
 			auto recBytes = zmq_recv(m_socket, &buffer[0], m_size, 0);
 
-			// if it's a ping message
-			if (recBytes == 4) continue;
-
-			m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+			switch (messageType)
+			{
+			case FrameResponse:
+				m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+				break;
+			case HumTempResponse:
+				m_receive_strategy->handle(new HumTempSensorData(&buffer[0], recBytes));
+				break;
+			default: break;
+			}
 		}
 
 		sendRequest(StopRequest);
@@ -67,6 +94,24 @@ public:
 
 protected:
 	void init() {
+
+		m_thread = std::make_unique<tbb::tbb_thread>([this]()
+		{
+			while (true)
+			{
+				MessageType request;
+				m_request_queue.pop(request);
+
+				// Send empty frame
+				zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+				// Send data frame
+				zmq_send(m_socket, &request, sizeof(MessageType), 0);
+
+				if (request == StopRequest)
+					break;
+			}
+		});
+
 		m_socket = zmq_socket(m_context, ZMQ_DEALER);
 		auto linger = 0;
 		zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
@@ -76,13 +121,19 @@ protected:
 
 		zmq_connect(m_socket, m_url.c_str());
 
-		sendRequest(Init);
+		sendRequest(InitRequest);
 
 		char temp[30] = { 0 };
 
 		// read empty frame
 		auto r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 		assert(r == 0);
+
+		MessageType messageType;
+
+		r = zmq_recv(m_socket, &messageType, sizeof(MessageType), 0);
+		assert(r == sizeof(MessageType));
+
 		r = zmq_recv(m_socket, temp, sizeof(temp), 0);
 
 		auto v = split(std::string(temp, r), ',');
@@ -94,10 +145,7 @@ protected:
 	}
 
 	void sendRequest(MessageType message) {
-		// Send empty frame
-		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-		// Send data frame
-		zmq_send(m_socket, &message, sizeof(MessageType), 0);
+		m_request_queue.push(message);
 	}
 
 	void destroy() {
@@ -120,6 +168,8 @@ private:
 	IReceiveStrategy* m_receive_strategy;
 	bool m_started;
 	int m_size;
+	tbb::concurrent_bounded_queue<MessageType> m_request_queue;
+	std::unique_ptr<tbb::tbb_thread> m_thread;
 };
 
 Connector::Connector(const std::string& url, IReceiveStrategy* strategy) :
@@ -139,6 +189,30 @@ void Connector::start() {
 
 void Connector::stop() {
 	m_ptr->stop();
+}
+
+void Connector::readSensor() {
+	m_ptr->readSensor();
+}
+
+void Connector::moveRight()
+{
+	m_ptr->moveRight();
+}
+
+void Connector::moveUp()
+{
+	m_ptr->moveUp();
+}
+
+void Connector::moveDown()
+{
+	m_ptr->moveDown();
+}
+
+void Connector::moveLeft()
+{
+	m_ptr->moveLeft();
 }
 
 int Connector::getWidth() {

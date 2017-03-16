@@ -25,6 +25,14 @@ namespace Client
 		void start();
 		void stop();
 		static void initialize();
+		void readSensor();
+
+		void moveRight();
+		void moveUp();
+		void moveDown();
+		void moveLeft();
+
+		event System::Action<float, float>^ OnSensorDataReceived;
 
 	protected:
 		std::string ManagedtoNativeString(System::String^ input) {

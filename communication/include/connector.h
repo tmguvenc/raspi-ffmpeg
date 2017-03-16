@@ -15,6 +15,12 @@ public:
 
 	void start();
 	void stop();
+	void readSensor();
+	void moveRight();
+	void moveUp();
+	void moveDown();
+	void moveLeft();
+
 	inline int getWidth();
 	inline int getHeight();
 	inline int getCodec();
