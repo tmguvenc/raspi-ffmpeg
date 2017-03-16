@@ -11,7 +11,7 @@ class COMMON_EXPORT HumTempSensorData : public Data
 {
 public:
 	explicit HumTempSensorData(uint32_t size);
-	HumTempSensorData(void* data, uint32_t size);
+	HumTempSensorData(const void* data, uint32_t size);
 	int type() override;
 	inline float getHumidity() const;
 	inline float getTemperature() const;

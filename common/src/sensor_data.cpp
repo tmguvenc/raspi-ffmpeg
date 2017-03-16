@@ -6,7 +6,7 @@ HumTempSensorData::HumTempSensorData(uint32_t size) : Data(size)
 		"Sensor Data must be derived from Data.");
 }
 
-HumTempSensorData::HumTempSensorData(void* data, uint32_t size): Data(size)
+HumTempSensorData::HumTempSensorData(const void* data, uint32_t size) : Data(size)
 {
 	memcpy(m_data, data, size);
 		
