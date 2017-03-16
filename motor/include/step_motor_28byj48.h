@@ -12,7 +12,6 @@ public:
 	~StepMotor28BYJ48();
 	void setup(const std::vector<int>& pins) override;
 	void move(bool clockwise) override;
-	void stop() override;
 
 protected:
 	void setStep(int pin1, int pin2, int pin3, int pin4);

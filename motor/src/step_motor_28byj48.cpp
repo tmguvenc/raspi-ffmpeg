@@ -26,7 +26,6 @@ m_delayMicroseconds(delayMicroseconds)
 
 StepMotor28BYJ48::~StepMotor28BYJ48()
 {
-
 }
 
 void StepMotor28BYJ48::setup(const std::vector<int>& pins)
@@ -43,10 +42,7 @@ void StepMotor28BYJ48::move(bool clockwise)
 {
 	for (auto i = 0; i < m_step; ++i)
 		m_funcs[clockwise](m_delayMicroseconds);
-}
 
-void StepMotor28BYJ48::stop()
-{
 	setStep(0, 0, 0, 0);
 }
 

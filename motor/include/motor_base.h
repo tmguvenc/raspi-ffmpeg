@@ -10,7 +10,6 @@ public:
 	virtual ~IMotor() { }
 	virtual void setup(const std::vector<int>& pins) = 0;
 	virtual void move(bool clockwise) = 0;
-	virtual void stop() = 0;
 };
 
 #endif
