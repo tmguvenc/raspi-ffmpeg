@@ -11,12 +11,13 @@ enum MessageType
 	MotorDownRequest = 5,
 	MotorRightRequest = 6,
 	MotorLeftRequest = 7,
-	MotorStopRequest = 8,
-	Ping = 9,
-	InitResponse = 10,
-	FrameResponse = 11,
-	StopResponse = 12,
-	HumTempResponse = 13
+	Ping = 8,
+	InitResponse = 9,
+	FrameResponse = 10,
+	StopResponse = 11,
+	HumTempResponse = 12,
+	StopQueueMessage = 13,
+	MessageCount = 14
 };
 
 #endif
