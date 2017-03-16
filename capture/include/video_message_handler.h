@@ -27,7 +27,7 @@ public:
 
 	~VideoMessageHandler()
 	{
-		std::cout << "destroying VideoMessageHandler" << std::endl;
+		m_capture.reset();
 		clearQueue(&m_frameQueue);
 	}
 

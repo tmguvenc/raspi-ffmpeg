@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 		try {
 			JobDistributor distributor(args.port, args.width, args.height, args.codec, args.fps, 1000, 8, { 0, 2, 3, 4 }, { 0, 2, 3, 4 });
 			distributor.start();
+			logger->info<std::string>("Restarting {0}", argv[0]);
 		} catch (const std::exception& ex) {
 			logger->error("{}", ex.what());
 			return -1;
