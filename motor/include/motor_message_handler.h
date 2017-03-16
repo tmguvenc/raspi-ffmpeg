@@ -6,11 +6,10 @@
 #include <memory>
 #include <messages.h>
 
-template<>
-class Handler<void, MessageType>
+class MotorMessageHandler
 {
 public:
-	Handler(int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins)
+	MotorMessageHandler(int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins)
 	{
 		m_panMotor = std::make_unique<StepMotor28BYJ48>(delayMicroseconds, step);
 		m_panMotor->setup(std::move(panPins));
@@ -25,7 +24,7 @@ public:
 		m_functionMap[MotorDownRequest] = [this](){m_tiltMotor->move(false); };
 	}
 
-	std::unique_ptr<void> execute(const MessageType& message)
+	Data* execute(const MessageType& message)
 	{
 		assert(m_functionMap[message] != nullptr && "Invalid motor function request");
 		m_functionMap[message]();
@@ -39,7 +38,5 @@ private:
 
 	std::vector<Function> m_functionMap;
 };
-
-using MotorMessageHandler = Handler<void, MessageType>;
 
 #endif

@@ -4,13 +4,7 @@
 #include <tbb/tbb_thread.h>
 #include <memory>
 #include <atomic>
-
-template<typename TData, typename TMessage>
-class Handler
-{
-public:
-	std::unique_ptr<TData> execute(const TMessage&) { return nullptr; }
-};
+#include <messages.h>
 
 template<typename RequestQueue, typename ResponseQueue, typename Executer>
 class MessageHandler
@@ -36,27 +30,34 @@ public:
 
 	void start()
 	{
-		m_thread = std::make_unique<tbb::tbb_thread>([]()
+		m_thread = std::make_unique<tbb::tbb_thread>([this]()
 		{
 			m_run.store(true);
 			while (m_run)
 			{
 				RequestValueType request;
 				m_requestQueue->pop(request);
-				auto retVal = m_executer->execute(request);
-				
-				static_assert(std::is_same<decltype(retVal), ResponseValueType>::value, "retval must be ResponseValueType");
+				if (request.second == StopQueueMessage) continue;
 
+				auto retVal = m_executer->execute(request.second);
+				
 				if (m_resposeQueue != nullptr)
-					m_resposeQueue->push(retVal);
+					m_resposeQueue->push(std::make_pair(request, retVal));
 			}
 		});
 	}
 
 	void stop()
 	{
-		m_run.store(false);
+		if (m_run)
+		{
+			m_run.store(false);
+			RequestValueType request;
+			request.second = StopQueueMessage;
+			m_requestQueue->push(request);
+		}
 	}
+
 private:
 	std::atomic<bool> m_run;
 	std::unique_ptr<tbb::tbb_thread> m_thread;
