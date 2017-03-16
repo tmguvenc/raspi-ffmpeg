@@ -6,6 +6,8 @@
 #include "video_frame.h"
 #include "sensor_data.h"
 #include <receive_strategy.h>
+#include <tbb/concurrent_queue.h>
+#include <tbb/tbb_thread.h>
 
 class ConnectorPrivate
 {
@@ -52,7 +54,7 @@ public:
 		sendRequest(MotorLeftRequest);
 	}
 	void motorStop() {
-		sendRequest(MotorStopRequest);
+		//sendRequest(MotorStopRequest);
 	}
 
 	void start() {
@@ -72,17 +74,13 @@ public:
 
 			switch (messageType)
 			{
-			case Ping:
-				break;
 			case FrameResponse:
 				m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
-				break;
-			case StopResponse:
-				// do nothing
 				break;
 			case HumTempResponse:
 				m_receive_strategy->handle(new HumTempSensorData(&buffer[0], recBytes));
 				break;
+			default: break;
 			}
 		}
 
@@ -99,6 +97,24 @@ public:
 
 protected:
 	void init() {
+
+		m_thread = std::make_unique<tbb::tbb_thread>([this]()
+		{
+			while (true)
+			{
+				MessageType request;
+				m_request_queue.pop(request);
+
+				// Send empty frame
+				zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
+				// Send data frame
+				zmq_send(m_socket, &request, sizeof(MessageType), 0);
+
+				if (request == StopRequest)
+					break;
+			}
+		});
+
 		m_socket = zmq_socket(m_context, ZMQ_DEALER);
 		auto linger = 0;
 		zmq_setsockopt(m_socket, ZMQ_LINGER, &linger, sizeof(linger)); // close cagirildiktan sonra beklemeden socket'i kapat.
@@ -132,10 +148,7 @@ protected:
 	}
 
 	void sendRequest(MessageType message) {
-		// Send empty frame
-		zmq_send(m_socket, nullptr, 0, ZMQ_SNDMORE);
-		// Send data frame
-		zmq_send(m_socket, &message, sizeof(MessageType), 0);
+		m_request_queue.push(message);
 	}
 
 	void destroy() {
@@ -158,6 +171,8 @@ private:
 	IReceiveStrategy* m_receive_strategy;
 	bool m_started;
 	int m_size;
+	tbb::concurrent_bounded_queue<MessageType> m_request_queue;
+	std::unique_ptr<tbb::tbb_thread> m_thread;
 };
 
 Connector::Connector(const std::string& url, IReceiveStrategy* strategy) :
