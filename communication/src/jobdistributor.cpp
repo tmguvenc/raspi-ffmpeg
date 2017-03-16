@@ -70,6 +70,20 @@ JobDistributor::~JobDistributor()
 	}
 }
 
+inline MessageType dummy(MessageType in)
+{
+	static std::vector<MessageType> cache = {
+		FrameResponse,
+		StopResponse,
+		HumTempResponse,
+		InitResponse
+	};
+
+	assert(in >= FrameRequest && in <= InitRequest);
+
+	return cache[in];
+}
+
 void JobDistributor::start()
 {
 	init();
@@ -87,7 +101,7 @@ void JobDistributor::start()
 			Response response;
 			m_response_queue.pop(response);
 			assert(response.second && "data is null");
-			send(response.first.first, response.first.second, response.second->getData(), response.second->getSize());
+			send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
 			delete response.second;
 		}
 	});
