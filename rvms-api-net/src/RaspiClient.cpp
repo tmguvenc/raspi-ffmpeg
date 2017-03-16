@@ -193,10 +193,3 @@ void RaspiClient::moveLeft()
 		m_connector->moveLeft();
 	}
 }
-
-void RaspiClient::motorStop()
-{
-	if (m_connector) {
-		m_connector->motorStop();
-	}
-}

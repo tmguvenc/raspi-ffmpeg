@@ -66,11 +66,6 @@ namespace raspi_client_test
             Stop();
         }
 
-        private void btn_up_MouseUp(object sender, MouseEventArgs e)
-        {
-            _client.motorStop();
-        }
-
         private void btn_up_MouseClick(object sender, MouseEventArgs e)
         {
             _client.moveUp();

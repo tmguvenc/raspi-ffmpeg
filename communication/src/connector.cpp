@@ -53,9 +53,6 @@ public:
 	void moveLeft() {
 		sendRequest(MotorLeftRequest);
 	}
-	void motorStop() {
-		//sendRequest(MotorStopRequest);
-	}
 
 	void start() {
 		uint32_t index = 0;
@@ -216,11 +213,6 @@ void Connector::moveDown()
 void Connector::moveLeft()
 {
 	m_ptr->moveLeft();
-}
-
-void Connector::motorStop()
-{
-	m_ptr->motorStop();
 }
 
 int Connector::getWidth() {

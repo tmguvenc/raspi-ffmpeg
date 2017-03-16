@@ -20,7 +20,6 @@ public:
 	void moveUp();
 	void moveDown();
 	void moveLeft();
-	void motorStop();
 
 	inline int getWidth();
 	inline int getHeight();

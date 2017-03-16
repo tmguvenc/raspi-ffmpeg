@@ -113,7 +113,6 @@
             this.btn_up.Text = "Up";
             this.btn_up.UseVisualStyleBackColor = true;
             this.btn_up.MouseClick += new System.Windows.Forms.MouseEventHandler(this.btn_up_MouseClick);
-            this.btn_up.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btn_up_MouseUp);
             // 
             // btl_left
             // 
@@ -124,7 +123,6 @@
             this.btl_left.Text = "Left";
             this.btl_left.UseVisualStyleBackColor = true;
             this.btl_left.Click += new System.EventHandler(this.btl_left_Click);
-            this.btl_left.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btn_up_MouseUp);
             // 
             // btn_right
             // 
@@ -135,7 +133,6 @@
             this.btn_right.Text = "Right";
             this.btn_right.UseVisualStyleBackColor = true;
             this.btn_right.MouseClick += new System.Windows.Forms.MouseEventHandler(this.btn_right_MouseClick);
-            this.btn_right.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btn_up_MouseUp);
             // 
             // btn_down
             // 
@@ -146,7 +143,6 @@
             this.btn_down.Text = "Down";
             this.btn_down.UseVisualStyleBackColor = true;
             this.btn_down.Click += new System.EventHandler(this.btn_down_Click);
-            this.btn_down.MouseUp += new System.Windows.Forms.MouseEventHandler(this.btn_up_MouseUp);
             // 
             // Form1
             // 

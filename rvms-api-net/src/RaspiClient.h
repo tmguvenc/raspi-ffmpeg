@@ -31,7 +31,6 @@ namespace Client
 		void moveUp();
 		void moveDown();
 		void moveLeft();
-		void motorStop();
 
 		event System::Action<float, float>^ OnSensorDataReceived;
 
