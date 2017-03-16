@@ -100,7 +100,11 @@ void JobDistributor::start()
 		{
 			Response response;
 			m_response_queue.pop(response);
-			assert(response.second && "data is null");
+			if (!response.second)
+			{
+				m_run.store(false);
+				break;
+			}
 			send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
 			delete response.second;
 		}
@@ -109,6 +113,7 @@ void JobDistributor::start()
 	while (m_run)
 		poll(10);
 
+	m_video_message_handler.stop();
 	m_motor_message_handler.stop();
 	m_sensor_message_handler.stop();
 }
