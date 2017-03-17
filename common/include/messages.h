@@ -1,7 +1,7 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
-enum MessageType
+enum MessageType : unsigned char
 {
 	FrameRequest = 0,
 	StopRequest = 1,

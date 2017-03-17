@@ -1,27 +1,75 @@
 #include <parser.h>
 #include <common_utils.h>
 #include <limits>
+#include <vector>
+#include <libavcodec/avcodec.h>
 
 #undef max
+#undef min
 
-ArgumentParser::ArgumentParser() 
+#define STRINGIFY(aa) #aa
+
+template<typename T>
+inline T toNumber(const char* str, T lowerBound = std::numeric_limits<T>::min(), T upperBound = std::numeric_limits<T>::max()) {
+	T number;
+	if (is_number(str))
+		number = static_cast<T>(atoi(str));
+	else
+		throw std::invalid_argument(string_format("invalid argument: %s", str));
+
+	if (number < lowerBound || number > upperBound)
+		throw std::out_of_range(string_format("Number is out of range"));
+
+	return number;
+}
+
+inline int getCodec(const char* codec_name) {
+	if (codec_name == "mjpeg")
+		return  AV_CODEC_ID_MJPEG;
+	if (codec_name == "h264")
+		return AV_CODEC_ID_H264;
+	if (codec_name == "raw")
+		return AV_CODEC_ID_RAWVIDEO;
+
+	throw std::invalid_argument(string_format("invalid codec: %s", codec_name));
+}
+
+template<typename T>
+inline std::vector<T> getPins(const char* str) {
+	std::vector<T> pins;
+	auto pins_str = split(str, ',');
+
+	try {
+		for (const auto pin : pins_str)
+			pins.push_back(toNumber<T>(pin.c_str()));
+	} catch (const std::invalid_argument& ex) { throw ex; }
+
+	return pins;
+}
+
+ArgumentParser::ArgumentParser()
 {
 	// set initial values of the map
-	m_options["-p"] = "5555";
-	m_options["-b"] = "20";
-	m_options["-u"] = "/dev/video0";
-	m_options["-r"] = "640x480";
-	m_options["-c"] = "mjpeg";
-	m_options["-f"] = "15";
+	m_options["-port"] = "5555";
+	m_options["-vsize"] = "20";
+	m_options["-asize"] = "20";
+	m_options["-vurl"] = "/dev/video0";
+	m_options["-aurl"] = "/dev/video0";
+	m_options["-res"] = "640x480";
+	m_options["-codec"] = "mjpeg";
+	m_options["-fps"] = "15";
+	m_options["-ppins"] = "0,2,3,4";
+	m_options["-tpins"] = "0,2,3,4";
+	m_options["-spin"] = "7";
 }
 
 ArgumentParser::~ArgumentParser()
 {
 }
 
-Arguments ArgumentParser::parse(int argc, char* argv[])
+ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 {
-	Arguments args;
+	ApplicationParams args;
 
 	for (auto i = 1; i < argc; ++i)
 	{
@@ -29,75 +77,63 @@ Arguments ArgumentParser::parse(int argc, char* argv[])
 		if (op != m_options.end())
 			op->second = argv[i + 1];
 		else{
-			if(std::string(argv[i]).find("-") != std::string::npos){
+			if (std::string(argv[i]).find("-") != std::string::npos){
 				throw std::invalid_argument(string_format("invalid option: %s", argv[i]));
 			}
 		}
 	}
 
-	// get frame queue capacity
-	if (is_number(m_options["-b"])) {
-		args.balance = atoi(m_options["-b"].c_str());
-	}
-	else {
-		throw std::invalid_argument(string_format("invalid queue size: %s", m_options["-b"].c_str()));
+	// get video frame buffer size
+	args.max_videoframe_queue_size = toNumber<uint16_t>(m_options["-vsize"].c_str());
+
+	// get audio frame buffer size
+	args.max_audioframe_queue_size = toNumber<uint16_t>(m_options["-asize"].c_str());
+
+	// get port to listen
+	args.port = toNumber<uint16_t>(m_options["-port"].c_str(), 1025, 65536);
+
+	// get FPS
+	args.fps = toNumber<uint8_t>(m_options["-fps"].c_str(), 1, 40);
+
+	// get video source URL
+	args.video_source_url = m_options["-vurl"];
+	if (args.video_source_url.empty() || args.video_source_url == " " || args.video_source_url == "") {
+		throw std::invalid_argument(string_format("invalid video source URL: %s", args.video_source_url));
 	}
 
-	// get port number
-	if (is_number(m_options["-p"])) {		
-		args.port = atoi(m_options["-p"].c_str());
-		if (args.port < 1025 || args.port > std::numeric_limits<uint16_t>::max()) {
-			throw std::invalid_argument(string_format("invalid port number (must be between 1025 and 65536): %s", m_options["-p"].c_str()));
-		}
-	}
-	else {
-		throw std::invalid_argument(string_format("invalid port number: %s", m_options["-p"].c_str()));
-	}
-
-	// get source URL
-	args.url = m_options["-u"];
-
-	if (args.url.empty() || args.url == " " || args.url == "") {
-		throw std::invalid_argument(string_format("invalid source URL: %s", m_options["-u"].c_str()));
+	// get audio source URL
+	args.audio_source_url = m_options["-aurl"];
+	if (args.audio_source_url.empty() || args.audio_source_url == " " || args.audio_source_url == "") {
+		throw std::invalid_argument(string_format("invalid audio source URL: %s", args.audio_source_url));
 	}
 
 	// get resolution
 	auto wh = getWidthAndHeight();
-
 	if (wh.first == -1 || wh.second == -1) {
-		throw std::invalid_argument(string_format("invalid resolution: %s", m_options["-r"].c_str()));
+		throw std::invalid_argument(string_format("invalid resolution: %s", m_options["-res"].c_str()));
 	}
 
 	args.width = wh.first;
 	args.height = wh.second;
 
 	// get codec
-	auto codec_name = m_options["-c"];
-	if (codec_name == "mjpeg")
-		args.codec = AV_CODEC_ID_MJPEG;
-	else if (codec_name == "h264")
-		args.codec = AV_CODEC_ID_H264;
-	else if (codec_name == "raw")
-		args.codec = AV_CODEC_ID_RAWVIDEO;
-	else
-		throw std::invalid_argument(string_format("invalid codec: %s", m_options["-c"].c_str()));
+	args.codec = getCodec(m_options["-c"].c_str());
 
-	// get FPS
-	if (is_number(m_options["-f"])) {
-		args.fps = atoi(m_options["-f"].c_str());
-		if (args.fps < 1 || args.fps > 40) {
-			throw std::invalid_argument(string_format("invalid fps (must be between 1 and 40): %s", m_options["-f"].c_str()));
-		}
-	} else {
-		throw std::invalid_argument(string_format("invalid fps: %s", m_options["-f"].c_str()));
-	}
+	// get pan motor connection pins
+	args.panMotorPins = std::move(getPins<uint8_t>(m_options["-ppins"].c_str()));
+
+	// get tilt motor connection pins
+	args.tiltMotorPins = std::move(getPins<uint8_t>(m_options["-tpins"].c_str()));
+
+	// get humidity and temperature sensor pin
+	args.sensorPin = toNumber<uint8_t>(m_options["-spin"].c_str());
 
 	return args;
 }
 
 std::pair<uint32_t, uint32_t> ArgumentParser::getWidthAndHeight()
 {
-	auto res = split(m_options["-r"], 'x');	
+	auto res = split(m_options["-res"], 'x');
 	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1]))
 		return std::make_pair(-1, -1);
 
