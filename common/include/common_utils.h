@@ -16,6 +16,22 @@
 #define HEARTHBEAT_INTERVAL_IN_SECONDS 5 
 #define TIMEOUT_INTERVAL_IN_SECONDS (3 * HEARTHBEAT_INTERVAL_IN_SECONDS)
 #define TIMEOUT_CHECK_INTERVAL_IN_SECONDS 2
+#include <functional>
+#include <algorithm>
+
+inline std::string &ltrim(std::string &s){
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
+
+inline std::string &rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+inline std::string &trim(std::string &s) {
+	return ltrim(rtrim(s));
+}
 
 inline std::string string_format(const char *fmt, ...)
 {
@@ -60,7 +76,7 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
 	std::string item;
 	std::vector<std::string> tokens;
 	while (std::getline(ss, item, delim)) {
-		tokens.push_back(item);
+		tokens.push_back(trim(item));
 	}
 	return tokens;
 }
