@@ -65,6 +65,8 @@ ArgumentParser::ArgumentParser()
 	m_options["-ppins"] = "0,2,3,4";
 	m_options["-tpins"] = "0,2,3,4";
 	m_options["-spin"] = "7";
+	m_options["-delay"] = "1000";
+	m_options["-spin"] = "8";
 }
 
 ArgumentParser::~ArgumentParser()
@@ -168,6 +170,12 @@ ApplicationParams ArgumentParser::getArgs()
 
 	// get humidity and temperature sensor pin
 	args.sensorPin = toNumber<uint8_t>(m_options["-spin"].c_str());
+
+	// get motor step delay
+	args.delayMicroseconds = toNumber<uint32_t>(m_options["-delay"].c_str());
+	
+	// get motor step count
+	args.step = toNumber<uint32_t>(m_options["-step"].c_str());
 
 	return args;
 }

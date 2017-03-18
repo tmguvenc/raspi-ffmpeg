@@ -12,6 +12,8 @@ struct ApplicationParams
 	uint32_t width;
 	uint32_t height;
 	uint32_t codec;
+	uint32_t delayMicroseconds;
+	uint32_t step;
 	uint16_t max_videoframe_queue_size;
 	uint16_t max_audioframe_queue_size;
 	uint8_t sensorPin;
