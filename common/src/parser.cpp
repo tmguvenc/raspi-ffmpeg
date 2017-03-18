@@ -60,7 +60,7 @@ ArgumentParser::ArgumentParser()
 	m_options["-vurl"] = "/dev/video0";
 	m_options["-aurl"] = "/dev/video0";
 	m_options["-res"] = "640x480";
-	m_options["-codec"] = "mjpeg";
+	m_options["-codec"] = "h264";
 	m_options["-fps"] = "15";
 	m_options["-ppins"] = "0,2,3,4";
 	m_options["-tpins"] = "0,2,3,4";
@@ -102,7 +102,12 @@ ApplicationParams ArgumentParser::parse(const std::string& fileName)
 	std::string line;
 	while (std::getline(in, line)){
 		const auto& kv = split(line, '=');
-		m_options[kv[0]] = kv[1];
+
+		auto it = m_options.find(kv[0]);
+		if (it != m_options.end())
+			it->second = kv[1];
+		else
+			throw std::invalid_argument(string_format("Invalid option: %s", kv[0].c_str()));
 	}
 
 	in.close();
