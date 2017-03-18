@@ -8,24 +8,24 @@
 class MOTOR_EXPORT StepMotor28BYJ48 : public IMotor
 {
 public:
-	explicit StepMotor28BYJ48(int delayMicroseconds, int step);
+	explicit StepMotor28BYJ48(uint32_t delayMicroseconds, uint32_t step);
 	~StepMotor28BYJ48();
-	void setup(const std::vector<int>& pins) override;
+	void setup(const std::vector<uint8_t>& pins) override;
 	void move(bool clockwise) override;
 
 protected:
-	void setStep(int pin1, int pin2, int pin3, int pin4);
-	void clockwiseSingleStep(int ms);
-	void counterClockwiseSingleStep(int ms);
+	void setStep(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4);
+	void clockwiseSingleStep(uint32_t ms);
+	void counterClockwiseSingleStep(uint32_t ms);
 
 private:
-	std::vector<std::vector<int>> m_array;
+	std::vector<std::vector<uint8_t>> m_array;
 	int m_pins[4];
 	std::atomic<bool> m_move;
 
-	std::vector<std::function<void(int)>> m_funcs;
-	int m_step;
-	int m_delayMicroseconds;
+	std::vector<std::function<void(uint32_t)>> m_funcs;
+	uint32_t m_step;
+	uint32_t m_delayMicroseconds;
 };
 
 #endif

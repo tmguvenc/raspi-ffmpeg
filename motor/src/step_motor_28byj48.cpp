@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "rgpio.h"
 
-StepMotor28BYJ48::StepMotor28BYJ48(int delayMicroseconds, int step) :
+StepMotor28BYJ48::StepMotor28BYJ48(uint32_t delayMicroseconds, uint32_t step) :
 m_step(step),
 m_delayMicroseconds(delayMicroseconds)
 {
@@ -19,8 +19,8 @@ m_delayMicroseconds(delayMicroseconds)
 	};
 
 	m_funcs = {
-		[this](int ms){this->counterClockwiseSingleStep(ms); },
-		[this](int ms){this->clockwiseSingleStep(ms); }
+		[this](uint32_t ms){this->counterClockwiseSingleStep(ms); },
+		[this](uint32_t ms){this->clockwiseSingleStep(ms); }
 	};
 }
 
@@ -28,7 +28,7 @@ StepMotor28BYJ48::~StepMotor28BYJ48()
 {
 }
 
-void StepMotor28BYJ48::setup(const std::vector<int>& pins)
+void StepMotor28BYJ48::setup(const std::vector<uint8_t>& pins)
 {
 	if (pins.size() != 4)
 		throw std::invalid_argument("Invalid Pin Count");
@@ -40,13 +40,13 @@ void StepMotor28BYJ48::setup(const std::vector<int>& pins)
 
 void StepMotor28BYJ48::move(bool clockwise)
 {
-	for (auto i = 0; i < m_step; ++i)
+	for (uint32_t i = 0; i < m_step; ++i)
 		m_funcs[clockwise](m_delayMicroseconds);
 
 	setStep(0, 0, 0, 0);
 }
 
-void StepMotor28BYJ48::setStep(int pin1, int pin2, int pin3, int pin4)
+void StepMotor28BYJ48::setStep(uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4)
 {
 	GPIO::write(m_pins[0], pin1);
 	GPIO::write(m_pins[1], pin2);
@@ -55,14 +55,14 @@ void StepMotor28BYJ48::setStep(int pin1, int pin2, int pin3, int pin4)
 }
 
 // 0.703125 degree step
-void StepMotor28BYJ48::clockwiseSingleStep(int ms) {
+void StepMotor28BYJ48::clockwiseSingleStep(uint32_t ms) {
 	for (auto i = 0; i < 8; ++i){
 		setStep(m_array[i][0], m_array[i][1], m_array[i][2], m_array[i][3]);
 		GPIO::sleepMicroSeconds(ms);
 	}
 }
 
-void StepMotor28BYJ48::counterClockwiseSingleStep(int ms)
+void StepMotor28BYJ48::counterClockwiseSingleStep(uint32_t ms)
 {
 	for (auto i = 7; i >= 0; --i){
 		setStep(m_array[i][0], m_array[i][1], m_array[i][2], m_array[i][3]);

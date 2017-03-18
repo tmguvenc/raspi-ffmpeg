@@ -9,7 +9,7 @@
 class MotorMessageHandler
 {
 public:
-	MotorMessageHandler(int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins)
+	MotorMessageHandler(uint32_t delayMicroseconds, uint32_t step, const std::vector<uint8_t>& panPins, const std::vector<uint8_t>& tiltPins)
 	{
 		m_panMotor = std::make_unique<StepMotor28BYJ48>(delayMicroseconds, step);
 		m_panMotor->setup(std::move(panPins));
