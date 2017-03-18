@@ -4,6 +4,7 @@
 #include <vector>
 #include <libavcodec/avcodec.h>
 #include <iostream>
+#include <fstream>
 
 #undef max
 #undef min
@@ -72,8 +73,6 @@ ArgumentParser::~ArgumentParser()
 
 ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 {
-	ApplicationParams args;
-
 	for (auto i = 1; i < argc; ++i)
 	{
 		auto op = m_options.find(argv[i]);
@@ -85,6 +84,45 @@ ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 			}
 		}
 	}
+	try{
+		return getArgs();
+	}
+	catch (const std::invalid_argument& ex) { throw ex; }
+}
+
+ApplicationParams ArgumentParser::parse(const std::string& fileName)
+{
+	std::ifstream in(fileName.c_str(), std::ios::binary);
+	if (!in.is_open()) {
+		throw std::invalid_argument(string_format("Cannot open: %s", fileName.c_str()));
+	}
+
+	std::string line;
+	while (std::getline(in, line)){
+		const auto& kv = split(line, '=');
+		m_options[kv[0]] = kv[1];
+	}
+
+	in.close();
+
+	try{
+		return getArgs();
+	}
+	catch (const std::invalid_argument& ex) { throw ex; }
+}
+
+std::pair<uint32_t, uint32_t> ArgumentParser::getWidthAndHeight()
+{
+	auto res = split(m_options["-res"], 'x');
+	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1]))
+		return std::make_pair(-1, -1);
+
+	return std::make_pair(atoi(res[0].c_str()), atoi(res[1].c_str()));
+}
+
+ApplicationParams ArgumentParser::getArgs()
+{
+	ApplicationParams args;
 
 	// get video frame buffer size
 	args.max_videoframe_queue_size = toNumber<uint16_t>(m_options["-vsize"].c_str());
@@ -132,13 +170,4 @@ ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 	args.sensorPin = toNumber<uint8_t>(m_options["-spin"].c_str());
 
 	return args;
-}
-
-std::pair<uint32_t, uint32_t> ArgumentParser::getWidthAndHeight()
-{
-	auto res = split(m_options["-res"], 'x');
-	if (res.size() != 2 || !is_number(res[0]) || !is_number(res[1]))
-		return std::make_pair(-1, -1);
-
-	return std::make_pair(atoi(res[0].c_str()), atoi(res[1].c_str()));
 }

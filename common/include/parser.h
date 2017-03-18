@@ -12,9 +12,11 @@ public:
 	virtual ~ArgumentParser();
 
 	ApplicationParams parse(int argc, char* argv[]);
+	ApplicationParams parse(const std::string& fileName);
 
 protected:
 	std::pair<uint32_t, uint32_t> getWidthAndHeight();
+	ApplicationParams getArgs();
 
 private:
 	std::unordered_map<std::string, std::string> m_options;

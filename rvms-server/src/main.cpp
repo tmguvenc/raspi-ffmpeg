@@ -15,10 +15,13 @@ int main(int argc, char* argv[]) {
 	auto logger = spdlog::stdout_color_mt("mainsender");
 	ApplicationParams args;
 
-	ArgumentParser parser;
+	if (argc != 2) {
+		logger->error("usage: {} configFileName", argv[0]);
+		return -1;
+	}
 
 	try {
-		args = parser.parse(argc, argv);
+		args = ArgumentParser().parse(argv[1]);
 	} catch (const std::exception& exception) {
 		logger->error("{}", exception.what());
 		return -1;
