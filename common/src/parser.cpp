@@ -66,7 +66,7 @@ ArgumentParser::ArgumentParser()
 	m_options["-tpins"] = "0,2,3,4";
 	m_options["-spin"] = "7";
 	m_options["-delay"] = "1000";
-	m_options["-spin"] = "8";
+	m_options["-step"] = "8";
 }
 
 ArgumentParser::~ArgumentParser()
