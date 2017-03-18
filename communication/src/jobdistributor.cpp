@@ -18,7 +18,7 @@ struct CommunicationTime
 JobDistributor::JobDistributor(const ApplicationParams& params) : 
 m_motor_executer(new MotorMessageHandler(params.delayMicroseconds, params.step, params.panMotorPins, std::move(params.tiltMotorPins))),
 m_sensor_executer(new SensorMessageHandler),
-m_video_executer(new VideoMessageHandler(params.video_source_url, params.width, params.height, params.codec, params.fps)),
+m_video_executer(new VideoMessageHandler(params.video_source_url, params.width, params.height, params.codec, params.fps, params.max_videoframe_queue_size)),
 m_motor_message_handler(&m_motor_request_queue, nullptr, m_motor_executer),
 m_sensor_message_handler(&m_sensor_request_queue, &m_response_queue, m_sensor_executer),
 m_video_message_handler(&m_video_request_queue, &m_response_queue, m_video_executer),

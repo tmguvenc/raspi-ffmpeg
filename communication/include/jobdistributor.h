@@ -25,7 +25,7 @@ using ClientMap = tbb::concurrent_hash_map<std::string, CommunicationTime>;
 class COMMUNICATION_EXPORT JobDistributor
 {
 public:
-	JobDistributor(const ApplicationParams& params);
+	explicit JobDistributor(const ApplicationParams& params);
 	~JobDistributor();
 
 	void start();

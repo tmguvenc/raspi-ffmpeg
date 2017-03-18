@@ -15,9 +15,10 @@
 class VideoMessageHandler
 {
 public:
-	explicit VideoMessageHandler(const std::string& url, int width, int height, int codec, int fps) :
+	explicit VideoMessageHandler(const std::string& url, uint32_t width, uint32_t height, uint32_t codec, uint32_t fps, uint32_t queueCapacity) :
 		m_settings(width, height, 3, fps, static_cast<AVCodecID>(codec))
 	{
+		m_frameQueue.set_capacity(queueCapacity);
 		m_capture = m_captureFactory.create(url);
 		m_capture->init(&m_settings);
 		m_capture->startAsync([this](void* ptr) {
