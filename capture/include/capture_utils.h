@@ -75,12 +75,15 @@ static inline void free_codec_context(AVCodecContext* context)
 #endif
 }
 
-static inline AVInputFormat* find_input_format()
+static inline AVInputFormat* find_input_format(bool video = true)
 {
 #if defined(_WIN32) && defined(_MSC_VER)
 	return av_find_input_format("dshow");
 #else
-	return av_find_input_format("video4linux2");
+	if(video)
+		return av_find_input_format("video4linux2");
+	else
+		return av_find_input_format("alsa");
 #endif
 }
 

@@ -6,6 +6,7 @@
 #include <sensor_message_handler.h>
 #include <motor_message_handler.h>
 #include <video_message_handler.h>
+#include <audio_message_handler.h>
 #include <iostream>
 #include <application_params.h>
 
@@ -19,9 +20,11 @@ JobDistributor::JobDistributor(const ApplicationParams& params) :
 m_motor_executer(new MotorMessageHandler(params.delayMicroseconds, params.step, params.panMotorPins, std::move(params.tiltMotorPins))),
 m_sensor_executer(new SensorMessageHandler),
 m_video_executer(new VideoMessageHandler(params.video_source_url, params.width, params.height, params.codec, params.fps, params.max_videoframe_queue_size)),
+m_audio_executer(new AudioMessageHandler(params.audio_source_url, params.max_audioframe_queue_size)),
 m_motor_message_handler(&m_motor_request_queue, nullptr, m_motor_executer),
 m_sensor_message_handler(&m_sensor_request_queue, &m_response_queue, m_sensor_executer),
 m_video_message_handler(&m_video_request_queue, &m_response_queue, m_video_executer),
+m_audio_message_handler(&m_audio_request_queue, &m_response_queue, m_audio_executer),
 m_port(params.port),
 m_context(nullptr),
 m_socket(nullptr)
@@ -38,12 +41,14 @@ m_socket(nullptr)
 
 	m_functionMap.resize(MessageCount, nullptr);
 
-	m_functionMap[FrameRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, FrameRequest)); };
+	m_functionMap[VideoFrameRequest] = [this](const std::string& client){m_video_request_queue.push(std::make_pair(client, VideoFrameRequest)); };
+	m_functionMap[AudioFrameRequest] = [this](const std::string& client){m_audio_request_queue.push(std::make_pair(client, AudioFrameRequest)); };
 	m_functionMap[StopRequest] = [this](const std::string& client)
 	{
 		m_video_request_queue.push(std::make_pair(client, StopQueueMessage));
 		m_sensor_request_queue.push(std::make_pair(client, StopQueueMessage));
 		m_motor_request_queue.push(std::make_pair(client, StopQueueMessage));
+		m_audio_request_queue.push(std::make_pair(client, StopQueueMessage));
 		stop();
 	};
 	m_functionMap[HumTempRequest] = [this](const std::string& client){m_sensor_request_queue.push(std::make_pair(client, HumTempRequest)); };
@@ -71,6 +76,7 @@ JobDistributor::~JobDistributor()
 	m_sensor_message_handler.stop();
 	m_motor_message_handler.stop();
 	m_video_message_handler.stop();
+	m_audio_message_handler.stop();
 
 	if (m_motor_executer) {
 		delete m_motor_executer;
@@ -84,18 +90,23 @@ JobDistributor::~JobDistributor()
 		delete m_video_executer;
 		m_video_executer = nullptr;
 	}
+	if (m_audio_executer) {
+		delete m_audio_executer;
+		m_audio_executer = nullptr;
+	}
 }
 
 inline MessageType dummy(MessageType in)
 {
 	static std::vector<MessageType> cache = {
-		FrameResponse,
+		VideoFrameResponse,
+		AudioFrameResponse,
 		StopResponse,
 		HumTempResponse,
 		InitResponse
 	};
 
-	assert(in >= FrameRequest && in <= InitRequest);
+	assert(in >= VideoFrameRequest && in <= InitRequest);
 
 	return cache[in];
 }
@@ -107,6 +118,7 @@ void JobDistributor::start()
 	m_sensor_message_handler.start();
 	m_motor_message_handler.start();
 	m_video_message_handler.start();
+	m_audio_message_handler.start();
 
 	m_run.store(true);
 

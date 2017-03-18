@@ -8,6 +8,7 @@
 #include <receive_strategy.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/tbb_thread.h>
+#include <audio_data.h>
 
 class ConnectorPrivate
 {
@@ -61,7 +62,8 @@ public:
 		std::vector<char> buffer(m_size);
 		MessageType messageType;
 		while (m_started) {
-			sendRequest(FrameRequest);
+			sendRequest(VideoFrameRequest);
+			sendRequest(AudioFrameRequest);
 
 			// read empty frame
 			zmq_recv(m_socket, &buffer[0], m_size, 0);
@@ -71,8 +73,11 @@ public:
 
 			switch (messageType)
 			{
-			case FrameResponse:
+			case VideoFrameResponse:
 				m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+				break;
+			case AudioFrameResponse:
+				m_receive_strategy->handle(new AudioData(&buffer[0], recBytes));
 				break;
 			case HumTempResponse:
 				m_receive_strategy->handle(new HumTempSensorData(&buffer[0], recBytes));

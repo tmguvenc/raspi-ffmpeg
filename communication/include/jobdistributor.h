@@ -15,6 +15,7 @@ class Data;
 class MotorMessageHandler;
 class SensorMessageHandler;
 class VideoMessageHandler;
+class AudioMessageHandler;
 struct CommunicationTime;
 using Request = std::pair<std::string, MessageType>;
 using Response = std::pair<Request, Data*>;
@@ -42,14 +43,19 @@ private:
 	RequestQueue m_motor_request_queue;
 	RequestQueue m_sensor_request_queue;
 	RequestQueue m_video_request_queue;
+	RequestQueue m_audio_request_queue;
+
 	ResponseQueue m_response_queue;
 
 	MotorMessageHandler *m_motor_executer;
 	SensorMessageHandler *m_sensor_executer;
 	VideoMessageHandler *m_video_executer;
+	AudioMessageHandler *m_audio_executer;
+
 	MessageHandler<RequestQueue, ResponseQueue, MotorMessageHandler> m_motor_message_handler;
 	MessageHandler<RequestQueue, ResponseQueue, SensorMessageHandler> m_sensor_message_handler;
 	MessageHandler<RequestQueue, ResponseQueue, VideoMessageHandler> m_video_message_handler;
+	MessageHandler<RequestQueue, ResponseQueue, AudioMessageHandler> m_audio_message_handler;
 
 	int m_port;
 	void* m_context;
