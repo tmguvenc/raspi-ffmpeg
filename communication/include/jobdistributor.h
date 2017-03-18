@@ -10,6 +10,7 @@
 #include <functional>
 #include <vector>
 
+struct ApplicationParams;
 class Data;
 class MotorMessageHandler;
 class SensorMessageHandler;
@@ -24,7 +25,7 @@ using ClientMap = tbb::concurrent_hash_map<std::string, CommunicationTime>;
 class COMMUNICATION_EXPORT JobDistributor
 {
 public:
-	JobDistributor(int port, int width, int height, int codec, int fps, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins);
+	JobDistributor(const ApplicationParams& params);
 	~JobDistributor();
 
 	void start();

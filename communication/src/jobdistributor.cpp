@@ -7,6 +7,7 @@
 #include <motor_message_handler.h>
 #include <video_message_handler.h>
 #include <iostream>
+#include <application_params.h>
 
 struct CommunicationTime
 {
@@ -14,25 +15,25 @@ struct CommunicationTime
 	int64_t lastSendMessageTime;
 };
 
-JobDistributor::JobDistributor(int port, int width, int height, int codec, int fps, int delayMicroseconds, int step, const std::vector<int>& panPins, const std::vector<int>& tiltPins) :
-m_motor_executer(new MotorMessageHandler(delayMicroseconds, step, std::move(panPins), std::move(tiltPins))),
+JobDistributor::JobDistributor(const ApplicationParams& params) : 
+m_motor_executer(new MotorMessageHandler(params.delayMicroseconds, params.step, params.panMotorPins, std::move(params.tiltMotorPins))),
 m_sensor_executer(new SensorMessageHandler),
-m_video_executer(new VideoMessageHandler("/dev/video0", width, height, codec, fps)),
+m_video_executer(new VideoMessageHandler(params.video_source_url, params.width, params.height, params.codec, params.fps)),
 m_motor_message_handler(&m_motor_request_queue, nullptr, m_motor_executer),
 m_sensor_message_handler(&m_sensor_request_queue, &m_response_queue, m_sensor_executer),
 m_video_message_handler(&m_video_request_queue, &m_response_queue, m_video_executer),
-m_port(port),
+m_port(params.port),
 m_context(nullptr),
 m_socket(nullptr)
 {
-	if (width <= 1)
+	if (params.width <= 1)
 		throw std::invalid_argument("Width must be greater than 1");
-	if (height <= 1)
+	if (params.height <= 1)
 		throw std::invalid_argument("Height must be greater than 1");
-	if (codec <= 0)
+	if (params.codec <= 0)
 		throw std::invalid_argument("Codec must be greater than 0");
 
-	m_settings = std::to_string(width) + "," + std::to_string(height) + "," + std::to_string(codec);
+	m_settings = std::to_string(params.width) + "," + std::to_string(params.height) + "," + std::to_string(params.codec);
 	memset(m_client_id, 0, sizeof(m_client_id));
 
 	m_functionMap.resize(MessageCount, nullptr);
