@@ -26,7 +26,8 @@ namespace raspi_client_test
 
             _timer.Elapsed += (o, args) =>
             {
-                _client.readSensor();
+                if (_client != null)
+                    _client.readSensor();
             };
 
             _client.start();
@@ -54,6 +55,8 @@ namespace raspi_client_test
                 _client.Dispose();
                 _client = null;
             }
+
+            _timer.Stop();
         }
 
         private void button2_Click(object sender, EventArgs e)
