@@ -3,6 +3,7 @@
 #include <limits>
 #include <vector>
 #include <libavcodec/avcodec.h>
+#include <iostream>
 
 #undef max
 #undef min
@@ -17,18 +18,20 @@ inline T toNumber(const char* str, T lowerBound = std::numeric_limits<T>::min(),
 	else
 		throw std::invalid_argument(string_format("invalid argument: %s", str));
 
-	if (number < lowerBound || number > upperBound)
+	if (number < lowerBound || number > upperBound){
+		std::cout << number << " is greater than " << upperBound << " or lower than " << lowerBound << std::endl;
 		throw std::out_of_range(string_format("Number is out of range"));
+	}
 
 	return number;
 }
 
 inline int getCodec(const char* codec_name) {
-	if (codec_name == "mjpeg")
+	if (strncmp(codec_name, "mjpeg", 5) == 0)
 		return  AV_CODEC_ID_MJPEG;
-	if (codec_name == "h264")
+	if (strncmp(codec_name, "h264", 4) == 0)
 		return AV_CODEC_ID_H264;
-	if (codec_name == "raw")
+	if (strncmp(codec_name, "raw", 3) == 0)
 		return AV_CODEC_ID_RAWVIDEO;
 
 	throw std::invalid_argument(string_format("invalid codec: %s", codec_name));
@@ -90,7 +93,7 @@ ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 	args.max_audioframe_queue_size = toNumber<uint16_t>(m_options["-asize"].c_str());
 
 	// get port to listen
-	args.port = toNumber<uint16_t>(m_options["-port"].c_str(), 1025, 65536);
+	args.port = toNumber<uint16_t>(m_options["-port"].c_str(), 1025);
 
 	// get FPS
 	args.fps = toNumber<uint8_t>(m_options["-fps"].c_str(), 1, 40);
@@ -98,13 +101,13 @@ ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 	// get video source URL
 	args.video_source_url = m_options["-vurl"];
 	if (args.video_source_url.empty() || args.video_source_url == " " || args.video_source_url == "") {
-		throw std::invalid_argument(string_format("invalid video source URL: %s", args.video_source_url));
+		throw std::invalid_argument(string_format("invalid video source URL: %s", args.video_source_url.c_str()));
 	}
 
 	// get audio source URL
 	args.audio_source_url = m_options["-aurl"];
 	if (args.audio_source_url.empty() || args.audio_source_url == " " || args.audio_source_url == "") {
-		throw std::invalid_argument(string_format("invalid audio source URL: %s", args.audio_source_url));
+		throw std::invalid_argument(string_format("invalid audio source URL: %s", args.audio_source_url.c_str()));
 	}
 
 	// get resolution
@@ -117,7 +120,7 @@ ApplicationParams ArgumentParser::parse(int argc, char* argv[])
 	args.height = wh.second;
 
 	// get codec
-	args.codec = getCodec(m_options["-c"].c_str());
+	args.codec = getCodec(m_options["-codec"].c_str());
 
 	// get pan motor connection pins
 	args.panMotorPins = std::move(getPins<uint8_t>(m_options["-ppins"].c_str()));
