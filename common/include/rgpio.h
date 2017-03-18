@@ -22,16 +22,17 @@
 #ifndef INPUT
 #define INPUT 0
 #endif
+#include <stdint.h>
 
 class COMMON_EXPORT GPIO
 {
 public:
 	static void setup();
-	static void write(int pin, int value);
-	static int read(int pin);
-	static void sleepMilliSeconds(int milliSeconds);
-	static void sleepMicroSeconds(int microSeconds);
-	static void setPinMode(int pin, int mode);
+	static void write(uint8_t pin, uint8_t value);
+	static int read(uint8_t pin);
+	static void sleepMilliSeconds(uint32_t milliSeconds);
+	static void sleepMicroSeconds(uint32_t microSeconds);
+	static void setPinMode(uint8_t pin, uint8_t mode);
 };
 
 #endif
