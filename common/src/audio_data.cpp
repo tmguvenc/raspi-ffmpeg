@@ -1,4 +1,5 @@
 #include <audio_data.h>
+#include <cstring>
 
 AudioData::AudioData(uint32_t size) : Data(size)
 {

@@ -16,6 +16,7 @@
 #include <thread>
 #include <capture_utils.h>
 #include <audio_frame.h>
+#include <cstring>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -59,6 +60,9 @@ void AudioCapture::init(CaptureSettings* settings) {
 	m_formatContext->interrupt_callback.callback = [](void* ctx)
 	{	return static_cast<int>(reinterpret_cast<intptr_t>(ctx)); };
 	m_formatContext->interrupt_callback.opaque = static_cast<void*>(nullptr);
+
+	av_dict_set(&m_options, "channels", "1", 0);
+	av_dict_set(&m_options, "sample_rate", "44100", 0);
 }
 
 FrameContainer* AudioCapture::grabFrame() {
@@ -78,7 +82,7 @@ FrameContainer* AudioCapture::grabFrame() {
 
 void AudioCapture::start(CaptureCallback func) {
 
-	auto input_format = find_input_format();
+	auto input_format = av_find_input_format("alsa");
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), input_format, &m_options) < 0) {
