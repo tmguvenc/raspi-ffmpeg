@@ -3,8 +3,10 @@
 #include <assert.h>
 #include <receive_strategy_queue.h>
 #include <video_frame.h>
+#include <audio_data.h>
 #include <sensor_data.h>
 #include <decoder.h>
+#include <audio_decoder.h>
 
 extern "C"
 {
@@ -22,12 +24,26 @@ m_control(control),
 m_started(false),
 m_initialized(false),
 m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
+
+	av_register_all();
+
 	m_receiveStrategy = new ReceiveStrategyQueue<tbb::concurrent_bounded_queue<Data*>>(m_frame_queue);
 	m_connector = new Connector(ManagedtoNativeString("tcp://" + ip + ":" + System::Convert::ToString(port)), m_receiveStrategy);
 	m_destWidth = m_connector->getWidth();
 	m_destHeight = m_connector->getHeight();
-	m_decoder = new Decoder(m_destWidth, m_destHeight);
-	m_decoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
+	m_videoDecoder = new Decoder(m_destWidth, m_destHeight);
+	m_videoDecoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
+
+	m_audioDecoder = new AudioDecoder;
+	try
+	{
+		m_audioDecoder->setup(AV_CODEC_ID_MP2);
+	}
+	catch (const std::invalid_argument& ex)
+	{
+		throw gcnew System::Exception(gcnew System::String(ex.what()));
+	}
+
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
 }
@@ -44,10 +60,15 @@ RaspiClient::!RaspiClient() {
 
 	stop();
 
-	if (m_decoder) {
-		m_decoder->teardown();
-		delete m_decoder;
-		m_decoder = nullptr;
+	if (m_videoDecoder) {
+		m_videoDecoder->teardown();
+		delete m_videoDecoder;
+		m_videoDecoder = nullptr;
+	}
+	if (m_audioDecoder) {
+		m_audioDecoder->teardown();
+		delete m_audioDecoder;
+		m_audioDecoder = nullptr;
 	}
 
 	if (m_receiveStrategy){
@@ -125,6 +146,8 @@ void RaspiClient::decode_loop()
 	const auto len = m_destWidth * m_destHeight * 3;
 	const System::Drawing::Rectangle roi = System::Drawing::Rectangle(0, 0, m_destWidth, m_destHeight);
 
+	std::vector<char> buf(2 * 1024 * 1024);
+
 	while (m_started)
 	{
 		Data* data;
@@ -132,21 +155,39 @@ void RaspiClient::decode_loop()
 		if (!data)
 			break;
 		
-		if (data->type() == 1){
+		switch (data->type())
+		{
+		case 0:
+		{
+			auto frame = static_cast<AudioData*>(data);
+
+			assert(frame->getData() != nullptr);
+			assert(frame->getSize() != 0);
+
+			if (m_audioDecoder->decode(frame->getData(), frame->getSize(), &buf[0], buf.size()))
+			{
+				int a = 5;
+			}
+
+			delete frame;
+		}break;
+		case 1:
+		{
 			auto frame = static_cast<VideoFrame*>(data);
 
 			if (!frame || frame->getSize() == 0)
 				break;
 
 			System::Drawing::Imaging::BitmapData^ bmpData = m_bmp->LockBits(roi, System::Drawing::Imaging::ImageLockMode::ReadWrite, System::Drawing::Imaging::PixelFormat::Format24bppRgb);
-			auto decoded = m_decoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
+			auto decoded = m_videoDecoder->decode(frame->getData(), frame->getSize(), bmpData->Scan0.ToPointer(), len);
 			m_bmp->UnlockBits(bmpData);
 
 			if (decoded)
 				m_graphics->DrawImage(m_bmp, roi);
 			delete frame;
-		}
-		else{
+		}break;
+		case 2:
+		{
 			auto sensorData = static_cast<HumTempSensorData*>(data);
 
 			auto h = sensorData->getHumidity();
@@ -155,6 +196,9 @@ void RaspiClient::decode_loop()
 			delete sensorData;
 
 			OnSensorDataReceived(h, t);
+		}break;
+		default:
+			throw gcnew System::ArgumentException("invalid data type");
 		}
 	}
 }

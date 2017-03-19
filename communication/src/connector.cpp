@@ -61,9 +61,10 @@ public:
 
 		std::vector<char> buffer(m_size);
 		MessageType messageType;
+		sendRequest(VideoFrameRequest);
+		sendRequest(AudioFrameRequest);
+
 		while (m_started) {
-			sendRequest(VideoFrameRequest);
-			sendRequest(AudioFrameRequest);
 
 			// read empty frame
 			zmq_recv(m_socket, &buffer[0], m_size, 0);
@@ -75,9 +76,11 @@ public:
 			{
 			case VideoFrameResponse:
 				m_receive_strategy->handle(new VideoFrame(&buffer[0], recBytes, ++index));
+				sendRequest(VideoFrameRequest);
 				break;
 			case AudioFrameResponse:
 				m_receive_strategy->handle(new AudioData(&buffer[0], recBytes));
+				sendRequest(AudioFrameRequest);
 				break;
 			case HumTempResponse:
 				m_receive_strategy->handle(new HumTempSensorData(&buffer[0], recBytes));
@@ -115,6 +118,7 @@ protected:
 				if (request == StopRequest)
 					break;
 			}
+			m_request_queue.clear();
 		});
 
 		m_socket = zmq_socket(m_context, ZMQ_DEALER);
