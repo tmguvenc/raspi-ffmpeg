@@ -82,7 +82,7 @@ FrameContainer* AudioCapture::grabFrame() {
 
 void AudioCapture::start(CaptureCallback func) {
 
-	auto input_format = av_find_input_format("alsa");
+	auto input_format = find_input_format(false);
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), input_format, &m_options) < 0) {
