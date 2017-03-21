@@ -37,7 +37,7 @@ m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
 	m_audioDecoder = new AudioDecoder;
 	try
 	{
-		m_audioDecoder->setup(AV_CODEC_ID_MP2);
+		m_audioDecoder->setup(AV_CODEC_ID_PCM_S16LE);
 	}
 	catch (const std::invalid_argument& ex)
 	{
