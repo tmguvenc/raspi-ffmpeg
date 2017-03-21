@@ -33,13 +33,6 @@ inline void create_if_not_exist(const char* path)
 	}
 }
 
-inline static bool is_number(const std::string& s) {
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it))
-		++it;
-	return !s.empty() && it == s.end();
-}
-
 static inline AVFrame* allocate_frame()
 {
 #if defined(_WIN32) && defined(_MSC_VER)

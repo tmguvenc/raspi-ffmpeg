@@ -15,6 +15,7 @@
 #include <chrono>
 #include <thread>
 #include <capture_utils.h>
+#include <common_utils.h>
 
 extern "C" {
 #include <libavformat/avformat.h>
