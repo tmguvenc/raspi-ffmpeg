@@ -5,6 +5,7 @@
 #include <assert.h>
 
 extern "C"{
+#include <libavdevice/avdevice.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/samplefmt.h>
 #include <libavutil/common.h>
@@ -63,6 +64,11 @@ static int select_sample_rate(AVCodec *codec)
 
 AudioEncoder::AudioEncoder()
 {
+	av_register_all();
+	avdevice_register_all();
+	avformat_network_init();
+	avcodec_register_all();
+
 	m_pCodec = avcodec_find_encoder(CODEC_ID_MP2);
 	if (!m_pCodec)
 		throw std::invalid_argument("cannot find codec");
