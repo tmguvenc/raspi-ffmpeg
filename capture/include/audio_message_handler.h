@@ -13,7 +13,7 @@
 #include <audio_capture_factory.h>
 #include "audio_frame.h"
 #include <audio_data.h>
-#include <audio_encoder.h>
+//#include <audio_encoder.h>
 
 class AudioMessageHandler
 {
@@ -27,14 +27,14 @@ public:
 			m_frameQueue.push(static_cast<AudioFrame*>(ptr));
 		});
 
-		m_buffer = malloc(10000);
+//		m_buffer = malloc(10000);
 	}
 
 	~AudioMessageHandler()
 	{
 		m_capture.reset();
 		clearQueue(&m_frameQueue);
-		free(m_buffer);
+//		free(m_buffer);
 	}
 
 	Data* execute(const MessageType& message_type)
@@ -46,12 +46,14 @@ public:
 		m_frameQueue.pop(frame);
 		assert(frame != nullptr && "audio frame is null");
 
-		size_t dataSize;
+//		int dataSize;
 
-		if (!m_encoder.encode(frame->data(), frame->size(), m_buffer, dataSize))
-			return nullptr;
+//		if (!m_encoder.encode(frame->data(), frame->size(), m_buffer, dataSize)){
+//			std::cout << "audio encode filed" << std::endl;
+//			throw ;
+//		}
 
-		auto data = new AudioData(m_buffer, dataSize);
+		auto data = new AudioData(frame->data(), frame->size());
 		delete frame;
 
 		return data;
@@ -60,9 +62,9 @@ private:
 	std::unique_ptr<ICapture, CaptureStopper<ICapture>> m_capture;
 	AudioCaptureFactory m_captureFactory;
 	tbb::concurrent_bounded_queue<FrameContainer*> m_frameQueue;
-	AudioEncoder m_encoder;
+//	AudioEncoder m_encoder;
 
-	void* m_buffer;
+//	void* m_buffer;
 };
 
 #endif

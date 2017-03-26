@@ -69,7 +69,7 @@ AudioEncoder::AudioEncoder()
 	avformat_network_init();
 	avcodec_register_all();
 
-	m_pCodec = avcodec_find_encoder(CODEC_ID_MP2);
+	m_pCodec = avcodec_find_encoder(AV_CODEC_ID_MP2);
 	if (!m_pCodec)
 		throw std::invalid_argument("cannot find codec");
 
@@ -77,13 +77,15 @@ AudioEncoder::AudioEncoder()
 
 	m_pCodecContext->bit_rate = 64000;
 	m_pCodecContext->sample_fmt = AV_SAMPLE_FMT_S16;
-	
+
 	if (!check_sample_fmt(m_pCodec, m_pCodecContext->sample_fmt))
 		throw std::invalid_argument("invalid sample format");
 
-	m_pCodecContext->sample_rate = select_sample_rate(m_pCodec);
+//	m_pCodecContext->sample_rate = select_sample_rate(m_pCodec);
+	m_pCodecContext->sample_rate = 44100;
 	m_pCodecContext->channel_layout = select_channel_layout(m_pCodec);
-	m_pCodecContext->sample_rate = av_get_channel_layout_nb_channels(m_pCodecContext->channel_layout);
+	m_pCodecContext->channels = av_get_channel_layout_nb_channels(m_pCodecContext->channel_layout);
+//	m_pCodecContext->channels = 1;
 
 	if (avcodec_open2(m_pCodecContext, m_pCodec, nullptr) < 0)
 		throw std::invalid_argument("cannot open codec");
@@ -104,7 +106,7 @@ AudioEncoder::~AudioEncoder()
 	av_free(m_pCodecContext);
 }
 
-bool AudioEncoder::encode(void* inputData, size_t /*inputLen*/, void* data, size_t& len)
+bool AudioEncoder::encode(void* inputData, int /*inputLen*/, void* data, int& len)
 {
 	AVPacket packet;
 	av_init_packet(&packet);

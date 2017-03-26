@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <iostream>
 #include <capture_utils.h>
+#include <stdexcept>
+
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
