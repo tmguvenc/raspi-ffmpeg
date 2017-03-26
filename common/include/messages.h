@@ -3,21 +3,23 @@
 
 enum MessageType : unsigned char
 {
-	FrameRequest = 0,
-	StopRequest = 1,
-	HumTempRequest = 2,
-	InitRequest = 3,
-	MotorUpRequest = 4,
-	MotorDownRequest = 5,
-	MotorRightRequest = 6,
-	MotorLeftRequest = 7,
-	Ping = 8,
-	InitResponse = 9,
-	FrameResponse = 10,
-	StopResponse = 11,
-	HumTempResponse = 12,
-	StopQueueMessage = 13,
-	MessageCount = 14
+	VideoFrameRequest = 0,
+	AudioFrameRequest = 1,
+	StopRequest = 2,
+	HumTempRequest = 3,
+	InitRequest = 4,
+	MotorUpRequest = 5,
+	MotorDownRequest = 6,
+	MotorRightRequest = 7,
+	MotorLeftRequest = 8,
+	Ping = 9,
+	InitResponse = 10,
+	VideoFrameResponse = 11,
+	AudioFrameResponse = 12,
+	StopResponse = 13,
+	HumTempResponse = 14,
+	StopQueueMessage = 15,
+	MessageCount = 16
 };
 
 #endif

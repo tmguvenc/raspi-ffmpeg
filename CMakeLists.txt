@@ -67,6 +67,11 @@ if (MSVC)
 	set(GTEST_LIBS ${DEPENDS_FOLDER}/googletest/googletest-distribution/lib)
 	set(GTEST_BINS ${DEPENDS_FOLDER}/googletest/googletest-distribution/lib)
 	set(GTEST_LINK debug "gtest-d" optimized "gtest")
+	
+	#libao
+	set(LIBAO_INCLUDE ${DEPENDS_FOLDER}/libao/include)
+	set(LIBAO_LIBS ${DEPENDS_FOLDER}/libao/lib)
+	set(LIBAO_LINK debug "libao-mt-debug" optimized "libao-mt")
 else()
 	set(LOCAL /usr/local)
 
@@ -92,6 +97,11 @@ else()
 	set(TBB_LIBS /usr/lib)
 	set(TBB_BINS /usr/lib)
 	set(TBB_LINK tbb)
+	
+	# libao
+	set(LIBAO_INCLUDE /usr/include)
+	set(LIBAO_LIBS /usr/lib)
+	set(LIBAO_LINK ao)
 
 	# protocol buffers
 	set(PROTOBUF_INCLUDE ${LOCAL}/include)

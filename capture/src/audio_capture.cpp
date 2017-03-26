@@ -5,7 +5,7 @@
  *      Author: Turan Murat Güvenç
  */
 
-#include <webcam_capture.h>
+#include <audio_capture.h>
 
 #include <frame.h>
 #include <iostream>
@@ -15,7 +15,8 @@
 #include <chrono>
 #include <thread>
 #include <capture_utils.h>
-#include <common_utils.h>
+#include <audio_frame.h>
+#include <cstring>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -23,9 +24,9 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 }
 
-WebcamCapture::WebcamCapture(const std::string& connectionString) :
-m_connectionString(connectionString), m_width(0), m_height(0),
-m_channels(0), m_completed(false),
+AudioCapture::AudioCapture(const std::string& connectionString) :
+m_connectionString(connectionString),
+m_completed(false),
 m_run(false),
 m_indexofVideoStream(0),
 m_formatContext(nullptr),
@@ -34,14 +35,14 @@ m_codecContext(nullptr){
 	m_settings = new CaptureSettings;
 }
 
-WebcamCapture::~WebcamCapture() {
+AudioCapture::~AudioCapture() {
 	if (m_settings) {
 		delete m_settings;
 		m_settings = nullptr;
 	}
 }
 
-void WebcamCapture::init(CaptureSettings* settings) {
+void AudioCapture::init(CaptureSettings* settings) {
 	av_register_all();
 	avdevice_register_all();
 	avformat_network_init();
@@ -60,39 +61,13 @@ void WebcamCapture::init(CaptureSettings* settings) {
 	{	return static_cast<int>(reinterpret_cast<intptr_t>(ctx)); };
 	m_formatContext->interrupt_callback.opaque = static_cast<void*>(nullptr);
 
-	auto codec_name = avcodec_get_name(static_cast<AVCodecID>(m_settings->getCodecId()));
-	if (codec_name != nullptr) {
-		av_dict_set(&m_options, "input_format", codec_name, 0);
-	}
-	else {
-		av_dict_set(&m_options, "input_format", "mjpeg", 0);
-	}
-
-	auto fps = std::to_string(m_settings->getFPS());
-
-	if (is_number(fps)) {
-		av_dict_set(&m_options, "framerate", fps.c_str(), 0);
-	}
-	else {
-		av_dict_set(&m_options, "framerate", "15", 0);
-	}
-
-	if (is_number(std::to_string(m_settings->getWidth())) && is_number(std::to_string(m_settings->getHeight()))) {
-		m_width = m_settings->getWidth();
-		m_height = m_settings->getHeight();
-		std::stringstream ss;
-		ss << m_width << "x" << m_height;
-		auto vs = ss.str();
-		av_dict_set(&m_options, "video_size", vs.c_str(), 0);
-	}
-	else {
-		av_dict_set(&m_options, "video_size", "640x480", 0);
-	}
+	av_dict_set(&m_options, "channels", "1", 0);
+	av_dict_set(&m_options, "sample_rate", "44100", 0);
 }
 
-FrameContainer* WebcamCapture::grabFrame() {
+FrameContainer* AudioCapture::grabFrame() {
 	while (true) {
-		auto frame = new Frame(m_width, m_height, 3, 0);
+		auto frame = new AudioFrame(0);
 		auto pkt = frame->getPacket();
 		auto result = av_read_frame(m_formatContext, pkt);
 		if (result < 0) {
@@ -105,9 +80,9 @@ FrameContainer* WebcamCapture::grabFrame() {
 	}
 }
 
-void WebcamCapture::start(CaptureCallback func) {
+void AudioCapture::start(CaptureCallback func) {
 
-	auto input_format = find_input_format();
+	auto input_format = find_input_format(false);
 
 	// open input file, and allocate format context
 	if (avformat_open_input(&m_formatContext, m_connectionString.c_str(), input_format, &m_options) < 0) {
@@ -131,14 +106,14 @@ void WebcamCapture::start(CaptureCallback func) {
 	func(nullptr);
 }
 
-void WebcamCapture::startAsync(CaptureCallback func) {
+void AudioCapture::startAsync(CaptureCallback func) {
 
 	auto future = std::async(std::launch::async, [this](CaptureCallback f) {start(f); }, func);
 
 	m_captureHandle = std::move(future);
 }
 
-void WebcamCapture::stop() {
+void AudioCapture::stop() {
 
 	// in case of the user stops capturing too soon.
 	while (!m_run) {
@@ -159,16 +134,16 @@ void WebcamCapture::stop() {
 	m_formatContext = nullptr;
 }
 
-bool WebcamCapture::started()
+bool AudioCapture::started()
 {
 	return m_run;
 }
 
-bool WebcamCapture::completed() {
+bool AudioCapture::completed() {
 	return m_completed;
 }
 
-void* WebcamCapture::getCodecInfo() {
+void* AudioCapture::getCodecInfo() {
 	if (m_codecContext != nullptr)
 		return m_codecContext;
 

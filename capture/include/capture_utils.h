@@ -33,13 +33,6 @@ inline void create_if_not_exist(const char* path)
 	}
 }
 
-inline static bool is_number(const std::string& s) {
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it))
-		++it;
-	return !s.empty() && it == s.end();
-}
-
 static inline AVFrame* allocate_frame()
 {
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -75,12 +68,15 @@ static inline void free_codec_context(AVCodecContext* context)
 #endif
 }
 
-static inline AVInputFormat* find_input_format()
+static inline AVInputFormat* find_input_format(bool video = true)
 {
 #if defined(_WIN32) && defined(_MSC_VER)
 	return av_find_input_format("dshow");
 #else
-	return av_find_input_format("video4linux2");
+	if(video)
+		return av_find_input_format("video4linux2");
+	else
+		return av_find_input_format("alsa");
 #endif
 }
 

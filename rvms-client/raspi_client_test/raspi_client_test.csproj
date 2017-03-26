@@ -101,6 +101,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/raspi-ffmpeg/build/capture/Debug/capture.dll D:/raspi-ffmpeg/rvms-client/raspi_client_test/bin/x64/Debug
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/raspi-ffmpeg/build/common/Debug/common.dll D:/raspi-ffmpeg/rvms-client/raspi_client_test/bin/x64/Debug
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/raspi-ffmpeg/build/communication/Debug/communication.dll D:/raspi-ffmpeg/rvms-client/raspi_client_test/bin/x64/Debug</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

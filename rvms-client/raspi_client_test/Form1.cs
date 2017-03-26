@@ -8,21 +8,21 @@ namespace raspi_client_test
 {
     public partial class Form1 : Form
     {
+        private readonly Timer _timer;
+        RaspiClient _client;
+
         public Form1()
         {
             InitializeComponent();
             RaspiClient.initialize();
+            _timer = new Timer(10000);
         }
-
-        RaspiClient _client;
-        private Timer _timer;
 
         private void button1_Click(object sender, EventArgs e)
         {
             _client = new RaspiClient(pictureBox1, txt_ip.Text, Convert.ToUInt16(txt_port.Text));
             _client.OnSensorDataReceived += _client_OnSensorDataReceived;
 
-            _timer = new Timer(10000);
 
             _timer.Elapsed += (o, args) =>
             {
@@ -32,7 +32,6 @@ namespace raspi_client_test
 
             _client.start();
             _timer.Start();
-
         }
 
         private void _client_OnSensorDataReceived(float arg1, float arg2)
@@ -56,7 +55,7 @@ namespace raspi_client_test
                 _client = null;
             }
 
-            _timer.Stop();
+            if (_timer != null) _timer.Stop();
         }
 
         private void button2_Click(object sender, EventArgs e)

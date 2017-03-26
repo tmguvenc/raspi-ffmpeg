@@ -25,9 +25,12 @@ include_directories("../common/include/")
 include_directories("../communication/include/")
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${ZEROMQ_INCLUDE})
+include_directories(${LIBAO_INCLUDE})
+
 link_directories(${TBB_LIBS})
 link_directories(${ZEROMQ_LIBS})
 link_directories(${FFMPEG_LIBS})
+link_directories(${LIBAO_LIBS})
 
 add_library(${PROJECT_NAME} SHARED ${TARGET_SRC} ${TARGET_H})
 
@@ -37,6 +40,15 @@ target_link_libraries(${PROJECT_NAME} ${ZEROMQ_LINK})
 target_link_libraries(${PROJECT_NAME} ${DLL_FILE_NAME})
 target_link_libraries(${PROJECT_NAME} capture)
 target_link_libraries(${PROJECT_NAME} communication)
+target_link_libraries(${PROJECT_NAME} ${LIBAO_LINK})
+
+if(MSVC)
+	target_link_libraries(${PROJECT_NAME} Winmm)
+endif()
+
+set(CAPTURE_DLL "${CMAKE_BINARY_DIR}/capture/Debug/capture.dll")
+set(COMMON_DLL "${CMAKE_BINARY_DIR}/common/Debug/common.dll")
+set(COMMUNICATION_DLL "${CMAKE_BINARY_DIR}/communication/Debug/communication.dll")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clr")
 SET (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
@@ -103,4 +115,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			"${TBB_BINS}/tbb_debug.dll"
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${CAPTURE_DLL}
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${COMMON_DLL}
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${COMMUNICATION_DLL}
 			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
