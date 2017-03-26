@@ -128,9 +128,12 @@ void JobDistributor::start()
 		{
 			Response response;
 			m_response_queue.pop(response);
-			if (!response.second) break;
-			send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
-			delete response.second;
+			if (response.second){
+				send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
+				delete response.second;
+			}else{
+				stop();
+			}
 		}
 	});
 
