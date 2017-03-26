@@ -132,7 +132,8 @@ void JobDistributor::start()
 				send(response.first.first, dummy(response.first.second), response.second->getData(), response.second->getSize());
 				delete response.second;
 			}else{
-				stop();
+				m_run = false;
+				break;
 			}
 		}
 	});
