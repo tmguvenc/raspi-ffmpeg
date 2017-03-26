@@ -11,7 +11,7 @@
 class Connector;
 class Data;
 class Decoder;
-class AudioDecoder;
+struct ao_device;
 class IReceiveStrategy;
 
 namespace Client
@@ -49,7 +49,7 @@ namespace Client
 		System::Int32 m_destWidth;
 		System::Int32 m_destHeight;
 		Decoder* m_videoDecoder;
-		AudioDecoder* m_audioDecoder;
+		ao_device *m_audioDevice;
 		tbb::concurrent_bounded_queue<Data*>* m_frame_queue;
 		volatile bool m_started;
 		volatile bool m_initialized;

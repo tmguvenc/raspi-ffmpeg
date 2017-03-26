@@ -15,6 +15,7 @@ extern "C"
 #include "./libavdevice/avdevice.h"
 #include "./libswscale/swscale.h"
 #include "./libavutil/imgutils.h"
+#include <ao/ao.h>
 }
 
 using namespace Client;
@@ -25,6 +26,7 @@ m_started(false),
 m_initialized(false),
 m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
 
+	ao_initialize();
 	av_register_all();
 
 	m_receiveStrategy = new ReceiveStrategyQueue<tbb::concurrent_bounded_queue<Data*>>(m_frame_queue);
@@ -34,18 +36,18 @@ m_frame_queue(new tbb::concurrent_bounded_queue<Data*>) {
 	m_videoDecoder = new Decoder(m_destWidth, m_destHeight);
 	m_videoDecoder->setup(static_cast<AVCodecID>(m_connector->getCodec()), AV_PIX_FMT_YUV420P);
 
-	m_audioDecoder = new AudioDecoder;
-	try
-	{
-		m_audioDecoder->setup(AV_CODEC_ID_MP2);
-	}
-	catch (const std::invalid_argument& ex)
-	{
-		throw gcnew System::Exception(gcnew System::String(ex.what()));
-	}
-
 	m_graphics = m_control->CreateGraphics();
 	m_bmp = gcnew System::Drawing::Bitmap(m_destWidth, m_destHeight);
+	int audioDriver = ao_default_driver_id();
+
+	ao_sample_format sformat;
+	sformat.bits = 16;
+	sformat.channels = 1;
+	sformat.rate = 44100;
+	sformat.byte_format = AO_FMT_NATIVE;
+	sformat.matrix = 0;
+
+	m_audioDevice = ao_open_live(audioDriver, &sformat, NULL);
 }
 
 RaspiClient::~RaspiClient()
@@ -64,11 +66,6 @@ RaspiClient::!RaspiClient() {
 		m_videoDecoder->teardown();
 		delete m_videoDecoder;
 		m_videoDecoder = nullptr;
-	}
-	if (m_audioDecoder) {
-		m_audioDecoder->teardown();
-		delete m_audioDecoder;
-		m_audioDecoder = nullptr;
 	}
 
 	if (m_receiveStrategy){
@@ -91,6 +88,9 @@ RaspiClient::!RaspiClient() {
 		delete m_bmp;
 		m_bmp = nullptr;
 	}
+
+	ao_close(m_audioDevice);
+	ao_shutdown();
 }
 
 #undef PixelFormat
@@ -164,10 +164,8 @@ void RaspiClient::decode_loop()
 			assert(frame->getData() != nullptr);
 			assert(frame->getSize() != 0);
 
-			if (m_audioDecoder->decode(frame->getData(), frame->getSize(), &buf[0], buf.size()))
-			{
-				int a = 5;
-			}
+			// libao output
+			ao_play(m_audioDevice, (char*)frame->getData(), frame->getSize());
 
 			delete frame;
 		}break;
