@@ -83,7 +83,7 @@ AudioEncoder::AudioEncoder()
 
 	m_pCodecContext->sample_rate = select_sample_rate(m_pCodec);
 	m_pCodecContext->channel_layout = select_channel_layout(m_pCodec);
-	m_pCodecContext->sample_rate = av_get_channel_layout_nb_channels(m_pCodecContext->channel_layout);
+	m_pCodecContext->channels = av_get_channel_layout_nb_channels(m_pCodecContext->channel_layout);
 
 	if (avcodec_open2(m_pCodecContext, m_pCodec, nullptr) < 0)
 		throw std::invalid_argument("cannot open codec");
@@ -104,7 +104,7 @@ AudioEncoder::~AudioEncoder()
 	av_free(m_pCodecContext);
 }
 
-bool AudioEncoder::encode(void* inputData, size_t /*inputLen*/, void* data, size_t& len)
+bool AudioEncoder::encode(void* inputData, int /*inputLen*/, void* data, int& len)
 {
 	AVPacket packet;
 	av_init_packet(&packet);

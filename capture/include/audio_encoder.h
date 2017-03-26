@@ -15,7 +15,7 @@ public:
 	AudioEncoder();
 	~AudioEncoder();
 
-	bool encode(void* inputData, size_t inputLen, void* data, size_t& len);
+	bool encode(void* inputData, int inputLen, void* data, int& len);
 
 private:
 	AVCodec *m_pCodec;

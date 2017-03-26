@@ -46,7 +46,7 @@ public:
 		m_frameQueue.pop(frame);
 		assert(frame != nullptr && "audio frame is null");
 
-		size_t dataSize;
+		int dataSize;
 
 		if (!m_encoder.encode(frame->data(), frame->size(), m_buffer, dataSize))
 			return nullptr;
