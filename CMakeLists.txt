@@ -69,8 +69,8 @@ if (MSVC)
 	set(GTEST_LINK debug "gtest-d" optimized "gtest")
 	
 	#libao
-	set(LIBAO_INCLUDE ${DEPENDS_FOLDER}/libao/include)
-	set(LIBAO_LIBS ${DEPENDS_FOLDER}/libao/lib)
+	set(LIBAO_INCLUDE ${DEPENDS_FOLDER}/libao-dist/include)
+	set(LIBAO_LIBS ${DEPENDS_FOLDER}/libao-dist/lib)
 	set(LIBAO_LINK debug "libao-mt-debug" optimized "libao-mt")
 else()
 	set(LOCAL /usr/local)
