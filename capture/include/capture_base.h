@@ -24,6 +24,7 @@ public:
 	virtual void init(CaptureSettings* settings) = 0;
 	virtual void start(CaptureCallback func) = 0;
 	virtual void startAsync(CaptureCallback func) = 0;
+	virtual FrameContainer* grabFrame() = 0;
 	virtual void stop() = 0;
 	virtual bool started() = 0;
 	virtual bool completed() = 0;

@@ -36,7 +36,7 @@ public:
 		return m_settings;
 	}
 protected:
-	FrameContainer* grabFrame();
+	FrameContainer* grabFrame() override;
 	explicit VideoFileCapture(const std::string& connectionString);
 
 private:

@@ -38,8 +38,9 @@ public:
 		assert(m_settings != nullptr);
 		return m_settings;
 	}
+	FrameContainer* grabFrame() override;
+
 protected:
-	FrameContainer* grabFrame();
 	explicit WebcamCapture(const std::string& connectionString);
 
 private:
