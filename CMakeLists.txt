@@ -72,6 +72,13 @@ if (MSVC)
 	set(LIBAO_INCLUDE ${DEPENDS_FOLDER}/libao-dist/include)
 	set(LIBAO_LIBS ${DEPENDS_FOLDER}/libao-dist/lib)
 	set(LIBAO_LINK debug "libao-mt-debug" optimized "libao-mt")
+	
+	#swig
+	# set(SWIG_EXE "${DEPENDS_FOLDER}/swigwin-3.0.12/swig")
+	
+	find_package(JAVA REQUIRED)
+	find_package(SWIG REQUIRED)
+	
 else()
 	set(LOCAL /usr/local)
 
@@ -124,7 +131,8 @@ endif()
 enable_testing ()
 
 add_subdirectory (capture)
-add_subdirectory (rvms-server)
+add_subdirectory (capture_wrapper)
+add_subdirectory (rvms_server)
 add_subdirectory (common)
 add_subdirectory (communication)
 add_subdirectory (test)
@@ -132,7 +140,7 @@ add_subdirectory (sensor)
 add_subdirectory (motor)	
 
 if (MSVC)
-	add_subdirectory (rvms-api-net)
+	add_subdirectory (rvms_api_net)
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

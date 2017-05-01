@@ -8,10 +8,9 @@
 #ifndef FRAME_CONTAINER_H
 #define FRAME_CONTAINER_H
 
-#include <capture_macros.h>
 #include <stdint.h>
 
-class CAPTURE_EXPORT FrameContainer {
+class FrameContainer {
 public:
 	virtual ~FrameContainer() {
 	}

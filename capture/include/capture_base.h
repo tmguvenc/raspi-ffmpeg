@@ -8,7 +8,6 @@
 #ifndef ICAPTURE_H_
 #define ICAPTURE_H_
 
-#include <capture_macros.h>
 #include <functional>
 
 class FrameContainer;
@@ -17,7 +16,7 @@ typedef std::function<void(FrameContainer*)> CaptureCallback;
 
 class CaptureSettings;
 
-class CAPTURE_EXPORT ICapture {
+class ICapture {
 public:
 	virtual ~ICapture() {
 	}

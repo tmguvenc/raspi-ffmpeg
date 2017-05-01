@@ -33,6 +33,8 @@ include_directories("../common/include/")
 include_directories(${TBB_INCLUDE})
 include_directories(${FFMPEG_INCLUDE})
 include_directories(${SPDLOG_INCLUDE})
+include_directories($ENV{JAVA_HOME}/include)
+include_directories($ENV{JAVA_HOME}/include/win32)
 
 # add library directories
 link_directories(${TBB_LIBS})
@@ -46,4 +48,6 @@ target_link_libraries(${PROJECT_NAME} ${FFMPEG_LINK})
 if(NOT MSVC)
 	target_link_libraries(${PROJECT_NAME} pthread)
 endif()
+
+
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "Utility")

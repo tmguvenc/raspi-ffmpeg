@@ -14,7 +14,7 @@ extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
-class CAPTURE_EXPORT CaptureSettings 
+class CaptureSettings 
 {
 public:
 	CaptureSettings() :

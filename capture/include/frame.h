@@ -9,6 +9,7 @@
 #define FRAME_H
 
 #include <frame_container.h>
+#include <capture_macros.h>
 
 struct AVPacket;
 
