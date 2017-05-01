@@ -6,7 +6,7 @@
 
 %{
 #include "webcam.h"
-
+#include "decode.h"
 %}
 
 /* Let's just grab the original header file here */
@@ -14,3 +14,4 @@
 %include std_string.i
 %include cpointer.i
 %include "webcam.h"
+%include "decode.h"

@@ -23,4 +23,7 @@ public class WebcamModuleJNI {
   public final static native long new_Webcam(String jarg1, int jarg2, int jarg3, int jarg4, int jarg5);
   public final static native void delete_Webcam(long jarg1);
   public final static native long Webcam_getFrame(long jarg1, Webcam jarg1_);
+  public final static native long new_Decode(int jarg1, int jarg2);
+  public final static native void delete_Decode(long jarg1);
+  public final static native long Decode_decode(long jarg1, Decode jarg1_, long jarg2, FrameBuffer jarg2_);
 }

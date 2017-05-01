@@ -253,7 +253,7 @@ SWIGINTERN void std_vector_Sl_unsigned_SS_char_Sg__set(std::vector< unsigned cha
             }
 
 #include "webcam.h"
-
+#include "decode.h"
 
 
 #include <string>
@@ -481,6 +481,54 @@ SWIGEXPORT jlong JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_Webcam_1getFra
   (void)jarg1_;
   arg1 = *(Webcam **)&jarg1; 
   result = (arg1)->getFrame();
+  *(std::vector< unsigned char > **)&jresult = new std::vector< unsigned char >((const std::vector< unsigned char > &)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_new_1Decode(JNIEnv *jenv, jclass jcls, jint jarg1, jint jarg2) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  int arg2 ;
+  Decode *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (Decode *)new Decode(arg1,arg2);
+  *(Decode **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_delete_1Decode(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  Decode *arg1 = (Decode *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(Decode **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_Decode_1decode(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  jlong jresult = 0 ;
+  Decode *arg1 = (Decode *) 0 ;
+  std::vector< unsigned char > *arg2 = 0 ;
+  std::vector< unsigned char > result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(Decode **)&jarg1; 
+  arg2 = *(std::vector< unsigned char > **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "std::vector< unsigned char > const & reference is null");
+    return 0;
+  } 
+  result = (arg1)->decode((std::vector< unsigned char > const &)*arg2);
   *(std::vector< unsigned char > **)&jresult = new std::vector< unsigned char >((const std::vector< unsigned char > &)result); 
   return jresult;
 }
