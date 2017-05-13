@@ -3,8 +3,9 @@
 
 #include <common_macros.h>
 
-#ifdef __linux__
+#if !defined(_WIN32) && defined(RASPBERRY_PI)
 #include <wiringPi.h>
+#define WIRINGPI
 #endif
 
 #ifndef HIGH
