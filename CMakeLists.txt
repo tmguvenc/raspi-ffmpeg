@@ -130,6 +130,8 @@ endif()
 
 enable_testing ()
 
+option(RASPI OFF)
+
 add_subdirectory (capture)
 add_subdirectory (capture_wrapper)
 add_subdirectory (rvms_server)

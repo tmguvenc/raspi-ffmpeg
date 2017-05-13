@@ -512,11 +512,10 @@ SWIGEXPORT void JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_delete_1Decode(
 }
 
 
-SWIGEXPORT jlong JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_Decode_1decode(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
-  jlong jresult = 0 ;
+SWIGEXPORT void JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_Decode_1decode(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jbyteArray jarg3) {
   Decode *arg1 = (Decode *) 0 ;
   std::vector< unsigned char > *arg2 = 0 ;
-  std::vector< unsigned char > result;
+  char *arg3 = (char *) 0 ;
   
   (void)jenv;
   (void)jcls;
@@ -526,11 +525,16 @@ SWIGEXPORT jlong JNICALL Java_tr_tmg_murat_guvenc_WebcamModuleJNI_Decode_1decode
   arg2 = *(std::vector< unsigned char > **)&jarg2;
   if (!arg2) {
     SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "std::vector< unsigned char > const & reference is null");
-    return 0;
+    return ;
   } 
-  result = (arg1)->decode((std::vector< unsigned char > const &)*arg2);
-  *(std::vector< unsigned char > **)&jresult = new std::vector< unsigned char >((const std::vector< unsigned char > &)result); 
-  return jresult;
+  {
+    arg3 = (char *) jenv->GetByteArrayElements(jarg3, 0); 
+  }
+  (arg1)->decode((std::vector< unsigned char > const &)*arg2,arg3);
+  {
+    jenv->ReleaseByteArrayElements(jarg3, (jbyte *) arg3, 0); 
+  }
+  
 }
 
 

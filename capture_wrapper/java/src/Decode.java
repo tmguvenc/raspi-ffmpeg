@@ -39,8 +39,8 @@ public class Decode {
     this(WebcamModuleJNI.new_Decode(width, height), true);
   }
 
-  public FrameBuffer decode(FrameBuffer buffer) {
-    return new FrameBuffer(WebcamModuleJNI.Decode_decode(swigCPtr, this, FrameBuffer.getCPtr(buffer), buffer), true);
+  public void decode(FrameBuffer buffer, byte[] BYTE) {
+    WebcamModuleJNI.Decode_decode(swigCPtr, this, FrameBuffer.getCPtr(buffer), buffer, BYTE);
   }
 
 }

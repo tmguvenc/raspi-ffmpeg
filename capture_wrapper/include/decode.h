@@ -10,11 +10,10 @@ public:
 	explicit Decode(int width, int height);
 	~Decode();
 
-	std::vector<unsigned char> decode(const std::vector<unsigned char>& buffer);
+	void decode(const std::vector<unsigned char>& buffer, char *BYTE);
 
 private:
 	Decoder m_decoder;
-	std::vector<unsigned char> m_internalBuffer;
 };
 
 #endif // !DECODE_H

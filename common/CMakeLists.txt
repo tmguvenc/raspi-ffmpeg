@@ -17,6 +17,10 @@ FILE(GLOB TARGET_H 							"include/*.h*" "src/*.h*")
 FILE(GLOB TARGET_SRC		 				"src/*.c*")
 add_definitions(-DCOMMON_EXPORTS)
 
+if(RASPI)
+	add_definitions(-DRASPBERRY_PI)
+endif()
+
 if (NOT MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()

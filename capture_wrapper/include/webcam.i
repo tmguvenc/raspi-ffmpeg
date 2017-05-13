@@ -1,7 +1,7 @@
 /* File : capture.i */
 %module WebcamModule
 %include std_vector.i
-
+%include various.i
 %template(FrameBuffer) std::vector<unsigned char>;
 
 %{

@@ -2,7 +2,7 @@
 
 void GPIO::setup()
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	wiringPiSetup();
 #endif
 	return;
@@ -10,7 +10,7 @@ void GPIO::setup()
 
 void GPIO::write(uint8_t pin, uint8_t value)
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	digitalWrite(pin, value);
 #endif
 	return;
@@ -18,7 +18,7 @@ void GPIO::write(uint8_t pin, uint8_t value)
 
 int GPIO::read(uint8_t pin)
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	return digitalRead(pin);
 #else
 	return -1;
@@ -27,7 +27,7 @@ int GPIO::read(uint8_t pin)
 
 void GPIO::sleepMilliSeconds(uint32_t milliSeconds)
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	delay(milliSeconds);
 #endif
 	return;
@@ -35,7 +35,7 @@ void GPIO::sleepMilliSeconds(uint32_t milliSeconds)
 
 void GPIO::sleepMicroSeconds(uint32_t microSeconds)
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	delayMicroseconds(microSeconds);
 #endif
 	return;
@@ -43,7 +43,7 @@ void GPIO::sleepMicroSeconds(uint32_t microSeconds)
 
 void GPIO::setPinMode(uint8_t pin, uint8_t mode)
 {
-#ifdef __linux__
+#ifdef WIRINGPI
 	pinMode(pin, mode);
 #endif
 	return;
